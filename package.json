@@ -1,0 +1,15 @@
+{
+  "name": "yongye",
+  "displayName": "雍也",
+  "version": "1.0.0",
+  "description": "雍也视频聚合应用",
+  "main": "index.js",
+  "scripts": {
+    "build": "cordova build android"
+  },
+  "cordova": {
+    "platforms": [
+      "android"
+    ]
+  }
+}
