@@ -224,7 +224,8 @@ window.CT=$=>{
 				if(!kw||kw.trim()=='')return
 				const U=`https://www.olehdtv.com/index.php/vod/search.html?wd=${encodeURIComponent(kw)}&submit=`;
 				U.r(o=>{
-					if(!o)return D.o('grid').da('a');
+					D.o('grid').da('a');
+					if(!o)return;
 					o=o.os('.searchlist_item .vodlist_thumb');
 					o&&D.o('grid').append(...o.map(_=>{
 						let n=_.ga('title').trim(),N=n.replace(/\s*[】]\s*/g,'').replace(/(\s*[【】:：·。～]\s*|\-+|—+)/g,'.').replace(/，/g,',').replace(/！/g,'!').replace(/\s\s/g,' ').replace(/\.{2,}/g,'.').trim().replace(/\s/g,'.').replace(/(\s*\.+$|\.?(剧场|真人)版)/g,'');
