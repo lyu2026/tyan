@@ -25,12 +25,13 @@ _W(
 		O:null,D:null,VM:{},P:0,I:'',C:{},X:false
 	},
 	'DB',()=>new Promise((S,C)=>{
-		let $=indexedDB.open('ol',8);
+		let $=indexedDB.open('lyu01',8);
 		$.onerror=e=>C(e);
 		$.onsuccess=e=>S($.result);
 		$.onupgradeneeded=e=>{
 			$=e.target.result;
 			$.objectStoreNames.contains('o')||$.createObjectStore('o',{keyPath:'id'});
+			alert($);
 			S($);
 		};
 	}),
@@ -264,6 +265,7 @@ DB().then(_=>{
 	if(!(R.D=_))return;
 	DG('..').then(async o=>{
 		if(!o)await DA('..',{});
+		alert('https://api.olelive.com/v1/pub/vod/list/type');
 		'https://api.olelive.com/v1/pub/vod/list/type'.r(o=>{
 			o.data.filter(_=>_.typeId<5).forEach(_=>(R.TM[_.typeId]={N:_.typeName,A:_.area,Y:_.year,T:_.children.map(x=>(x.typeId+'').startsWith(_.typeId+'')?(x.typeId+':'+x.typeName):null).filter(_=>_)}));
 			R.TM['']={N:'收藏夹',A:[],Y:[],T:[]};
@@ -274,12 +276,15 @@ DB().then(_=>{
 				`<icc onclick='TM(this)' style='line-height:33px'>⊙</icc>`,
 				`<icc onclick='CM(this)'>╳</icc>`
 			].join('');
+			alert(Object.keys(R.TM).length);
 			D.body.h(`<tab T='G'>${Object.keys(R.TM).map(_=>`<div V='${_}' onclick='CT(this)'>${R.TM[_].N}</div>`).join('')}</tab><grid></grid><modal hide><mbox><modal-t><title></title>${ic}</modal-t><modal-c></modal-c></mbox></modal>`);
 			const __=JSON.parse(localStorage.getItem('T')||'{}'),T=__&&__.G?`[V='${__.G}']`:'';
+			alert(T);
 			D.o(`tab[T='G']>div${T}`).click();
 		},'j')
 	});
-});
+}).catch(_=>alert(_.message));
+
 const OX=new IntersectionObserver((s,o)=>{
 	let $=null;
 	s.forEach(e=>e.target.isConnected&&(e.target.nodeName=='GRID-C')&&(e.intersectionRatio>=0.7)&&($=e.target));
