@@ -31,6 +31,9 @@ jobs:
       - name: 安装 Cordova
         run: npm install -g cordova
 
+      - name: 安装插件
+        run: cordova plugin add cordova-plugin-fetch
+
       - name: 安装依赖组件
         run: npm install
 

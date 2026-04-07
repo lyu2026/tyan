@@ -8,6 +8,7 @@
 		"build": "cordova build android"
 	},
 	"cordova": {
-		"platforms": ["android"]
+		"platforms": ["android"],
+		"plugins": {"cordova-plugin-fetch":{}}
 	}
 }
