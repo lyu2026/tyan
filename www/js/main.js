@@ -15,14 +15,12 @@ String.prototype.md5=function(){const s=unescape(encodeURIComponent(this));let l
 Date.prototype.vv=function(){const r=Date.parse(this)/1e3;const sb=r=>{let n=[],a=r.split('');for(let i=0;i<a.length;i++){i!=0&&n.push(' ');let u=a[i].charCodeAt().toString(2);n.push(u)}return n.join('')};let n=r.toString(),a=[[],[],[],[]];for(let i=0;i<n.length;i++){let b=sb(n[i]);a[0]+=b.slice(2,3),a[1]+=b.slice(3,4),a[2]+=b.slice(4,5),a[3]+=b.slice(5)}let l=[];for(let i=0;i<a.length;i++){let E=parseInt(a[i],2).toString(16);E.length==2&&(E='0'+E),E.length==1&&(E='00'+E),E.length==0&&(E='000'),l[i]=E}let u=n.md5();return u.slice(0,3)+l[0]+u.slice(6,11)+l[1]+u.slice(14,19)+l[2]+u.slice(22,27)+l[3]+u.slice(30)};
 
 String.prototype.r=function(f,x){
-	x=x.split('.').filter(_=>_.trim()!='')
-	const a=x.shift(),b=x.shift()
 	cordova.plugin.http.get(this,{_vv:(new Date).vv()},{'Content-Type':'text/plain'},_=>{
 		_=_.data
-		if(a=='j'||b=='j')_=JSON.parse(_)
-		else if(b=='h')_=_.html()
+		if(x=='j')_=JSON.parse(_)
+		else if(x=='h')_=_.html()
 		f(_)
-	},e=>alert('r: '+e.message));
+	},_=>alert('r: '+_.error));
 };
 
 
@@ -88,8 +86,8 @@ D.head.append(
 	grid-c score{position:absolute;top:8px;left:8px;z-index:20;display:block;font-size:12px;color:orange;-webkit-text-stroke:.3px blue}
 	grid-c tip{position:absolute;top:calc(((100vw - 2px) / 3 - 2px) * 1.34 - 60px);left:20px;right:20px;text-align:center;z-index:20;display:block;font-size:12px;color:#fff;-webkit-text-stroke:.3px blue}
 	grid-c title{position:absolute;bottom:0;left:0;right:0;z-index:10;display:block;font-size:12px;color:#fff;line-height:14px;padding:4px 3px;background:linear-gradient(rgba(60,60,60,.6),rgba(0,0,0,.9))}
-	modal{touch-action:none;display:block;width:100vw.height:100vh;position:fixed;top:0;left:0;bottom:0;z-index:1000000;background:rgba(255,255,255,.4);padding:2px}
-	modal mbox{touch-action:none;position:relative;display:block;width:calc(100vw - 4px);height:calc(100vh - 4px);background:rgba(0,0,0,.95);overflow:hidden;border-radius:4px}
+	modal{touch-action:none;display:block;width:100vw.height:100vh;position:fixed;top:0;left:0;bottom:0;z-index:1000000}
+	modal mbox{touch-action:none;position:relative;display:block;width:100vw;height:100vh;background:rgba(0,0,0,.95);overflow:hidden}
 	modal-t{position:absolute;top:0;z-index:222;display:flex;width:100%;overflow:hidden;height:30px;padding:0 4px;background:rgba(0,0,0,.8)}
 	modal-t>title{flex:1;display:block;height:30px;font-size:18px;line-height:30px;color:#fff;white-space:pre-line;word-break:break-word}
 	modal-t>icc{display:inline-block;width:30px;height:30px;line-height:30px;font-size:28px;color:#fff;margin-right:20px}
@@ -220,17 +218,17 @@ window.CT=$=>{
 				return;
 			}
 			if(R.T.G=='?'){
+				D.o('grid').da('a');
 				const kw=prompt('搜索关键字:')
 				if(!kw||kw.trim()=='')return
-				const x=D.o('grid').da('a');
 				const U=`https://www.olehdtv.com/index.php/vod/search.html?wd=${encodeURIComponent(kw)}&submit=`;
 				U.r(o=>{
 					o=o.os('.searchlist_item .vodlist_thumb');
-					o&&x.append(...o.map(_=>{
+					o&&D.o('grid').append(...o.map(_=>{
 						let n=_.ga('title').trim(),N=n.replace(/\s*[】]\s*/g,'').replace(/(\s*[【】:：·。～]\s*|\-+|—+)/g,'.').replace(/，/g,',').replace(/！/g,'!').replace(/\s\s/g,' ').replace(/\.{2,}/g,'.').trim().replace(/\s/g,'.').replace(/(\s*\.+$|\.?(剧场|真人)版)/g,'');
 						return NF.test(N)?null:D.n('grid-c',{I:_.ga('href').split('/').pop().split('.').shift(),N,onclick:'GD(this)'},`<img src='${II}' s='${_.ga('data-original')}'/><score></score><tip>${_.o('.pic_text').innerText.trim()}</tip><title>${N}</title>`);
 					}).filter(_=>_));
-				},'t.h');
+				},'h');
 				return;
 			}
 			const X=R.TM[R.T.G];
@@ -264,7 +262,7 @@ window.CT=$=>{
 			if(R.T.G=='1')N=N.replace(/\.?电影版/g,'');
 			return NF.test(N)?null:D.n('grid-c',{I:J?_.id:_.ga('href').split('/').pop().split('.').shift(),N,onclick:'GD(this)'},`<img src='${II}' s='${J?`https://static.olelive.com/${_.pic}`:_.ga('data-original')}'/><score>${J?_.score:''}</score><tip>${J?(_.remarks?_.remarks.trim():''):_.o('.pic_text').innerText.trim()}</tip><title>${N}</title>`);
 		}).filter(_=>_));
-	},R.T.U!=''?'t.h':'j');
+	},R.T.U!=''?'h':'j');
 };
 
 
