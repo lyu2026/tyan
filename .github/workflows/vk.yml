@@ -1,0 +1,44 @@
+name: Verify Keystore
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Decode and Verify Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "❌ 错误：KEYSTORE_BASE64 secret 未设置"
+            exit 1
+          fi
+          
+          echo "$KEYSTORE_BASE64" | base64 -d > test.keystore
+          
+          echo "🔍 验证密钥信息..."
+          keytool -list -v -keystore test.keystore \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -alias "$KEY_ALIAS" || echo "❌ 密钥验证失败"
+          
+          echo "✅ 密钥验证成功"
+          
+          # 显示密钥详细信息
+          keytool -list -v -keystore test.keystore \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -alias "$KEY_ALIAS" 2>/dev/null | grep -E "Alias|创建日期|所有者|SHA256"
+          
+          rm test.keystore
