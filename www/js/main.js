@@ -93,6 +93,7 @@ window.GD=async $=>{
 	R.C={N:$.ga('N'),C:$.o('img').ga('s'),S:$.o('score').innerText.trim()};
 	D.o('modal-t [SC]').innerText=I in SC?'♡':'⊕';
 	D.o('body').sa('ns');
+	D.o('grid').da('a');
 	D.o('modal').da('hide').o('modal-t>title').h('&nbsp;&nbsp;'+R.C.N);
 	`https://api.olelive.com/v1/pub/vod/detail/${I}/true`.r(o=>{
 		o=o.data;
@@ -108,16 +109,18 @@ window.GD=async $=>{
 		R.O=new Hls({levelTargetDuration:8,maxBufferLength:50,maxBufferSize:1000*1000*2});
 		R.O.attachMedia(V);
 		V.addEventListener('fullscreenchange',()=>{
-			if(!document.fullscreenElement)return screen.orientation.unlock();
-			if(document.fullscreenElement===V){
-				if(!V.fsn){
-					screen.orientation.lock('landscape');
-					V.fsn=true
-				}else{
-					screen.orientation.unlock();
-					V.fsn=false
-				}
+			if(!document.fullscreenElement){
+				screen.orientation.unlock();
+				if(V.fsn)V.fsn=false;
+				return
 			}
+			if(!V.fsn){
+				screen.orientation.lock('landscape');
+				V.fsn=true
+				return
+			}
+			screen.orientation.unlock();
+			V.fsn=false
 		},false);
 		V.ondurationchange=()=>{
 			if(V.duration<250)return;
@@ -154,7 +157,7 @@ window.CM=async()=>{
 
 window.CT=$=>{
 	screen.orientation.unlock();
-	let $G=D.o('grid'),K;
+	let $G=D.o('grid').sa('a'),K;
 	if($){
 		CM();
 		R.P=0;
@@ -177,12 +180,10 @@ window.CT=$=>{
 				return;
 			}
 			if(R.T.G=='?'){
-				D.o('grid').da('a');
 				const kw=prompt('搜索关键字:')
 				if(!kw||kw.trim()=='')return
 				const U=`https://www.olehdtv.com/index.php/vod/search.html?wd=${encodeURIComponent(kw)}&submit=`;
 				U.r(o=>{
-					D.o('grid').da('a');
 					if(!o)return;
 					o=o.os('.searchlist_item .vodlist_thumb');
 					o&&D.o('grid').append(...o.map(_=>{
@@ -213,7 +214,6 @@ window.CT=$=>{
 		}
 	}
 	if(Object.keys(R.T).filter(_=>R.T[_]!='').length<1)return;
-	$G.sa('a');
 	const TS=JSON.stringify(R.T),J=R.T.U=='';
 	const U=J?`https://api.olelive.com/v1/pub/vod/list/true/3/0/${encodeURIComponent(R.T.A)}/${R.T.G}/${R.T.T}/${R.T.Y}/${R.T.S}/${++R.P}/30`:`https://www.olehdtv.com/index.php/vod/search/page/${++R.P}/wd/${encodeURIComponent(R.T.U)}.html`;
 	U.r(o=>{
