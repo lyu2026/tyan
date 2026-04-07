@@ -17,6 +17,10 @@ String.prototype.r=function(f,x){
 	r.then(f)
 };
 
+alert("oooooo")
+document.addEventListener('deviceready',()=>{
+alert("xxxxxxx")
+
 _W(
 	'D',document,'CO',console.log,'CC',console.clear,
 	'R',{
@@ -258,45 +262,46 @@ window.CT=$=>{
 };
 
 
-document.addEventListener('deviceready',()=>{
-	DB().then(_=>{
-		CC();
-		if(!(R.D=_))return;
-		DG('..').then(async o=>{
-			if(!o)await DA('..',{});
-			'https://api.olelive.com/v1/pub/vod/list/type'.r(o=>{
-				o.data.filter(_=>_.typeId<5).forEach(_=>(R.TM[_.typeId]={N:_.typeName,A:_.area,Y:_.year,T:_.children.map(x=>(x.typeId+'').startsWith(_.typeId+'')?(x.typeId+':'+x.typeName):null).filter(_=>_)}));
-				R.TM['']={N:'收藏夹',A:[],Y:[],T:[]};
-				R.TM['?']={N:'搜索',A:[],Y:[],T:[]};
-				CO(R.TM);
-				const ic=[
-					`<icc SC onclick='SC(this)' style='line-height:33px'>⊕</icc>`,
-					`<icc onclick='TM(this)' style='line-height:33px'>⊙</icc>`,
-					`<icc onclick='CM(this)'>╳</icc>`
-				].join('');
-				D.body.h(`<tab T='G'>${Object.keys(R.TM).map(_=>`<div V='${_}' onclick='CT(this)'>${R.TM[_].N}</div>`).join('')}</tab><grid></grid><modal hide><mbox><modal-t><title></title>${ic}</modal-t><modal-c></modal-c></mbox></modal>`);
-				const __=JSON.parse(localStorage.getItem('T')||'{}'),T=__&&__.G?`[V='${__.G}']`:'';
-				D.o(`tab[T='G']>div${T}`).click();
-			},'j')
-		});
+DB().then(_=>{
+	CC();
+	if(!(R.D=_))return;
+	DG('..').then(async o=>{
+		if(!o)await DA('..',{});
+		'https://api.olelive.com/v1/pub/vod/list/type'.r(o=>{
+			o.data.filter(_=>_.typeId<5).forEach(_=>(R.TM[_.typeId]={N:_.typeName,A:_.area,Y:_.year,T:_.children.map(x=>(x.typeId+'').startsWith(_.typeId+'')?(x.typeId+':'+x.typeName):null).filter(_=>_)}));
+			R.TM['']={N:'收藏夹',A:[],Y:[],T:[]};
+			R.TM['?']={N:'搜索',A:[],Y:[],T:[]};
+			CO(R.TM);
+			const ic=[
+				`<icc SC onclick='SC(this)' style='line-height:33px'>⊕</icc>`,
+				`<icc onclick='TM(this)' style='line-height:33px'>⊙</icc>`,
+				`<icc onclick='CM(this)'>╳</icc>`
+			].join('');
+			D.body.h(`<tab T='G'>${Object.keys(R.TM).map(_=>`<div V='${_}' onclick='CT(this)'>${R.TM[_].N}</div>`).join('')}</tab><grid></grid><modal hide><mbox><modal-t><title></title>${ic}</modal-t><modal-c></modal-c></mbox></modal>`);
+			const __=JSON.parse(localStorage.getItem('T')||'{}'),T=__&&__.G?`[V='${__.G}']`:'';
+			D.o(`tab[T='G']>div${T}`).click();
+		},'j')
 	});
-	const OX=new IntersectionObserver((s,o)=>{
-		let $=null;
-		s.forEach(e=>e.target.isConnected&&(e.target.nodeName=='GRID-C')&&(e.intersectionRatio>=0.7)&&($=e.target));
-		$&&o.unobserve($);
-		$&&(R.T.G!='')&&CT();
-	},{threshold:0.7});
-	const OY=new IntersectionObserver((s,o)=>s.forEach(e=>e.target.isConnected&&(e.target.nodeName=='IMG')&&(e.intersectionRatio>=0.7)&&(e.target.ga('src')!=e.target.ga('s'))&&e.target.sa({src:e.target.ga('s')})&&o.unobserve(e.target)),{threshold:0.7});
-	const OO=new MutationObserver(s=>{
-		let $=null;
-		s.forEach(e=>{
-			const t=e.target,tp=t.nodeName;
-			const ig=tp=='GRID',$s=Array.from(e.addedNodes);
-			if(!ig||$s.length<1||(ig&&$s.some(_=>_.nodeName!='GRID-C')))return;
-			ig&&!$&&($=$s[$s.length-1]);
-			$s.filter(_=>_.nodeName=='GRID-C').forEach(_=>OY.observe(_.o('img')));
-		});
-		$&&OX.observe($);
+});
+const OX=new IntersectionObserver((s,o)=>{
+	let $=null;
+	s.forEach(e=>e.target.isConnected&&(e.target.nodeName=='GRID-C')&&(e.intersectionRatio>=0.7)&&($=e.target));
+	$&&o.unobserve($);
+	$&&(R.T.G!='')&&CT();
+},{threshold:0.7});
+const OY=new IntersectionObserver((s,o)=>s.forEach(e=>e.target.isConnected&&(e.target.nodeName=='IMG')&&(e.intersectionRatio>=0.7)&&(e.target.ga('src')!=e.target.ga('s'))&&e.target.sa({src:e.target.ga('s')})&&o.unobserve(e.target)),{threshold:0.7});
+const OO=new MutationObserver(s=>{
+	let $=null;
+	s.forEach(e=>{
+		const t=e.target,tp=t.nodeName;
+		const ig=tp=='GRID',$s=Array.from(e.addedNodes);
+		if(!ig||$s.length<1||(ig&&$s.some(_=>_.nodeName!='GRID-C')))return;
+		ig&&!$&&($=$s[$s.length-1]);
+		$s.filter(_=>_.nodeName=='GRID-C').forEach(_=>OY.observe(_.o('img')));
 	});
-	OO.observe(D.body,{subtree:true,childList:true,attributeFilter:['hide','_I']});
+	$&&OX.observe($);
+});
+OO.observe(D.body,{subtree:true,childList:true,attributeFilter:['hide','_I']});
+
+
 },false)
