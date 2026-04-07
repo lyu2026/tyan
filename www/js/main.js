@@ -61,7 +61,7 @@ D.head.append(
 	}
 	[hide]{display:none!important}
 	html,body{margin:0;padding:0}
-	body{position:relative;display:flex;flex-direction:column;width:100vw;min-height:100vh;overflow:hidden;background:#000}
+	body{position:relative;display:block;width:100vw;min-height:100vh;overflow:hidden;background:#000}
 	body *{position:relative;overflow-wrap:break-word;white-space:pre-line;word-break:break-word;font-synthesis:weight style small-caps}
 	img{image-rendering:crisp-edges}
 	rbox,cbox{display:flex!important}
