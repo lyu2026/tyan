@@ -18,8 +18,8 @@
 		<icon src="icons/ldpi.png" density="ldpi" />
 		<icon src="icons/mdpi.png" density="mdpi" />
 		<icon src="icons/hdpi.png" density="hdpi" />
-		<icon src="icons/xdpi.png" density="xhdpi" />
-		<icon src="icons/xxdpi.png" density="xxhdpi" />
-		<icon src="icons/xxxdpi.png" density="xxxhdpi" />
+		<icon src="icons/xhdpi.png" density="xhdpi" />
+		<icon src="icons/xxhdpi.png" density="xxhdpi" />
+		<icon src="icons/xxxhdpi.png" density="xxxhdpi" />
 	</platform>
 </widget>
