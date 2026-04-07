@@ -1,16 +1,31 @@
-name: 构建签名包
+name: 构建并发布 Debug APK
 
 on:
   push:
-    branches: [ main, master ]
-  workflow_dispatch:
+    tags:
+      - 'v*'      # 匹配 v1.0.0, v2.0.0 等
+      - 'release-*' # 匹配 release-1.0.0 等
+  workflow_dispatch:  # 保留手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 需要写入权限来创建 Release
+    
     steps:
       - name: 查看代码库
         uses: actions/checkout@v4
+
+      - name: 获取版本号
+        id: version
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION=$(echo "$TAG_NAME" | sed 's/^v//' | sed 's/^release-//')
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "当前 Tag: $TAG_NAME"
+          echo "版本号: $VERSION"
 
       - name: 安装 Nodejs
         uses: actions/setup-node@v4
@@ -32,19 +47,100 @@ jobs:
         run: npm install -g cordova
 
       - name: 安装插件
-        run: cordova plugin add cordova-plugin-advanced-http;cordova plugin add cordova-plugin-screen-orientation
+        run: |
+          cordova plugin add cordova-plugin-advanced-http || true
+          cordova plugin add cordova-plugin-screen-orientation || true
+          cordova plugin add cordova-plugin-file || true
 
       - name: 安装依赖组件
-        run: npm install
+        run: npm install || true
 
-      - name: 添加安卓平台
-        run: cordova platform add android --no-fetch
+      - name: 构建 Debug 包
+        run: |
+          cordova platform add android@latest
+          cordova build android --debug
 
-      - name: 构建安装包
-        run: cordova build android --debug;mv platforms/android/app/build/outputs/apk/debug/app-debug.apk platforms/android/app/build/outputs/apk/debug/o.apk
+      - name: 查找并重命名 APK
+        id: apk
+        run: |
+          # 查找 Debug APK
+          APK_PATH=$(find platforms/android -path "*/debug/*.apk" 2>/dev/null | head -n 1)
+          
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find platforms/android -name "*.apk" 2>/dev/null | head -n 1)
+          fi
+          
+          if [ -z "$APK_PATH" ]; then
+            echo "❌ 未找到 APK 文件"
+            exit 1
+          fi
+          
+          VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_NAME="廷琰-v${VERSION}-debug.apk"
+          
+          cp "$APK_PATH" "$RELEASE_NAME"
+          
+          echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+          
+          echo "✅ APK 文件: $RELEASE_NAME"
+          ls -lh "$RELEASE_NAME"
+          
+          SHA256=$(sha256sum "$RELEASE_NAME" | cut -d ' ' -f 1)
+          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+          
+          SIZE=$(ls -lh "$RELEASE_NAME" | awk '{print $5}')
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
 
-      - name: 上传安装包
+      - name: 创建 Release 并上传 APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: 廷琰 ${{ steps.version.outputs.version }} (Debug)
+          body: |
+            ## 📱 廷琰 v${{ steps.version.outputs.version }} (Debug)
+            
+            > ⚠️ 这是 Debug 版本，仅供测试使用
+            
+            ### 📦 版本信息
+            | 项目 | 信息 |
+            |------|------|
+            | 版本号 | v${{ steps.version.outputs.version }} |
+            | 构建类型 | Debug |
+            | 构建时间 | $(date '+%Y-%m-%d %H:%M:%S') |
+            | 文件大小 | ${{ steps.apk.outputs.size }} |
+            | SHA256 | `${{ steps.apk.outputs.sha256 }}` |
+            
+            ### 📥 安装说明
+            1. 下载下方的 APK 文件
+            2. 在手机上允许"安装未知来源应用"
+            3. 点击 APK 文件进行安装
+            
+            ### ⚠️ 注意事项
+            - 此版本为 Debug 版本，性能可能不如 Release 版本
+            - 不能覆盖安装正式版，需要先卸载正式版
+          files: ${{ steps.apk.outputs.release_name }}
+          generate_release_notes: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 上传到 Artifacts（备用）
         uses: actions/upload-artifact@v4
         with:
-          name: 廷琰
-          path: platforms/android/app/build/outputs/apk/debug/o.apk
+          name: 廷琰-v${{ steps.version.outputs.version }}-debug
+          path: ${{ steps.apk.outputs.release_name }}
+          retention-days: 30
+
+      - name: 构建摘要
+        run: |
+          echo "## ✅ 构建完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 版本信息" >> $GITHUB_STEP_SUMMARY
+          echo "- **版本号**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **构建类型**: Debug" >> $GITHUB_STEP_SUMMARY
+          echo "- **文件名**: ${{ steps.apk.outputs.release_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **大小**: ${{ steps.apk.outputs.size }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **SHA256**: \`${{ steps.apk.outputs.sha256 }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📥 下载" >> $GITHUB_STEP_SUMMARY
+          echo "APK 已发布到 [Releases](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag_name }}) 页面" >> $GITHUB_STEP_SUMMARY
