@@ -32,7 +32,10 @@ jobs:
         run: npm install -g cordova
 
       - name: 安装插件
-        run: cordova plugin add cordova-plugin-advanced-http;cordova plugin add cordova-plugin-screen-orientation
+        run: |
+          cordova plugin add cordova-plugin-advanced-http
+          cordova plugin add cordova-plugin-screen-orientation
+          cordova plugin add cordova-plugin-file
 
       - name: 安装依赖组件
         run: npm install
@@ -45,7 +48,15 @@ jobs:
             echo "❌ 错误：KEYSTORE_BASE64 secret 未设置"
             exit 1
           fi
-          echo "$KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > release.keystore
+          # 清理空白字符并解码
+          echo "$KEYSTORE_BASE64" | tr -d '\n\r\t ' | base64 -d > release.keystore
+          
+          # 验证 keystore 文件
+          if [ ! -s release.keystore ]; then
+            echo "❌ 错误：keystore 解码失败或文件为空"
+            exit 1
+          fi
+          echo "✅ Keystore 解码成功，文件大小: $(ls -lh release.keystore | awk '{print $5}')"
 
       - name: 构建签名包
         env:
@@ -63,9 +74,13 @@ jobs:
       - name: 包文件重命名
         id: apk
         run: |
-          APK_PATH=$(find platforms/android -name "*.apk" ! -name "*.unaligned.apk" | head -n 1)
+          # 查找已签名的 APK（排除未对齐的）
+          APK_PATH=$(find platforms/android -name "*.apk" ! -name "*.unaligned.apk" ! -name "*-unsigned.apk" | head -n 1)
+          
           if [ -z "$APK_PATH" ]; then
-            echo "❌ 未找到 APK 文件"
+            echo "❌ 未找到已签名的 APK 文件"
+            echo "尝试查找所有 APK："
+            find . -name "*.apk" -type f
             exit 1
           fi
           
@@ -76,19 +91,26 @@ jobs:
           echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
           
           echo "✅ APK 文件: $RELEASE_NAME"
-
+          ls -lh "$RELEASE_NAME"
 
       - name: 上传安装包
         uses: actions/upload-artifact@v4
         with:
           name: 廷琰
           path: ${{ steps.apk.outputs.release_name }}
+          retention-days: 30
 
       - name: 获取包信息
         id: apk_info
         run: |
           echo "size=$(ls -lh ${{ steps.apk.outputs.release_name }} | awk '{print $5}')" >> $GITHUB_OUTPUT
           echo "sha256=$(sha256sum ${{ steps.apk.outputs.release_name }} | cut -d ' ' -f 1)" >> $GITHUB_OUTPUT
+          
+          echo "## 📦 构建信息" >> $GITHUB_STEP_SUMMARY
+          echo "- **文件名**: 廷琰.apk" >> $GITHUB_STEP_SUMMARY
+          echo "- **大小**: $(ls -lh ${{ steps.apk.outputs.release_name }} | awk '{print $5}')" >> $GITHUB_STEP_SUMMARY
+          echo "- **SHA256**: \`$(sha256sum ${{ steps.apk.outputs.release_name }} | cut -d ' ' -f 1)\`" >> $GITHUB_STEP_SUMMARY
 
-
-
+      - name: 清理敏感文件
+        if: always()
+        run: rm -f release.keystore
