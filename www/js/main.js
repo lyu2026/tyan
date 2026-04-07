@@ -59,7 +59,6 @@ _W(
 
 D.body.h('');
 D.title='欧乐';
-D.head.innerHTML+=`<meta name='viewport' content='initial-scale=1.0,maximum-scale=1.0,user-scalable=no'/>`;
 D.head.append(
 	D.n('style',{},`:root{
 		font-size:16px;color:#eee;
