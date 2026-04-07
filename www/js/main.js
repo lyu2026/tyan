@@ -108,9 +108,16 @@ window.GD=async $=>{
 		R.O=new Hls({levelTargetDuration:8,maxBufferLength:50,maxBufferSize:1000*1000*2});
 		R.O.attachMedia(V);
 		V.addEventListener('fullscreenchange',()=>{
-			alert(456+' '+document.fullscreenElement)
-			if(document.fullscreenElement===V)screen.orientation.lock('landscape');
-			else screen.orientation.unlock();
+			if(!document.fullscreenElement&&!V.fsn)return screen.orientation.unlock();
+			if(document.fullscreenElement===V){
+				if(!V.fsn){
+					screen.orientation.lock('landscape');
+					V.fsn=true
+				}else{
+					screen.orientation.unlock();
+					V.fsn=false
+				}
+			}
 		},false);
 		V.ondurationchange=()=>{
 			if(V.duration<250)return;
