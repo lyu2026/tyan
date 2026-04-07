@@ -9,7 +9,7 @@
 	<allow-intent href="http://*/*" />
 	<allow-intent href="https://*/*" />
 	<preference name="Fullscreen" value="false" />
-	<preference name="Orientation" value="portrait" />
+	<preference name="Orientation" value="default" />
 	<preference name="loadUrlTimeoutValue" value="70000" />
 	<preference name="StatusBarOverlaysWebView" value="false" />
 	<preference name="android-hardwareAccelerated" value="true" />
