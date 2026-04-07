@@ -19,10 +19,9 @@ String.prototype.r=function(f,x){
 	const a=x.shift(),b=x.shift()
 	alert('r: '+f)
 	alert('r: '+x)
-	cordova.plugin.http.get(this,{_vv:(new Date).vv()},{'Content-Type':a=='j'?'application/json':'text/plain'},_=>{
+	cordova.plugin.http.get(this,{_vv:(new Date).vv()},{'Content-Type':'text/plain'},_=>{
 		_=_.data
-		alert('r: '+_)
-		if(b=='j')_=JSON.parse(_)
+		if(a=='j'||b=='j')_=JSON.parse(_)
 		else if(b=='h')_=_.html()
 		f(_)
 	},e=>alert('r: '+e.message));
