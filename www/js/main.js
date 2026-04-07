@@ -154,7 +154,7 @@ window.CM=async()=>{
 
 window.CT=$=>{
 	screen.orientation.unlock();
-	let $G=D.o('grid').sa('a'),K;
+	let $G=D.o('grid'),K;
 	if($){
 		CM();
 		R.P=0;
@@ -192,6 +192,7 @@ window.CT=$=>{
 				},'h');
 				return;
 			}
+			$G.sa('a');
 			const X=R.TM[R.T.G];
 			const tt=`<div${''==R.T.T?' c':''} V='' onclick='CT(this)'>全部</div>`+X.T.map(_=>{
 				let x=_.split(':');return `<div${x[0]==R.T.T?' c':''} V='${x[0]}' onclick='CT(this)'>${x[1]}</div>`;
@@ -212,6 +213,7 @@ window.CT=$=>{
 		}
 	}
 	if(Object.keys(R.T).filter(_=>R.T[_]!='').length<1)return;
+	$G.sa('a');
 	const TS=JSON.stringify(R.T),J=R.T.U=='';
 	const U=J?`https://api.olelive.com/v1/pub/vod/list/true/3/0/${encodeURIComponent(R.T.A)}/${R.T.G}/${R.T.T}/${R.T.Y}/${R.T.S}/${++R.P}/30`:`https://www.olehdtv.com/index.php/vod/search/page/${++R.P}/wd/${encodeURIComponent(R.T.U)}.html`;
 	U.r(o=>{
