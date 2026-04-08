@@ -1,4 +1,4 @@
-name: 安卓签名打包
+name: 签名打包
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
       - 'release-*'
 
 jobs:
-  o:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -29,11 +29,6 @@ jobs:
 
       - name: 配置 Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          api-level: '34'
-          build-tools-version: '34.0.0'
-          ndk-version: '26.1.10909125'
-          cmake-version: '3.27.1'
 
       - name: 安装 Android SDK Platform 34 及编译工具
         run: |
@@ -51,132 +46,33 @@ jobs:
       - name: 添加 Android 平台
         run: cordova platform add android
 
-      - name: 配置 Gradle 9.4.1 兼容性
-        run: |
-          set -e
-          
-          GRADLE_PROPS="platforms/android/gradle.properties"
-          BUILD_GRADLE="platforms/android/app/build.gradle"
-          
-          # 1. 创建/更新 gradle.properties
-          cat > "$GRADLE_PROPS" << 'EOF'
-          org.gradle.jvmargs=-Xmx4g -XX:+UseG1GC
-          org.gradle.parallel=true
-          org.gradle.caching=true
-          org.gradle.daemon=true
-          org.gradle.configureondemand=false
-          
-          org.gradle.java.installations.auto-detect=false
-          org.gradle.java.installations.paths=/usr/lib/jvm/temurin-17-jdk-amd64
-          
-          android.useAndroidX=true
-          android.enableJetifier=true
-          android.compileSdkVersion=34
-          android.targetSdkVersion=34
-          android.minSdkVersion=24
-          
-          android.enableDexingArtifactTransform=true
-          android.nonTransitiveRClass=false
-          android.defaults.buildfeatures.aidl=false
-          android.defaults.buildfeatures.renderscript=false
-          
-          android.aidl.enableParcelable=false
-          EOF
-          
-          cp "$BUILD_GRADLE" "$BUILD_GRADLE.bak"
-          
-          cat >> "$BUILD_GRADLE" << 'EOF'
-          kotlinOptions {
-              jvmTarget = "17"
-          }
-          tasks.withType(JavaCompile) {
-              options.compilerArgs += [
-                  '-Xlint:deprecation',
-                  '-Xlint:unchecked'
-              ]
-          }
-          buildTypes {
-              release {
-                  minifyEnabled false
-                  debuggable false
-                  shrinkResources false
-                  proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-                  ndk {
-                      debugSymbolLevel 'full'
-                  }
-              }
-              debug {
-                  minifyEnabled false
-                  debuggable true
-                  debugSymbolLevel 'full'
-              }
-          }
-          android {
-              ndkVersion "26.1.10909125"
-              defaultConfig {
-                  ndk {
-                      abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
-                  }
-              }
-          }
-          EOF
-
-      - name: 创建网络安全配置
+      - name: 创建网络安全配置目录
         run: |
           mkdir -p platforms/android/app/src/main/res/xml
-          
+
+      - name: 创建网络安全配置文件
+        run: |
           cat > platforms/android/app/src/main/res/xml/network_security_config.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <network-security-config>
+              <!-- 允许所有HTTP明文流量 -->
               <domain-config cleartextTrafficPermitted="true">
                   <domain includeSubdomains="true">*</domain>
-                  <trust-anchors>
-                      <certificates src="system" />
-                      <certificates src="user" />
-                  </trust-anchors>
               </domain-config>
-              <debug>
-                  <trust-anchors>
-                      <certificates src="system" />
-                      <certificates src="user" />
-                  </trust-anchors>
-              </debug>
-             <trust-anchors>
+              
+              <!-- 允许用户安装的CA证书（支持代理和调试） -->
+              <trust-anchors>
                   <certificates src="system" />
+                  <certificates src="user" />
               </trust-anchors>
-              <cleartextTrafficPermitted>true</cleartextTrafficPermitted>
           </network-security-config>
           EOF
 
-      - name: 更新 AndroidManifest.xml
-        run: |
-          MANIFEST="platforms/android/app/src/main/AndroidManifest.xml"
-          
-          # 确保包含必要的权限
-          if ! grep -q 'android:usesCleartextTraffic="true"' "$MANIFEST"; then
-            sed -i 's/<application/<application android:usesCleartextTraffic="true"/g' "$MANIFEST"
-          fi
-          
-          if ! grep -q 'android:networkSecurityConfig' "$MANIFEST"; then
-            sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/g' "$MANIFEST"
-          fi
-
-      - name: 清洗并准备
-        run: |
-          cordova clean android
-          rm -rf platforms/android/build
-          rm -rf ~/.gradle/caches/build-cache
-          rm -rf ~/.gradle/caches/gradle-*.jar
-          
-          cd platforms/android
-          ./gradlew clean --quiet
-          cd ../..
-
-      - name: 调用签名信息
+      - name: 调用签名生成器
         id: keystore
         uses: ./.github/actions/keystore
 
-      - name: 分 CPU 架构打包签名 APK
+      - name: 分 CPU 架构打签名包
         run: |
           # 从 Action 输出读取签名参数
           KEYSTORE_PATH="${{ steps.keystore.outputs.keystore_path }}"
@@ -260,6 +156,7 @@ jobs:
           | 版本号 | v${{ steps.version.outputs.version }} |
           | 构建时间 | ${{ steps.time.outputs.datetime }} |
           | 构建类型 | Release（签名） |
+          | 网络支持 | ✓ 支持跨域访问 |
           
           $(cat release_body.md)
           
@@ -273,6 +170,12 @@ jobs:
           
           ### 🔍 查看 CPU 架构
           如不确定手机架构，可安装 [Device Info HW](https://play.google.com/store/apps/details?id=ru.andr7e.deviceinfohw) 查看
+          
+          ### 🌐 网络特性
+          本版本已启用以下网络特性：
+          - ✓ 支持 HTTP/HTTPS 混合内容
+          - ✓ 完全的跨域资源访问
+          - ✓ 支持自定义协议跳转
           EOF
 
       - name: 创建 Release 并上传 APK
@@ -288,3 +191,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 构建完成通知
+        if: success()
+        run: |
+          echo "✅ 所有 APK 包构建成功！"
+          echo "📦 输出文件位置: output/"
+          echo "🌐 已启用跨域支持"
+          ls -lh output/
+
+      - name: 构建失败通知
+        if: failure()
+        run: |
+          echo "❌ 构建失败，请检查日志"
+          exit 1

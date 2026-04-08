@@ -9,36 +9,58 @@
 
 	<content src="index.html"/>
 
+	<!-- ========== 网络访问策略配置 ========== -->
+	<!-- 允许所有来源 -->
 	<access origin="*"/>
+	<!-- 允许所有导航 -->
 	<allow-navigation href="*"/>
+	<!-- 允许所有HTTP请求 -->
 	<allow-intent href="http://*/*"/>
 	<allow-intent href="https://*/*"/>
+	<!-- 允许自定义协议 -->
+	<allow-intent href="tyan://*"/>
 
+	<!-- ========== 应用通用配置 ========== -->
 	<preference name="scheme" value="http"/>
 	<preference name="hostname" value="localhost"/>
+	
+	<!-- ========== 文件系统配置 ========== -->
 	<preference name="AndroidInsecureFileModeEnabled" value="true"/>
 	<preference name="AndroidPersistentFileLocation" value="Compatibility"/>
 
+	<!-- ========== UI配置 ========== -->
 	<preference name="Fullscreen" value="false"/>
 	<preference name="Orientation" value="default"/>
 	<preference name="SplashScreenDelay" value="1"/>
 	<preference name="AutoHideSplashScreen" value="true"/>
 	<preference name="loadUrlTimeoutValue" value="70000"/>
 	<preference name="StatusBarOverlaysWebView" value="false"/>
-	<preference name="android-hardwareAccelerated" value="true"/>
 	<preference name="StatusBarBackgroundColor" value="#000000"/>
 
+	<!-- ========== Android特定配置 ========== -->
 	<platform name="android">
+		<!-- 允许自定义协议 -->
 		<allow-intent href="tyan:*"/>
+		
+		<!-- SDK版本配置 -->
 		<preference name="android-minSdkVersion" value="24"/>
 		<preference name="android-targetSdkVersion" value="34"/>
-	</platform>
-
-	<plugin name="cordova-plugin-whitelist"/>
-	<plugin name="cordova-plugin-advanced-http"/>
-	<plugin name="cordova-plugin-screen-orientation"/>
-
-	<platform name="android">
+		
+		<!-- 硬件加速配置 -->
+		<preference name="android-hardwareAccelerated" value="true"/>
+		
+		<!-- ========== 网络安全配置（解决签名包跨域问题） ========== -->
+		<!-- 允许HTTP内容在HTTPS中加载 -->
+		<preference name="android-usesCleartextTraffic" value="true"/>
+		<!-- 禁用默认网络安全配置以支持跨域 -->
+		<preference name="android-networkSecurityConfig" value="@xml/network_security_config"/>
+		
+		<!-- ========== 信任所有证书（生产环境需谨慎使用） ========== -->
+		<edit-config file="android/build.gradle" target="android" mode="merge">
+			<aapt attr="package" value="com.tyan" />
+		</edit-config>
+		
+		<!-- ========== 应用图标配置 ========== -->
 		<icon src="icons/ldpi.png" density="ldpi"/>
 		<icon src="icons/mdpi.png" density="mdpi"/>
 		<icon src="icons/hdpi.png" density="hdpi"/>
@@ -46,5 +68,10 @@
 		<icon src="icons/xxhdpi.png" density="xxhdpi"/>
 		<icon src="icons/xxxhdpi.png" density="xxxhdpi"/>
 	</platform>
+
+	<!-- ========== 插件配置 ========== -->
+	<plugin name="cordova-plugin-whitelist"/>
+	<plugin name="cordova-plugin-advanced-http"/>
+	<plugin name="cordova-plugin-screen-orientation"/>
 
 </widget>

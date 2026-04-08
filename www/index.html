@@ -4,6 +4,17 @@
 <head>
 	<meta charset='UTF-8'>
 	<meta name='viewport' content='initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover'>
+	<meta http-equiv='Content-Security-Policy' content="
+		default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:;
+		script-src * 'self' 'unsafe-inline' 'unsafe-eval';
+		style-src * 'self' 'unsafe-inline';
+		img-src * 'self' data: blob:;
+		media-src * 'self' data: blob:;
+		font-src * 'self' data:;
+		connect-src * 'self' data: blob:;
+		frame-src * 'self';
+		object-src 'none';
+ ">
 	<title>廷琰</title>
 
 	<script src='cordova.js'></script>
@@ -16,12 +27,10 @@
 
 <body>
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 200' style='width:90vw;margin:40vh 5vw;object-fit:contain'>
-  <polyline fill='none' stroke='#00d704' stroke-width='3' stroke-linecap='round' stroke-linejoin='miter'
-    stroke-dasharray='1000' stroke-dashoffset='1000'
-    points='486.6,113.8 328.2,113.8 310.3,132.3 296,70.7 246.8,127.4 241.6,120.2 233.9,166.4 227,27.6 213.2,118.3 211.8,112.3 205.1,126.1 198.2,108.5 194.1,124.4 184.5,92.9 174.1,113 4.3,113'>
-    <animate attributeName='stroke-dashoffset' values='1000;2000;3000;1000' dur='1.5s' repeatCount='indefinite'/>
-    <animate attributeName='opacity' values='0;1;1;0;0' dur='1.5s' repeatCount='indefinite'/>
-  </polyline>
+	<polyline fill='none' stroke='#00d704' stroke-width='3' stroke-linecap='round' stroke-linejoin='miter' stroke-dasharray='1000' stroke-dashoffset='1000' points='486.6,113.8 328.2,113.8 310.3,132.3 296,70.7 246.8,127.4 241.6,120.2 233.9,166.4 227,27.6 213.2,118.3 211.8,112.3 205.1,126.1 198.2,108.5 194.1,124.4 184.5,92.9 174.1,113 4.3,113'>
+		<animate attributeName='stroke-dashoffset' values='1000;2000;3000;1000' dur='1.5s' repeatCount='indefinite'/>
+		<animate attributeName='opacity' values='0;1;1;0;0' dur='1.5s' repeatCount='indefinite'/>
+	</polyline>
 </svg>
 </body>
 
