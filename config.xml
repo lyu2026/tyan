@@ -22,7 +22,7 @@
 	<preference name="StatusBarOverlaysWebView" value="false"/>
 	<preference name="android-hardwareAccelerated" value="true"/>
 	<preference name="StatusBarBackgroundColor" value="#000000"/>
-
+	<preference name="AndroidInsecureFileModeEnabled" value="true"/>
 
 	<platform name="android">
 		<allow-intent href="tyan:*"/>
