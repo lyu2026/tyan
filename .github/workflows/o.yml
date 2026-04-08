@@ -1,0 +1,114 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version Name'
+        required: true
+        default: '1.0.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        packages: 'platforms;android-33 build-tools;33.0.0'
+
+    - name: Generate keystore
+      run: |
+        keytool -genkey -v \
+          -keystore debug.keystore \
+          -alias androiddebugkey \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -storepass android \
+          -keypass android \
+          -dname "CN=Android Debug, O=Android, C=US"
+
+    - name: Install dependencies
+      run: |
+        npm install
+        npm install -g cordova
+
+    - name: Add Android platform
+      run: cordova platform add android@latest
+
+    - name: 安装插件
+      run: |
+        cordova plugin add cordova-plugin-advanced-http
+        cordova plugin add cordova-plugin-screen-orientation
+
+    - name: Set version
+      run: |
+        VERSION_NAME="${{ github.event.inputs.version_name || github.ref_name }}"
+        VERSION_NAME="${VERSION_NAME#v}"
+        sed -i "s/version=\"[^\"]*\"/version=\"$VERSION_NAME\"/" config.xml
+        
+        if ! grep -q "android-versionCode" config.xml; then
+          sed -i 's/<widget /<widget android-versionCode="1" /' config.xml
+        fi
+
+    - name: Create signing config
+      run: |
+        cat > platforms/android/release-signing.properties << EOF
+        storeFile=../../debug.keystore
+        storePassword=android
+        keyAlias=androiddebugkey
+        keyPassword=android
+        EOF
+
+    - name: Build APK
+      run: |
+        cordova build android --release
+        mkdir -p outputs
+        find platforms/android/app/build/outputs/apk -name "*.apk" -exec cp {} outputs/app-release.apk \;
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release
+        path: outputs/*.apk
+        retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - name: Download APK
+      uses: actions/download-artifact@v4
+      with:
+        name: app-release
+        path: ./
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: "*.apk"
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
