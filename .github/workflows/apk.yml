@@ -29,6 +29,11 @@ jobs:
 
       - name: 配置 Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          api-level: '34'
+          build-tools-version: '34.0.0'
+          ndk-version: '26.1.10909125'
+          cmake-version: '3.27.1'
 
       - name: 安装 Android SDK Platform 34 及编译工具
         run: |
@@ -46,7 +51,172 @@ jobs:
       - name: 添加 Android 平台
         run: cordova platform add android
 
-      - name: 调用签名生成 Action（有缓存则复用，无则生成）
+      - name: 配置 Gradle 9.4.1 兼容性
+        run: |
+          set -e
+          
+          GRADLE_PROPS="platforms/android/gradle.properties"
+          BUILD_GRADLE="platforms/android/app/build.gradle"
+          
+          # 1. 创建/更新 gradle.properties
+          cat > "$GRADLE_PROPS" << 'EOF'
+          org.gradle.jvmargs=-Xmx4g -XX:+UseG1GC
+          org.gradle.parallel=true
+          org.gradle.caching=true
+          org.gradle.daemon=true
+          org.gradle.configureondemand=false
+          
+          org.gradle.java.installations.auto-detect=false
+          org.gradle.java.installations.paths=/usr/lib/jvm/temurin-17-jdk-amd64
+          
+          android.useAndroidX=true
+          android.enableJetifier=true
+          android.compileSdkVersion=34
+          android.targetSdkVersion=34
+          android.minSdkVersion=24
+          
+          android.enableDexingArtifactTransform=true
+          android.nonTransitiveRClass=false
+          android.defaults.buildfeatures.aidl=false
+          android.defaults.buildfeatures.renderscript=false
+          
+          android.aidl.enableParcelable=false
+          EOF
+          
+          cp "$BUILD_GRADLE" "$BUILD_GRADLE.bak"
+          
+          cat >> "$BUILD_GRADLE" << 'EOF'
+          compileOptions {
+              sourceCompatibility = JavaVersion.VERSION_17
+              targetCompatibility = JavaVersion.VERSION_17
+          }
+          kotlinOptions {
+              jvmTarget = "17"
+          }
+          tasks.withType(JavaCompile) {
+              options.compilerArgs += [
+                  '-Xlint:deprecation',
+                  '-Xlint:unchecked'
+              ]
+          }
+          buildTypes {
+              release {
+                  minifyEnabled false
+                  debuggable false
+                  shrinkResources false
+                  proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+                  ndk {
+                      debugSymbolLevel 'full'
+                  }
+              }
+              debug {
+                  minifyEnabled false
+                  debuggable true
+                  debugSymbolLevel 'full'
+              }
+          }
+          android {
+              ndkVersion "26.1.10909125"
+              defaultConfig {
+                  ndk {
+                      abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+                  }
+              }
+          }
+          EOF
+
+      - name: 创建网络安全配置
+        run: |
+          mkdir -p platforms/android/app/src/main/res/xml
+          
+          cat > platforms/android/app/src/main/res/xml/network_security_config.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <network-security-config>
+              <domain-config cleartextTrafficPermitted="true">
+                  <domain includeSubdomains="true">*</domain>
+                  <trust-anchors>
+                      <certificates src="system" />
+                      <certificates src="user" />
+                  </trust-anchors>
+              </domain-config>
+              <debug>
+                  <trust-anchors>
+                      <certificates src="system" />
+                      <certificates src="user" />
+                  </trust-anchors>
+              </debug>
+             <trust-anchors>
+                  <certificates src="system" />
+              </trust-anchors>
+              <cleartextTrafficPermitted>true</cleartextTrafficPermitted>
+          </network-security-config>
+          EOF
+
+      - name: 更新 AndroidManifest.xml
+        run: |
+          MANIFEST="platforms/android/app/src/main/AndroidManifest.xml"
+          
+          # 确保包含必要的权限
+          if ! grep -q 'android:usesCleartextTraffic="true"' "$MANIFEST"; then
+            sed -i 's/<application/<application android:usesCleartextTraffic="true"/g' "$MANIFEST"
+          fi
+          
+          if ! grep -q 'android:networkSecurityConfig' "$MANIFEST"; then
+            sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/g' "$MANIFEST"
+          fi
+
+      - name: 创建 build.json
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cat > build.json << EOF
+          {
+            "android": {
+              "release": {
+                "keystore": "\$HOME/.android/release.keystore",
+                "storePassword": "$KEYSTORE_PASSWORD",
+                "alias": "$KEY_ALIAS",
+                "password": "$KEY_PASSWORD",
+                "keystoreType": "jks"
+              }
+            }
+          }
+          EOF
+          
+          echo "✓ build.json created"
+
+      # ========== Gradle Validation ==========
+      - name: Validate Gradle build configuration
+        run: |
+          cd platforms/android
+          
+          echo "=== Gradle Version ==="
+          ./gradlew --version
+          
+          echo ""
+          echo "=== Gradle Configuration ==="
+          ./gradlew -DShowBuildCache properties 2>&1 | grep -E "android|java|gradle|version" | head -20
+          
+          echo ""
+          echo "=== Tasks Available ==="
+          ./gradlew tasks --quiet 2>&1 | head -15
+          
+          cd ../..
+
+      - name: 清洗并准备
+        run: |
+          cordova clean android
+          rm -rf platforms/android/build
+          rm -rf ~/.gradle/caches/build-cache
+          rm -rf ~/.gradle/caches/gradle-*.jar
+          
+          cd platforms/android
+          ./gradlew clean --quiet
+          cd ../..
+
+      - name: 调用签名信息
         id: keystore
         uses: ./.github/actions/keystore
 
