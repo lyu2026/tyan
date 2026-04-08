@@ -37,7 +37,7 @@ jobs:
       - name: 自动生成签名 Keystore
         run: |
           keytool -genkeypair -v \
-            -keystore tyan.keystore \
+            -keystore $GITHUB_WORKSPACE/tyan.keystore \
             -alias tyan \
             -keyalg RSA \
             -keysize 2048 \
@@ -58,7 +58,7 @@ jobs:
             cordova build android --release -- \
               --packageType=apk \
               --gradleArg="-Pandroid.defaultConfig.abiFilters=$ABI" \
-              --keystore=../../tyan.keystore \
+              --keystore=$GITHUB_WORKSPACE/tyan.keystore \
               --storePassword=Tyan2006 \
               --alias=tyan \
               --password=Tyan2006

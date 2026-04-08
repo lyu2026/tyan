@@ -1,21 +1,21 @@
 {
-	"name": "tyan",
-	"version": "1.0.0",
-	"description": "...",
-	"displayName": "廷琰",
-	"dependencies": {
-		"cordova": "latest",
-		"cordova-android": "latest",
-		"cordova-plugin-whitelist": "*",
-		"cordova-plugin-advanced-http": "*",
-		"cordova-plugin-screen-orientation": "*"
+	"name":"tyan",
+	"version":"1.0.0",
+	"description":"...",
+	"displayName":"廷琰",
+	"dependencies":{
+		"cordova":"latest",
+		"cordova-android":"latest",
+		"cordova-plugin-whitelist":"*",
+		"cordova-plugin-advanced-http":"*",
+		"cordova-plugin-screen-orientation":"*"
 	},
-	"cordova": {
-		"plugins": {
-			"cordova-plugin-screen-orientation": {},
-			"cordova-plugin-advanced-http": {},
-			"cordova-plugin-whitelist": {}
+	"cordova":{
+		"plugins":{,
+			"cordova-plugin-whitelist":{},
+			"cordova-plugin-advanced-http":{},
+			"cordova-plugin-screen-orientation":{}
 		},
-		"platforms": ["android"]
+		"platforms":["android"]
 	}
 }
