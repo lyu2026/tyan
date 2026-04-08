@@ -76,11 +76,10 @@ jobs:
 
             # 按架构重命名归档
             cp platforms/android/app/build/outputs/apk/release/app-release.apk \
-               output/tyan-${ABI}.apk
+               output/${ABI}.apk
 
             echo ">>> $ABI 打包完成"
           done
-
 
       - name: 获取版本号
         id: version
@@ -116,7 +115,6 @@ jobs:
             SIZE=$(ls -lh "$apk" | awk '{print $5}')
             SHA256=$(sha256sum "$apk" | cut -d ' ' -f 1)
             ARCH=${apk%.apk}
-            ARCH=${ARCH#tyan-}
             
             echo "| $ARCH | $apk | $SIZE | \`$SHA256\` |" >> ../release_body.md
             
@@ -165,31 +163,3 @@ EOF
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 上传到 Artifacts（备用/手动触发时）
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
-        with:
-          name: 廷琰-v${{ steps.version.outputs.version }}-apks
-          path: output/*.apk
-          retention-days: 30
-
-      - name: 构建摘要
-        run: |
-          echo "## ✅ 构建完成" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 版本信息" >> $GITHUB_STEP_SUMMARY
-          echo "- **版本号**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **构建时间**: ${{ steps.time.outputs.datetime }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📁 生成的 APK" >> $GITHUB_STEP_SUMMARY
-          echo "| 架构 | 大小 |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| arm64-v8a | ${{ steps.apk_info.outputs.arm64-v8a_size }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| armeabi-v7a | ${{ steps.apk_info.outputs.armeabi-v7a_size }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| x86_64 | ${{ steps.apk_info.outputs.x86_64_size }} |" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 🔗 Release 链接" >> $GITHUB_STEP_SUMMARY
-            echo "[查看 Release](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag_name }})" >> $GITHUB_STEP_SUMMARY
-          fi
