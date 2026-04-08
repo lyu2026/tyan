@@ -165,46 +165,6 @@ jobs:
             sed -i 's/<application/<application android:networkSecurityConfig="@xml\/network_security_config"/g' "$MANIFEST"
           fi
 
-      - name: 创建 build.json
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: |
-          cat > build.json << EOF
-          {
-            "android": {
-              "release": {
-                "keystore": "\$HOME/.android/release.keystore",
-                "storePassword": "$KEYSTORE_PASSWORD",
-                "alias": "$KEY_ALIAS",
-                "password": "$KEY_PASSWORD",
-                "keystoreType": "jks"
-              }
-            }
-          }
-          EOF
-          
-          echo "✓ build.json created"
-
-      # ========== Gradle Validation ==========
-      - name: Validate Gradle build configuration
-        run: |
-          cd platforms/android
-          
-          echo "=== Gradle Version ==="
-          ./gradlew --version
-          
-          echo ""
-          echo "=== Gradle Configuration ==="
-          ./gradlew -DShowBuildCache properties 2>&1 | grep -E "android|java|gradle|version" | head -20
-          
-          echo ""
-          echo "=== Tasks Available ==="
-          ./gradlew tasks --quiet 2>&1 | head -15
-          
-          cd ../..
-
       - name: 清洗并准备
         run: |
           cordova clean android
