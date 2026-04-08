@@ -51,6 +51,6 @@ runs:
       shell: bash
       run: |
         echo "keystore_path=$GITHUB_WORKSPACE/tyan.keystore" >> $GITHUB_OUTPUT
-        echo "store_password=Tyan2026"                       >> $GITHUB_OUTPUT
-        echo "key_alias=tyan"                                >> $GITHUB_OUTPUT
-        echo "key_password=Tyan2026"   
+        echo "store_password=Tyan2026" >> $GITHUB_OUTPUT
+        echo "key_alias=tyan" >> $GITHUB_OUTPUT
+        echo "key_password=Tyan2026" >> $GITHUB_OUTPUT
