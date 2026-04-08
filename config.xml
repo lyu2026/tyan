@@ -16,6 +16,7 @@
 
 	<preference name="scheme" value="http"/>
 	<preference name="hostname" value="localhost"/>
+	<preference name="AndroidInsecureFileModeEnabled" value="true"/>
 
 	<preference name="Fullscreen" value="false"/>
 	<preference name="Orientation" value="default"/>
