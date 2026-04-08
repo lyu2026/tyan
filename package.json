@@ -11,7 +11,7 @@
 		"cordova-plugin-screen-orientation":"*"
 	},
 	"cordova":{
-		"plugins":{,
+		"plugins":{
 			"cordova-plugin-whitelist":{},
 			"cordova-plugin-advanced-http":{},
 			"cordova-plugin-screen-orientation":{}
