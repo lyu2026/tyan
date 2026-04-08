@@ -1,81 +1,81 @@
 name: 安卓签名打包
 
 on:
-	workflow_dispatch: # 仅支持手动触发
+  workflow_dispatch: # 仅支持手动触发
 
 jobs:
-	build:
-		runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-		steps:
-			- name: 拉取代码
-				uses: actions/checkout@v4
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
 
-			- name: 配置 Java 环境
-				uses: actions/setup-java@v4
-				with:
-					distribution: temurin
-					java-version: 17
+      - name: 配置 Java 环境
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-			- name: 配置 Node.js 环境
-				uses: actions/setup-node@v4
-				with:
-					node-version: 22
+      - name: 配置 Node.js 环境
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-			- name: 配置 Android SDK
-				uses: android-actions/setup-android@v3
+      - name: 配置 Android SDK
+        uses: android-actions/setup-android@v3
 
-			- name: 全局安装 Cordova
-				run: npm install -g cordova@latest
+      - name: 全局安装 Cordova
+        run: npm install -g cordova@latest
 
-			- name: 安装项目依赖
-				run: npm install
+      - name: 安装项目依赖
+        run: npm install
 
-			- name: 添加 Android 平台
-				run: cordova platform add android
+      - name: 添加 Android 平台
+        run: cordova platform add android
 
-			- name: 自动生成签名 Keystore
-				run: |
-					keytool -genkeypair -v \
-						-keystore tyan.keystore \
-						-alias tyan \
-						-keyalg RSA \
-						-keysize 2048 \
-						-validity 10000 \
-						-storepass Tyan2006 \
-						-keypass Tyan2006 \
-						-dname "CN=App, OU=Dev, O=Org, L=City, ST=State, C=CN"
+      - name: 自动生成签名 Keystore
+        run: |
+          keytool -genkeypair -v \
+            -keystore tyan.keystore \
+            -alias tyan \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass Tyan2006 \
+            -keypass Tyan2006 \
+            -dname "CN=App, OU=Dev, O=Org, L=City, ST=State, C=CN"
 
-			- name: 分 CPU 架构打包签名 APK
-				run: |
-					# 支持的 CPU 架构列表
-					ABIS=("arm64-v8a" "armeabi-v7a" "x86_64")
-					mkdir -p output
+      - name: 分 CPU 架构打包签名 APK
+        run: |
+          # 支持的 CPU 架构列表
+          ABIS=("arm64-v8a" "armeabi-v7a" "x86_64")
+          mkdir -p output
 
-					for ABI in "${ABIS[@]}"; do
-						echo ">>> 正在打包架构：$ABI"
+          for ABI in "${ABIS[@]}"; do
+            echo ">>> 正在打包架构：$ABI"
 
-						cordova build android --release -- \
-							--packageType=apk \
-							--gradleArg="-Pandroid.defaultConfig.abiFilters=$ABI" \
-							--keystore=../../tyan.keystore \
-							--storePassword=Tyan2006 \
-							--alias=tyan \
-							--password=Tyan2006
+            cordova build android --release -- \
+              --packageType=apk \
+              --gradleArg="-Pandroid.defaultConfig.abiFilters=$ABI" \
+              --keystore=../../tyan.keystore \
+              --storePassword=Tyan2006 \
+              --alias=tyan \
+              --password=Tyan2006
 
-						# 将生成的 APK 按架构重命名并归档
-						cp platforms/android/app/build/outputs/apk/release/app-release.apk \
-							 output/Tyan-${ABI}.apk
+            # 将生成的 APK 按架构重命名并归档
+            cp platforms/android/app/build/outputs/apk/release/app-release.apk \
+               output/Tyan-${ABI}.apk
 
-						echo ">>> $ABI 打包完成"
-					done
+            echo ">>> $ABI 打包完成"
+          done
 
-			- name: 压缩所有签名包
-				run: zip -j tyan.zip output/*.apk
+      - name: 压缩所有签名包
+        run: zip -j tyan.zip output/*.apk
 
-			- name: 上传构建产物
-				uses: actions/upload-artifact@v4
-				with:
-					name: 签名安装包
-					path: tyan.zip
-					retention-days: 7 # 保留 7 天
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: 签名安装包
+          path: tyan.zip
+          retention-days: 7 # 保留 7 天
