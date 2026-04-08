@@ -1,0 +1,56 @@
+name: 生成或恢复签名 Keystore
+description: 优先从缓存恢复 tyan.keystore，不存在时生成并缓存，最终输出签名参数
+
+outputs:
+  keystore_path:
+    description: Keystore 文件绝对路径
+    value: ${{ steps.params.outputs.keystore_path }}
+  store_password:
+    description: Keystore 密码
+    value: ${{ steps.params.outputs.store_password }}
+  key_alias:
+    description: Key 别名
+    value: ${{ steps.params.outputs.key_alias }}
+  key_password:
+    description: Key 密码
+    value: ${{ steps.params.outputs.key_password }}
+
+runs:
+  using: composite
+  steps:
+    - name: 尝试从缓存恢复 Keystore
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/tyan.keystore
+        key: tyan-keystore-v1
+
+    - name: 缓存不存在时生成 Keystore
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo ">>> 缓存未命中，正在生成 tyan.keystore ..."
+        keytool -genkeypair -v \
+          -keystore "$GITHUB_WORKSPACE/tyan.keystore" \
+          -alias tyan \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -storepass Tyan2026 \
+          -keypass Tyan2026 \
+          -dname "CN=Tyan, OU=Dev, O=Tyan, L=City, ST=State, C=CN"
+        echo "✅ tyan.keystore 生成完成"
+
+    - name: 缓存命中时直接复用
+      if: steps.cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: echo "✅ tyan.keystore 已从缓存恢复，跳过生成"
+
+    - name: 输出签名参数
+      id: params
+      shell: bash
+      run: |
+        echo "keystore_path=$GITHUB_WORKSPACE/tyan.keystore" >> $GITHUB_OUTPUT
+        echo "store_password=Tyan2026"                       >> $GITHUB_OUTPUT
+        echo "key_alias=tyan"                                >> $GITHUB_OUTPUT
+        echo "key_password=Tyan2026"   

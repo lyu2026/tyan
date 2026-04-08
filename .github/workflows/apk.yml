@@ -1,11 +1,17 @@
 name: 安卓签名打包
 
 on:
-  workflow_dispatch:  # 仅支持手动触发
+  push:
+    tags:
+      - 'v*'
+      - 'release-*'
+  workflow_dispatch:  # 手动触发
 
 jobs:
   o:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: 拉取代码
@@ -22,12 +28,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: 配置 Android SDK 基础环境
+      - name: 配置 Android SDK
         uses: android-actions/setup-android@v3
 
       - name: 安装 Android SDK Platform 34 及编译工具
         run: |
-          sdkmanager --update
           sdkmanager \
             "platform-tools" \
             "platforms;android-34" \
@@ -42,22 +47,19 @@ jobs:
       - name: 添加 Android 平台
         run: cordova platform add android
 
-      - name: 自动生成签名 Keystore
-        run: |
-          # 生成到工作区根目录，使用绝对路径避免 Gradle 路径解析错误
-          keytool -genkeypair -v \
-            -keystore $GITHUB_WORKSPACE/tyan.keystore \
-            -alias tyan \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass Tyan2026 \
-            -keypass Tyan2026 \
-            -dname "CN=App, OU=Dev, O=Org, L=City, ST=State, C=CN"
+      - name: 调用签名生成 Action（有缓存则复用，无则生成）
+        id: keystore
+        uses: ./.github/actions/keystore
 
       - name: 分 CPU 架构打包签名 APK
         run: |
-          # 支持的 CPU 架构列表
+          # 从 Action 输出读取签名参数
+          KEYSTORE_PATH="${{ steps.keystore.outputs.keystore_path }}"
+          STORE_PASSWORD="${{ steps.keystore.outputs.store_password }}"
+          KEY_ALIAS="${{ steps.keystore.outputs.key_alias }}"
+          KEY_PASSWORD="${{ steps.keystore.outputs.key_password }}"
+
+          # 支持的三种 CPU 架构
           ABIS=("arm64-v8a" "armeabi-v7a" "x86_64")
           mkdir -p output
 
@@ -67,10 +69,10 @@ jobs:
             cordova build android --release -- \
               --packageType=apk \
               --gradleArg="-Pandroid.defaultConfig.abiFilters=$ABI" \
-              --keystore=$GITHUB_WORKSPACE/tyan.keystore \
-              --storePassword=Tyan2026 \
-              --alias=tyan \
-              --password=Tyan2026
+              --keystore="$KEYSTORE_PATH" \
+              --storePassword="$STORE_PASSWORD" \
+              --alias="$KEY_ALIAS" \
+              --password="$KEY_PASSWORD"
 
             # 按架构重命名归档
             cp platforms/android/app/build/outputs/apk/release/app-release.apk \
@@ -79,12 +81,115 @@ jobs:
             echo ">>> $ABI 打包完成"
           done
 
-      - name: 压缩所有签名包
-        run: zip -j tyan.zip output/*.apk
 
-      - name: 上传构建产物
+      - name: 获取版本号
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_NAME="manual-$(date +'%Y%m%d-%H%M%S')"
+            VERSION="$TAG_NAME"
+          else
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            VERSION=$(echo "$TAG_NAME" | sed 's/^v//' | sed 's/^release-//')
+          fi
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: 获取构建时间
+        id: time
+        run: |
+          export TZ='Asia/Shanghai'
+          echo "datetime=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
+
+      - name: 获取 APK 信息
+        id: apk_info
+        run: |
+          cd output
+          
+          # 生成文件列表和 SHA256
+          echo "### 📦 APK 文件清单" > ../release_body.md
+          echo "" >> ../release_body.md
+          echo "| 架构 | 文件名 | 大小 | SHA256 |" >> ../release_body.md
+          echo "|------|--------|------|--------|" >> ../release_body.md
+          
+          for apk in *.apk; do
+            SIZE=$(ls -lh "$apk" | awk '{print $5}')
+            SHA256=$(sha256sum "$apk" | cut -d ' ' -f 1)
+            ARCH=${apk%.apk}
+            ARCH=${ARCH#tyan-}
+            
+            echo "| $ARCH | $apk | $SIZE | \`$SHA256\` |" >> ../release_body.md
+            
+            # 保存到输出变量
+            echo "${ARCH}_sha256=$SHA256" >> $GITHUB_OUTPUT
+            echo "${ARCH}_size=$SIZE" >> $GITHUB_OUTPUT
+          done
+          
+          cd ..
+          
+          # 生成完整的 Release Body
+          cat >> release_body_full.md << EOF
+## 🫧 廷琰 v${{ steps.version.outputs.version }}
+
+### 📦 版本信息
+| 项目 | 信息 |
+|------|------|
+| 版本号 | v${{ steps.version.outputs.version }} |
+| 构建时间 | ${{ steps.time.outputs.datetime }} |
+| 构建类型 | Release（签名） |
+
+$(cat release_body.md)
+
+### 📥 安装说明
+1. 根据手机 CPU 架构选择对应的 APK
+   - 大多数现代手机选择 \`arm64-v8a\`
+   - 老旧手机选择 \`armeabi-v7a\`
+   - 模拟器选择 \`x86_64\`
+2. 下载后在手机上允许"安装未知来源应用"
+3. 点击 APK 进行安装
+
+### 🔍 查看 CPU 架构
+如不确定手机架构，可安装 [Device Info HW](https://play.google.com/store/apps/details?id=ru.andr7e.deviceinfohw) 查看
+EOF
+
+      - name: 创建 Release 并上传 APK
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: 廷琰 v${{ steps.version.outputs.version }}
+          body_path: release_body_full.md
+          files: output/*.apk
+          generate_release_notes: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 上传到 Artifacts（备用/手动触发时）
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: 签名安装包
-          path: tyan.zip
-          retention-days: 7
+          name: 廷琰-v${{ steps.version.outputs.version }}-apks
+          path: output/*.apk
+          retention-days: 30
+
+      - name: 构建摘要
+        run: |
+          echo "## ✅ 构建完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 版本信息" >> $GITHUB_STEP_SUMMARY
+          echo "- **版本号**: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **构建时间**: ${{ steps.time.outputs.datetime }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📁 生成的 APK" >> $GITHUB_STEP_SUMMARY
+          echo "| 架构 | 大小 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| arm64-v8a | ${{ steps.apk_info.outputs.arm64-v8a_size }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| armeabi-v7a | ${{ steps.apk_info.outputs.armeabi-v7a_size }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| x86_64 | ${{ steps.apk_info.outputs.x86_64_size }} |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### 🔗 Release 链接" >> $GITHUB_STEP_SUMMARY
+            echo "[查看 Release](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag_name }})" >> $GITHUB_STEP_SUMMARY
+          fi
