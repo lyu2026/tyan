@@ -70,8 +70,6 @@ jobs:
         uses: ./.github/actions/keystore
 
       - name: 分 CPU 架构打签名包
-        env:
-          CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL: https\://services.gradle.org/distributions/gradle-8.7-all.zip
         run: |
           # 从 Action 输出读取签名参数
           KEYSTORE_PATH="${{ steps.keystore.outputs.keystore_path }}"
