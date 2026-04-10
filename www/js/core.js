@@ -153,7 +153,7 @@
 			}
 		})
 	}
-	_RP.json=function(){return this.text().then(_=>JSON.parse(_||''))}
+	_RP.json=function(){return this.text().then(_=>JSON.parse(_||'null'))}
 	_RP.blob=function(){return this._consume().then(_=>new Blob([_],{type:(this.headers.get('Content-Type')||'application/octet-stream').split(';')[0].trim()}))}
 	_RP.clone=function(){
 		if(this.bodyUsed)throw new TypeError('body has already been consumed')
@@ -384,6 +384,16 @@
 	W.Response=RP
 	W.XMLHttpRequest=XR
 
+	W.$O=document // 简化 document
+
+	W.run=(g,n,i)=>(W.I===i&&W[g]&&W[g][n]&&(typeof W[g][n]=='function')?W[g][n]:(_=>{})) // 自定义方法校验
+
+	// 本地缓存操作
+	String.prototype.gc=function(_=null){return JSON.parse(localStorage.getItem(this.trim())||'null')||_}
+	String.prototype.sc=function(){if(arguments.length>0)localStorage.setItem(this.trim(),JSON.stringify(arguments[0]))}
+	String.prototype.hc=function(){return localStorage.hasOwnProperty(this.trim())}
+	String.prototype.dc=function(){this.hc()&&localStorage.removeItem(this.trim())}
+
 	// 字符串转Dom树
 	String.prototype.html=function(){return(new DOMParser()).parseFromString(this,'text/html')}
 	// 字符串MD5加密
@@ -456,6 +466,40 @@
 		if(undefined===_)return this.innerHTML.trim()
 		if(typeof _=='string')this.innerHTML=_.trim()
 		return this
+	}
+
+	// 数据库操作
+	W.DB=(db,store)=>new Promise((S,C)=>{
+		let $=indexedDB.open(db,8)
+		$.onerror=e=>C(e)
+		$.onsuccess=e=>S($.result)
+		$.onupgradeneeded=e=>{
+			$=e.target.result
+			$.objectStoreNames.contains(store)||$.createObjectStore(store,{keyPath:'id'})
+			W.DB(db,store)
+		}
+	})
+	W.DA=(_,store,id,o)=>new Promise((S,C)=>{
+		const r=_.transaction(store,'readwrite').objectStore(store).add({id,o})
+		r.onsuccess=e=>S(true)
+		r.onerror=e=>S(false)
+	})
+	W.DG=(_,store,i)=>new Promise((S,C)=>{
+		const r=_.transaction(store).objectStore(store).get(i)
+		r.onsuccess=e=>S(r.result?r.result.o:null)
+		r.onerror=e=>S(null)
+	})
+	W.DU=(_,store,o)=>new Promise((S,C)=>{
+		const r=_.transaction(store,'readwrite').objectStore(store).put(o)
+		r.onsuccess=e=>S(null)
+		r.onerror=e=>S(null)
+	})
+
+	// 数据类型获取/验证
+	W._T=(a,b)=>{
+		const _=Object.prototype.toString.call(a).split(' ').pop().replace(/]$/,'').toLowerCase()
+		if(b=='element')return _.includes(b)&&a.isConnected
+		return b?_.includes(b):_
 	}
 
 })(window)

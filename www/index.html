@@ -43,7 +43,7 @@
 				if(!t)return _
 				if(!e)return '<pre>'+JSON.stringify(_,null,2)+'</pre>'
 				type='error'
-				_=_.stack.split('\n').map(_=>_.trim().replace(/^at /,'')).filter(_=>_.includes('/www/js/'))
+				_=_.stack.split('\n').map(v=>v.trim().replace(/^at /,'')).filter(_=>_.includes('/www/'))
 				return _.join('<br>')
 			}).filter(Boolean)
 			if(!type){
@@ -52,27 +52,37 @@
 			}
 			$.appendChild(document.node('div',{type,onclick:_=>_.remove()},s.join('<br>')))
 		}
-		window.onerror=(message,source,lineno,colno,error)=>log(message,error)
+		window.onerror=(message,source,lineno,colno,error)=>log(message,source+' '+lineno,error)
 		window.addEventListener('unhandledrejection',e=>log(e.reason.message,e.reason))
+		document.addEventListener('DOMContentLoaded',()=>{
+			document.body.innerHTML=window._loader=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 200' style='width:90vw;margin:40vh 5vw;object-fit:contain'>
+				<polyline fill='none' stroke='#00d704' stroke-width='3' stroke-linecap='round' stroke-linejoin='miter' stroke-dasharray='1000' stroke-dashoffset='1000' points='486.6,113.8 328.2,113.8 310.3,132.3 296,70.7 246.8,127.4 241.6,120.2 233.9,166.4 227,27.6 213.2,118.3 211.8,112.3 205.1,126.1 198.2,108.5 194.1,124.4 184.5,92.9 174.1,113 4.3,113'>
+					<animate attributeName='stroke-dashoffset' values='1000;2000;3000;1000' dur='1.5s' repeatCount='indefinite'/>
+					<animate attributeName='opacity' values='0;1;1;0;0' dur='1.5s' repeatCount='indefinite'/>
+				</polyline>
+			</svg>`
+		})
+		let WI=crypto.randomUUID()
 		document.addEventListener('deviceready',()=>{
-			document.head.appendChild(document.node('script',{src:'js/core.js',onload:_=>{
-				document.head.appendChild(document.node('script',{src:'js/hls.js',onload:_=>{
-					document.head.appendChild(document.node('script',{src:'js/ole.js'}))
+			document.addEventListener('backbutton',()=>{
+				if(!window.IX||window.IX.name=='home')return navigator.app.exitApp()
+				document.body.innerHTML=window._loader
+				document.querySelector('head>style[ix]').innerHTML=''
+				Array.from(document.querySelectorAll('head>script[ix]')).forEach(_=>_.remove())
+				document.head.appendChild(document.node('script',{ix:'',src:`./js/home.js?_=${crypto.randomUUID()}`}))
+			},false)
+			document.head.appendChild(document.node('script',{src:`./js/core.js?_=${crypto.randomUUID()}`,onload:_=>{
+				document.head.appendChild(document.node('script',{src:`./js/hls.js?_=${crypto.randomUUID()}`,onload:_=>{
+					document.head.appendChild(document.node('script',{ix:'',src:`./js/home.js?_=${crypto.randomUUID()}`}))
 				}}))
 			}}))
 		})
 	</script>
 
 	<link rel='stylesheet' href='css/style.css'>
+	<style ix></style>
 </head>
 
-<body>
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 200' style='width:90vw;margin:40vh 5vw;object-fit:contain'>
-	<polyline fill='none' stroke='#00d704' stroke-width='3' stroke-linecap='round' stroke-linejoin='miter' stroke-dasharray='1000' stroke-dashoffset='1000' points='486.6,113.8 328.2,113.8 310.3,132.3 296,70.7 246.8,127.4 241.6,120.2 233.9,166.4 227,27.6 213.2,118.3 211.8,112.3 205.1,126.1 198.2,108.5 194.1,124.4 184.5,92.9 174.1,113 4.3,113'>
-		<animate attributeName='stroke-dashoffset' values='1000;2000;3000;1000' dur='1.5s' repeatCount='indefinite'/>
-		<animate attributeName='opacity' values='0;1;1;0;0' dur='1.5s' repeatCount='indefinite'/>
-	</polyline>
-</svg>
-</body>
+<body></body>
 
 </html>
