@@ -18,7 +18,50 @@
 	<title>廷琰</title>
 
 	<script src='cordova.js'></script>
-	<script src='js/main.js'></script>
+	<script>
+		Document.prototype.node=function(tag='div',attrs={},html=''){
+			const o=this.createElement(tag)
+			for(let k in attrs){
+				if(k.startsWith('on')&&(typeof attrs[k]=='function')){
+					o[k]=()=>attrs[k](o)
+					continue
+				}
+				o.setAttribute(k,attrs[k])
+			}
+			if(html.trim()!='')o.innerHTML=html.trim()
+			return o
+		}
+		window.log=function(){
+			let $=document.querySelector('#w_logs')
+			if(!$){
+				$=document.node('div',{id:'w_logs'})
+				document.body.appendChild($)
+			}
+			let type=null,s=Array.from(arguments).map(_=>{
+				if(_===null||_===undefined)return null
+				const t=typeof _=='object',e=t&&Object.prototype.toString.call(_).includes('Error')
+				if(!t)return _
+				if(!e)return '<pre>'+JSON.stringify(_,null,2)+'</pre>'
+				type='error'
+				_=_.stack.split('\n').map(_=>_.trim().replace(/^at /,'')).filter(_=>_.includes('/www/js/'))
+				return _.join('<br>')
+			}).filter(Boolean)
+			if(!type){
+				type=s.length>0&&['info','error','warn','debug'].includes(s[s.length-1])?s[s.length-1]:null
+				if(type)s.length-=1
+			}
+			$.appendChild(document.node('div',{type,onclick:_=>_.remove()},s.join('<br>')))
+		}
+		window.onerror=(message,source,lineno,colno,error)=>log(message,error)
+		window.addEventListener('unhandledrejection',e=>log(e.reason.message,e.reason))
+		document.addEventListener('deviceready',()=>{
+			document.head.appendChild(document.node('script',{src:'js/core.js',onload:_=>{
+				document.head.appendChild(document.node('script',{src:'js/hls.js',onload:_=>{
+					document.head.appendChild(document.node('script',{src:'js/ole.js'}))
+				}}))
+			}}))
+		})
+	</script>
 
 	<link rel='stylesheet' href='css/style.css'>
 </head>
