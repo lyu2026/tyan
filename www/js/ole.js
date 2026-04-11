@@ -39,25 +39,25 @@ window.IX={
 	// 筛选设置
 	filters:{category:'',type:'',area:'',year:'',sort:''},search_key:null,search_val:null,
 
-	// 筛选类型
-	tmap:{'':{name:'收藏夹',areas:[],years:[],types:[]},'?':{name:'搜索',areas:[],years:[],types:[]}},
-	hls:null,page:0,id:null,curr:null,wait:true,
+	// 控制参数
+	tmap:{},hls:null,page:0,id:null,curr:null,wait:true,
 
 	// 节点监听器
 	load_more:null,img_lazy:null,get_nodes:null,
 
 	tab_click:me=>{ // 筛选视频
-		let gbox=$O.$('grid'),key,val
+		let gbox=$O.$('grid').da('_').sa('a'),key,val
 		if(me){
 			IX.page=0
-			gbox.html('')
 			IX.modal_close()
 			screen.orientation.unlock()
 			key=me.parentElement.ga('T');val=me.ga('V')
+			gbox.da('a').sa({_:key=='category'&&val=='?'?'💡 请输入关键字 . . ':'🥏 正在搜索，请稍等 . . .'}).html('')
 			if(key=='category'&&val=='?'){
 				IX.search_val=prompt('搜索关键字:')
 				IX.search_key='name'
 				IX.filters.category='?'
+				gbox.sa({_:`————  ${IX.search_val?`🔍 开始搜索关键字“${IX.search_val}”`:'🚨 关键字为空，肯定冇数据啊瑟瑟'}！  ————`})
 			}else if(key=='actor'||key=='director'){
 				me=$O.$(`tab[T='category']>div[V='?']`)
 				IX.filters.category='?'
@@ -77,11 +77,11 @@ window.IX={
 			'ole_filters'.sc({filters:IX.filters,search_key:IX.search_key,search_val:IX.search_val})
 			if(key=='category'){
 				if(IX.filters.category==''){
+					gbox.da('_')
 					const videos='ole_favorite_videos'.gc({})
 					gbox.append(...Object.keys(videos).map(_=>$O.node('grid-c',{I:_,N:videos[_].N,onclick:'run("IX","card_click",WI)(this)'},`<img src='${IX.cover}' s='${videos[_].C}'/><score>${videos[_].S}</score><title>${videos[_].N}</title>`)))
 					return
 				}
-				if(IX.filters.category!='')gbox.sa('a')
 				if(IX.filters.category!='?'){
 					const X=IX.tmap[IX.filters.category]
 					const tt=`<div${''==IX.filters.type?' c':''} V='' onclick='run("IX","tab_click",WI)(this)'>全部</div>`+X.types.map(_=>{
@@ -101,14 +101,14 @@ window.IX={
 						return
 					}
 				}
-			}else gbox.sa('a')
-		}
+			}
+		}else gbox.da('_').sa('a')
 		if(Object.keys(IX.filters).filter(_=>IX.filters[_]!='').length<1&&!IX.search_key)return
 		let S=IX.search_key,page=++IX.page,U=`https://api.olelive.com/v1/pub/vod/list/true/3/0/${encodeURIComponent(IX.filters.area)}/${IX.filters.category}/${IX.filters.type}/${IX.filters.year}/${IX.filters.sort}/${page}/30`
 		if(S)U=`https://www.olehdtv.com/index.php/vod/search/${IX.search_key}/${encodeURIComponent(IX.search_val)}/page/${page}.html`
 		const TS=JSON.stringify({filters:IX.filters,search_key:IX.search_key,search_val:IX.search_val})
-	U.get(o=>{
-			gbox.da('a')
+		U.get(o=>{
+			gbox.da('a').sa({_:`————  ${o===null?'🚨 请求失败，请重试':'🫧 数据为空'}！  ————`})
 			if(!o||TS!=JSON.stringify({filters:IX.filters,search_key:IX.search_key,search_val:IX.search_val}))return
 			o=S?o.$$('.vodlist_thumb'):o.data.list
 			o&&gbox.append(...o.map(_=>{
@@ -121,7 +121,7 @@ window.IX={
 	},
 
 	card_click:me=>{ // 打开详情弹层
-		const id=IX.id=me.ga('I'),videos='ole_favorite_videos'.gc({})
+		const id=IX.id=me.ga('I'),videos='ole_favorite_videos'.gc({}),mbox=$O.$('modal-c').html(window._loader)
 		IX.curr={N:me.ga('N'),C:me.$('img').ga('s'),S:me.$('score').innerText}
 		$O.$('modal-t [SC]').innerText=id in videos?'♡':'⊕'
 		$O.$('body').sa('ns')
@@ -129,7 +129,7 @@ window.IX={
 		$O.$('modal').da('hide').$('modal-t>title').html('&nbsp;&nbsp;'+IX.curr.N);
 		`https://api.olelive.com/v1/pub/vod/detail/${id}/true`.get(o=>{
 			o=o.data
-			const mbox=$O.$('modal-c'),[trim_start,trim_end]=(id+'_ole_trim_config').gc('0:0').split(':').map(_=>parseFloat(_))
+			const [trim_start,trim_end]=(id+'_ole_trim_config').gc('0:0').split(':').map(_=>parseFloat(_))
 			mbox.html(`<p><span>地区:&emsp;<em>${o.area}</em>&emsp;&emsp;&emsp;年份:&emsp;<em>${o.year}</em></span></p>
 				<p T='director'${o.director!=''?'':' hide'}><span>导演: </span>${o.director.split('/').filter(_=>_.trim()!='').map(_=>`<span V='${_.trim()}' onclick='run("IX","tab_click",WI)(this)'><em>${_.trim()}</em></span>`).join('')}</p>
 				<p T='actor'><span>主演: </span>${o.actor.split('/').filter(_=>_.trim()!='').map(_=>`<span V='${_.trim()}' onclick='run("IX","tab_click",WI)(this)'><em>${_.trim()}</em></span>`).join('')}</p>
@@ -248,7 +248,7 @@ window.IX={
 		IX.get_nodes.observe($O.body,{subtree:true,childList:true,attributeFilter:['hide','_I']});
 	},
 
-	run:()=>{
+	run:()=>{ // 启动执行
 		$O.$('head>style[ix]').innerHTML=`
 body[ns]{overflow-y:hidden!important}
 body>img{position:absolute;top:50%;left:50%;width:90vw;object-fit:contain;transform:translate(-50%,-50%)}
@@ -260,12 +260,12 @@ tab{height:26px;display:flex;align-items:center;overflow-x:auto;overflow-y:hidde
 tab::-webkit-scrollbar{width:0;height:0}
 tab>div{width:auto;padding:0 10px;color:rgba(255,255,255,.5);line-height:25px;white-space:nowrap}
 tab>div[c]{position:relative;color:#fff;font-weight:bold}
-tab>div[c]:after{content:'';position:absolute;bottom:0;left:30%;z-index:100;display:block;width:40%;height:1.5px;background:#7bda3e}
+tab>div[c]::after{content:'';position:absolute;bottom:0;left:30%;z-index:100;display:block;width:40%;height:1.5px;background:#7bda3e}
 grid{flex:.91;display:block;padding:2px 2px 0 0;overflow-y:auto;overflow-x:hidden}
 grid[a]{padding-bottom:20px}
-grid[a]:after{content:'加载中...';color:#fff;display:block;position:fixed;left:0;right:0;bottom:4px;z-index:10000000000;text-align:center}
+grid[a]::after{content:'加载中，请稍后 . . .';color:#fff;background:linear-gradient(to bottom,rgba(0,0,0,.1) 0%,rgba(0,0,0,.5) 40%,rgba(0,0,0,.9) 100%);font-size:12px;display:block;padding:2px 0;position:fixed;left:0;right:0;bottom:0;z-index:10000000000;text-align:center}
 grid:empty{min-height:40vh}
-grid:empty:after{content:'————  🫧 数据为空！  ————'!important;color:#ccc!important;text-align:center;display:block;font-size:14px;position:absolute;top:20vh;left:0;right:0;z-index:10000}
+grid:empty::after{content:attr(_,'————  🫧 数据为空！  ————')!important;color:#ccc!important;background:rgba(0,0,0,0)!important;text-align:center;display:block;font-size:14px;position:absolute!important;top:20vh!important;left:0;right:0;bottom:unset!important;z-index:100000000;text-align:center}
 grid-c{display:block;float:left;width:calc((100vw - 2px) / 3 - 2px);height:calc(((100vw - 2px) / 3 - 2px) * 1.34);overflow:hidden;background:rgba(255,255,255,.02);border-radius:2px;margin:0 0 2px 2px}
 grid-c[X='ok']{padding:16px;background:rgba(255,255,255,.3)}
 grid-c img{display:block;width:100%;object-fit:cover}
@@ -274,7 +274,7 @@ grid-c tip{position:absolute;top:calc(((100vw - 2px) / 3 - 2px) * 1.34 - 60px);l
 grid-c title{position:absolute;bottom:0;left:0;right:0;z-index:10;display:block;font-size:12px;color:#fff;line-height:14px;padding:4px 3px;background:linear-gradient(rgba(60,60,60,.6),rgba(0,0,0,.9))}
 modal{touch-action:none;display:block;width:100vw.height:100vh;position:fixed;top:0;left:0;bottom:0;z-index:1000000}
 modal mbox{touch-action:none;position:relative;display:block;width:100vw;height:100vh;background:rgba(0,0,0,.95);overflow:hidden}
-modal-t{position:absolute;top:0;z-index:222;display:flex;width:100%;overflow:hidden;height:30px;padding:10px 4px 0 4px;background:rgba(0,0,0,.8)}
+modal-t{position:absolute;top:0;z-index:222;display:flex;width:100%;overflow:hidden;height:40px;padding:10px 4px 0 4px;background:rgba(0,0,0,.8)}
 modal-t>title{flex:1;display:block;height:30px;font-size:18px;line-height:30px;color:#fff;white-space:pre-line;word-break:break-word}
 modal-t>icc{display:inline-block;width:30px;height:30px;line-height:30px;font-size:28px;color:#fff;margin-right:20px}
 modal-c{margin-top:45px;display:flex;flex-direction:column;height:calc(100vh - 100px);overflow:hidden auto}
@@ -307,20 +307,30 @@ modal[DK] modal-c>video{position:fixed!important;left:0;right:0;bottom:30px;widt
 		transition:transform 0.1s;
 	}
 }`;
-		'https://api.olelive.com/v1/pub/vod/list/type'.get(o=>{ // 启动执行
+	const render=()=>{
+		let o=`<tab T='category'>${Object.keys(IX.tmap).map(_=>`<div V='${_}' onclick='run("IX","tab_click",WI)(this)'>${IX.tmap[_].name}</div>`).join('')}</tab>`
+		o+=`<grid></grid>`
+		o+=`<modal hide><mbox><modal-t><title></title>`
+		o+=`<icc SC onclick='run("IX","collect_toggle",WI)(this)' style='line-height:33px'>⊕</icc>`
+		o+=`<icc onclick='run("IX","dark_toggle",WI)(this)' style='line-height:33px'>⊙</icc>`
+		o+=`<icc onclick='run("IX","modal_close",WI)()'>╳</icc>`
+		o+=`</modal-t><modal-c></modal-c></mbox></modal>`
+		$O.body.html(o)
+		IX.watch()
+		const {filters}='ole_filters'.gc({filters:{}})
+		$O.$(`tab[T='category']>div${filters.category?`[V='${filters.category}']`:''}`).click()
+	}
+
+	IX.tmap='ole_tmap'.gc({})
+	if(Object.keys(IX.tmap).length>0)return render()
+
+	'https://api.olelive.com/v1/pub/vod/list/type'.get(o=>{
 			if(!o)return
 			o.data.filter(_=>_.typeId<5).forEach(_=>(IX.tmap[_.typeId]={name:_.typeName,areas:_.area,years:_.year,types:_.children.map(x=>(x.typeId+'').startsWith(_.typeId+'')?(x.typeId+':'+x.typeName):null).filter(_=>_)}))
-			$O.body.html(`<tab T='category'>${Object.keys(IX.tmap).map(_=>`<div V='${_}' onclick='run("IX","tab_click",WI)(this)'>${IX.tmap[_].name}</div>`).join('')}</tab>
-<grid></grid><modal hide><mbox><modal-t><title></title>
-<icc SC onclick='run("IX","collect_toggle",WI)(this)' style='line-height:33px'>⊕</icc>
-<icc onclick='run("IX","dark_toggle",WI)(this)' style='line-height:33px'>⊙</icc>
-<icc onclick='run("IX","modal_close",WI)()'>╳</icc>
-</modal-t><modal-c></modal-c></mbox></modal>`)
-			IX.watch()
-			const {filters}='ole_filters'.gc({filters:{}})
-			$O.$(`tab[T='category']>div${filters.category?`[V='${filters.category}']`:''}`).click()
+			IX.tmap['']={name:'收藏夹',areas:[],years:[],types:[]}
+			IX.tmap['?']={name:'搜索',areas:[],years:[],types:[]}
+			'ole_tmap'.sc(IX.tmap)
+			render()
 		},{_vv:IX.vv()},'json')
 	},
 }
-
-IX.run()

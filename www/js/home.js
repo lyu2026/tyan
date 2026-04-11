@@ -12,11 +12,14 @@ window.IX={
 
  goto:me=>{ // 页面跳转
 		setTimeout(()=>{
-			$O.body.html(window._loader)
-			$O.$('head>style[ix]').innerHTML=''
-			$O.$$('head>script[ix]').forEach(_=>_.remove())
-			$O.head.appendChild($O.node('script',{ix:'',src:`./js/${me.ga('K')}.js?_=${crypto.randomUUID()}`}))
-		},2000)
+			const js=`${me.ga('K')}.js`
+			$O.head.appendChild($O.node('script',{ix:'',src:`./js/${js}?_=${crypto.randomUUID()}`,onload:()=>{
+				$O.body.html(window._loader)
+				$O.$('head>style[ix]').innerHTML=''
+				$O.$$('head>script[ix]').forEach(_=>_.remove())
+				IX.run()
+			},onerror:e=>log(`脚本文件${js}不存在`,e)}))
+		},200)
  },
 
 	run:()=>{ // 启动执行
@@ -42,4 +45,4 @@ card h1{font-size:26px;text-shadow:1px 1px #0000000a,2px 2px #0000000a,3px 3px #
 
 }
 
-window.IX.run()
+IX.run()

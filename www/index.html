@@ -43,7 +43,7 @@
 				if(!t)return _
 				if(!e)return '<pre>'+JSON.stringify(_,null,2)+'</pre>'
 				type='error'
-				_=_.stack.split('\n').map(v=>v.trim().replace(/^at /,'')).filter(_=>_.includes('/www/'))
+				_=_.stack.split('\n').map(v=>v.trim().replace(/^at /,'').split('/www/').pop().split('?_=').shift()).filter(_=>_.includes('/www/'))
 				return _.join('<br>')
 			}).filter(Boolean)
 			if(!type){
@@ -52,7 +52,7 @@
 			}
 			$.appendChild(document.node('div',{type,onclick:_=>_.remove()},s.join('<br>')))
 		}
-		window.onerror=(message,source,lineno,colno,error)=>log(message,source+' '+lineno,error)
+		window.onerror=(message,source,lineno,colno,error)=>log(message,source.split('/www/').pop().split('?_=').shift()+' '+lineno,error)
 		window.addEventListener('unhandledrejection',e=>log(e.reason.message,e.reason))
 		document.addEventListener('DOMContentLoaded',()=>{
 			document.body.innerHTML=window._loader=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 200' style='width:90vw;margin:40vh 5vw;object-fit:contain'>
@@ -71,8 +71,8 @@
 				Array.from(document.querySelectorAll('head>script[ix]')).forEach(_=>_.remove())
 				document.head.appendChild(document.node('script',{ix:'',src:`./js/home.js?_=${crypto.randomUUID()}`}))
 			},false)
-			document.head.appendChild(document.node('script',{src:`./js/core.js?_=${crypto.randomUUID()}`,onload:_=>{
-				document.head.appendChild(document.node('script',{src:`./js/hls.js?_=${crypto.randomUUID()}`,onload:_=>{
+			document.head.appendChild(document.node('script',{src:`./js/core.js`,onload:_=>{
+				document.head.appendChild(document.node('script',{src:`./js/hls.js`,onload:_=>{
 					document.head.appendChild(document.node('script',{ix:'',src:`./js/home.js?_=${crypto.randomUUID()}`}))
 				}}))
 			}}))
