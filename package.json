@@ -10,7 +10,6 @@
 		"cordova-plugin-advanced-http":"*",
 		"cordova-plugin-streaming-media":"*",
 		"cordova-plugin-screen-orientation":"*"
-}
 	},
 	"cordova":{
 		"plugins":{
