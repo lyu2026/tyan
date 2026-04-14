@@ -121,6 +121,7 @@ window.IX={
 		const TS=JSON.stringify({filters:IX.filters,search_key:IX.search_key,search_val:IX.search_val})
 		U.get(o=>{
 			if(IX.key!=K)return
+			log('列表数据',o)
 			gbox.da('a').sa({_:`————  ${o===null?'🚨 请求失败，请重试':'🫧 数据为空'}！  ————`})
 			if(o===null)return go(false)
 			if(TS!=JSON.stringify({filters:IX.filters,search_key:IX.search_key,search_val:IX.search_val}))return go(true)
@@ -138,7 +139,7 @@ window.IX={
 	fold_toggle:me=>{ // 视频源展开/折叠
 		const x=me.html()=='💦'
 		me.innerText=x?'🌀':'💦'
-		$O.$$('modal-c [VS]>*:nth-child(n+22)').forEach(_=>(_.style.display=!x?'inline-block':'none'))
+		$O.$('modal-c [VS]')[x?'sa':'da']('x')
 	},
 
 	card_click:me=>{ // 打开详情弹层
@@ -148,16 +149,21 @@ window.IX={
 		$O.$('modal-t [SC]').innerText=id in videos?'♡':'⊕'
 		$O.body.sa('ns')
 		$O.$('grid').da('a')
-		$O.$('modal').da('hide').$('modal-t>title').html('&nbsp;&nbsp;'+IX.curr.N);
+		$O.$('modal').da('hide').$('modal-t>title').da('s10','s12','s14').html(IX.curr.N.length>14?(IX.curr.N.substring(0,14)+'\n'+IX.curr.N.substring(14)):IX.curr.N)
+		if(IX.curr.N.length>14)$O.$('modal-t>title').sa('s14')
+		else if(IX.curr.N.length>12)$O.$('modal-t>title').sa('s12')
+		else if(IX.curr.N.length>10)$O.$('modal-t>title').sa('s10');
+
 		`https://api.olelive.com/v1/pub/vod/detail/${id}/true`.get(_=>{
 			if(IX.key!=K)return
+			log('详情数据',_)
 			const {area,year,director,actor,urls,content}=_.data,o=[]
 			const [trim_start,trim_end]=(id+'_ole_trim_config').gc('0:0').split(':').map(_=>parseFloat(_))
-			o.push(`<div><div>地区:&emsp;<em>${area}</em>&emsp;&emsp;&emsp;年份:&emsp;<em>${year}</em></div></div>`)
-			o.push(`<div T='director'${director!=''?'':' hide'}><div>导演: </div>${director.split('/').filter(_=>_.trim()!='').map(_=>`<div V='${_.trim()}' onclick='run("IX","tab_click",WI)(this)'><em>${_.trim()}</em></div>`).join('')}</div>`)
-			o.push(`<div T='actor'${actor!=''?'':' hide'}><div>主演: </div>${actor.split('/').filter(_=>_.trim()!='').map(_=>`<div V='${_.trim()}' onclick='run("IX","tab_click",WI)(this)'><em>${_.trim()}</em></div>`).join('')}</div>`)
-			o.push(`<div VS>${urls.length>20?`<toggle onclick='run("IX","fold_toggle",WI)(this)'>🌀</toggle>`:''}${urls.map((_,i)=>`<div u='${_.url}' ${i>19?'style="display:none" ':''}onclick='run("IX","part_click",WI)(this)'>${_.title}</div>`).join('')}</div>`)
-			o.push(`<video preload autoplay crossorigin='anonymous' controls poster='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" style="background:skyblue"%3E%3C/svg%3E'></video>`)
+			o.push(`<div><div><b>地区:</b>&emsp;<em>${area}</em>&emsp;&emsp;&emsp;<b>年份:</b>&emsp;<em>${year}</em></div></div>`)
+			o.push(`<div T='director'${director!=''?'':' hide'}><div b>导演: </div>${director.split('/').filter(_=>_.trim()!='').map(_=>`<div V='${_.trim()}' onclick='run("IX","tab_click",WI)(this)'><em>${_.trim()}</em></div>`).join('')}</div>`)
+			o.push(`<div T='actor'${actor!=''?'':' hide'}><div b>主演: </div>${actor.split('/').filter(_=>_.trim()!='').map(_=>`<div V='${_.trim()}' onclick='run("IX","tab_click",WI)(this)'><em>${_.trim()}</em></div>`).join('')}</div>`)
+			o.push(`${urls.length>14?`<div tg><div onclick='run("IX","fold_toggle",WI)(this)'>🌀</div></div>`:''}<div VS${urls.length>14?' x':''}>${urls.map((_,i)=>`<div u='${_.url}' onclick='run("IX","part_click",WI)(this)'>${_.title}</div>`).join('')}</div>`)
+			o.push(`<video preload autoplay crossorigin='anonymous' controls poster='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" style="background:%23${$O.body.ha('dark')?'001':'eff'}"%3E%3C/svg%3E'></video>`)
 			o.push(`<div VL><div VL S onclick='run("IX","trim_click",WI)(false)'>╟ ${Number(trim_start).dt()}</div><div VL W onclick='run("IX","trim_click",WI)(true)'>${Number(-trim_end).dt()} ╢</div></div>`)
 			o.push(`<div BF>${content}</div>`)
 			mbox.html(o.join(''))
@@ -206,6 +212,7 @@ window.IX={
 	part_click:me=>{ // 切换视频源
 		IX.wait=true
 		const url=me.ga('u')
+		log('视频源链',url)
 		me.parentElement.$$(`div`).forEach(_=>_[_==me?'sa':'da']('c'))
 		IX.hls.loadSource(url);
 		(IX.id+'_ole_part_url').sc(url)
@@ -232,7 +239,7 @@ window.IX={
 
 	modal_close:async()=>{ // 关闭详情弹层
 		const video=$O.$('video')
-		// video&&(IX.id+'_ole_part_ctime').sc($O.$('[VS]>[c]').ga('u')+'$'+video.currentTime)
+		video&&(IX.id+'_ole_part_ctime').sc($O.$('[VS]>[c]').ga('u')+'$'+video.currentTime)
 		IX.wait=false
 		IX.id=IX.curr=null
 		IX.hls&&(await IX.hls.destroy())
@@ -254,7 +261,7 @@ window.IX={
 			if(!card||card.ha('wait')||IX.filters.category==='')return
 			card.sa('wait')
 			IX.tab_click(null,_=>{
-				if(_)o.unobserve(card)
+				if(_)o?.unobserve(card)
 				card.da('wait')
 			})
 		},{threshold:0.7})
@@ -262,7 +269,7 @@ window.IX={
 			s.forEach(e=>{
 				e.target.isConnected&&(e.target.nodeName=='IMG')
 				&&(e.intersectionRatio>=0.7)&&(e.target.ga('src')!=e.target.ga('s'))
-				&&e.target.sa({src:e.target.ga('s')})&&o.unobserve(e.target)
+				&&e.target.sa({src:e.target.ga('s')})&&o?.unobserve(e.target)
 			})
 		},{threshold:0.7})
 		IX.observer.get_nodes=new MutationObserver(s=>{
@@ -272,9 +279,9 @@ window.IX={
 				const is_gbox=tag=='GRID',cards=Array.from(e.addedNodes)
 				if(!is_gbox||cards.length<1||(is_gbox&&cards.some(_=>_.nodeName!='GRID-C')))return
 				is_gbox&&!last_card&&(last_card=cards[cards.length-1])
-				cards.filter(_=>_.nodeName=='GRID-C').forEach(_=>IX.observer.lazy_img.observe(_.$('img')))
+				cards.filter(_=>_.nodeName=='GRID-C').forEach(_=>IX.observer.lazy_img?.observe(_.$('img')))
 			})
-			last_card&&IX.observer.load_more.observe(last_card)
+			last_card&&IX.observer.load_more?.observe(last_card)
 		})
 		IX.observer.get_nodes.observe($O.body,{subtree:true,childList:true,attributeFilter:['hide','_I']})
 	},
@@ -285,43 +292,61 @@ window.IX={
 body{display:flex!important;flex-direction:column!important}
 body[ns]{overflow:hidden!important}
 
-tab{display:flex;width:100vw;height:26px;align-items:center;overflow:auto hidden;border-bottom:1px solid rgba(255,255,255,.1);position:relative}
+tab{display:flex;width:100vw;height:26px;align-items:center;overflow:auto hidden;border-bottom:1px solid rgba(0,0,0,.1);position:relative}
+body[dark] tab{border-bottom-color:rgba(255,255,255,.1)}
 tab::-webkit-scrollbar{width:0;height:0}
 tab:first-child{margin-top:20px}
-tab>div{width:auto;padding:0 10px;color:rgba(255,255,255,.8);line-height:25px;white-space:nowrap}
-tab>div[c]{color:#fff;font-weight:bold}
+tab>div{width:auto;padding:0 10px;color:rgba(0,0,0,.8);line-height:25px;white-space:nowrap}
+body[dark] tab>div{color:rgba(255,255,255,.8)}
+tab>div[c]{color:black;font-weight:bold}
+body[dark] tab>div[c]{color:white}
 tab>div[c]::after{content:'';display:block;width:40%;height:1.5px;background:#7bda3e;position:absolute;left:30%;bottom:0;z-index:10}
 tab:not(tab:first-of-type):not(tab:last-of-type){padding-left:40px}
-tab:not(tab:first-of-type):not(tab:last-of-type)>div:first-child{margin-bottom:-1.5px;padding-bottom:1.5px;position:fixed;left:0;z-index:20;background:#000;border-right:1px solid rgba(255,255,255,.05)}
+tab:not(tab:first-of-type):not(tab:last-of-type)>div:first-child{margin-bottom:-1.5px;padding-bottom:1.5px;position:fixed;left:0;z-index:20;background:white;border-right:1px solid rgba(0,0,0,.05)}
+body[dark] tab:not(tab:first-of-type):not(tab:last-of-type)>div:first-child{background:black;border-right-color:rgba(255,255,255,.05)}
 
 grid{flex:1;display:block;padding:2px 10px 0 8px;overflow:hidden auto;transform:translateZ(0);will-change:transform}
 grid:empty{min-height:34vh}
-grid:empty::before{content:attr(_,'————  🫧 数据为空！  ————');display:block;line-height:24vh;color:#ccc;font-size:16px;text-align:center}
-grid[a]::after{clear:both;content:'加载中，请稍后 . . .';display:block;width:calc(100vw - 20px)!important;height:30px;line-height:30px;text-align:center;color:#ccc;font-size:12px;font-weight:blod}
-grid-c{float:left;display:block;width:calc((100vw - 18px) / 3 - 2px);height:calc(((100vw - 18px) / 3 - 2px) * 1.34);overflow:hidden;background:rgba(255,255,255,.02);border-radius:2px;margin:0 0 2px 2px}
-grid-c[X='ok']{padding:16px;background:rgba(255,255,255,.3)}
+grid:empty::before{content:attr(_,'————  🫧 数据为空！  ————');display:block;line-height:24vh;color:#444;font-size:16px;text-align:center}
+grid[a]::after{clear:both;content:'加载中，请稍后 . . .';display:block;width:calc(100vw - 20px)!important;height:30px;line-height:30px;text-align:center;color:#444;font-size:12px;font-weight:blod}
+body[dark] grid:empty::before,body[dark] grid[a]::after{color:#ccc}
+grid-c{float:left;display:block;width:calc((100vw - 18px) / 3 - 2px);height:calc(((100vw - 18px) / 3 - 2px) * 1.34);overflow:hidden;background:rgba(0,0,0,.02);border-radius:2px;margin:0 0 2px 2px}
+body[dark] grid-c{background:rgba(255,255,255,.02)}
+grid-c[X='ok']{padding:16px;background:rgba(0,0,0,.3)}
+body[dark] grid-c[X='ok']{background:rgba(255,255,255,.3)}
 grid-c img{display:block;width:100%;object-fit:cover}
 grid-c score{display:block;font-size:12px;color:orange;position:absolute;top:8px;left:8px;z-index:10;-webkit-text-stroke:.3px blue}
-grid-c tip{display:block;font-size:12px;color:#fff;text-align:center;position:absolute;top:calc(((100vw - 2px) / 3 - 2px) * 1.34 - 60px);left:20px;right:20px;z-index:10;-webkit-text-stroke:.3px blue}
-grid-c title{display:block;font-size:12px;color:#fff;line-height:16px;padding:4px 3px;background:linear-gradient(rgba(60,60,60,.6),rgba(0,0,0,.9));position:absolute;left:0;right:0;bottom:0;z-index:10}
+grid-c tip{display:block;font-size:12px;color:white;text-align:center;position:absolute;top:calc(((100vw - 2px) / 3 - 2px) * 1.34 - 60px);left:20px;right:20px;z-index:10;-webkit-text-stroke:.3px blue}
+grid-c title{display:block;font-size:12px;color:white;line-height:16px;padding:4px 3px;background:linear-gradient(rgba(60,60,60,.6),rgba(0,0,0,.9));position:absolute;left:0;right:0;bottom:0;z-index:10}
 
 modal{touch-action:none;display:block;width:100vw.height:100vh;position:fixed;left:0;right:0;top:0;bottom:0;z-index:100}
-modal>mbox{display:block;width:100vw;height:100vh;background:rgba(0,0,0,.95);overflow:hidden auto;transform:translateZ(0);will-change:transform}
-modal-t{display:flex;width:100%;height:40px;padding:10px 4px 0 4px;overflow:hidden;background:rgba(0,0,0,.8);position:sticky;top:0;z-index:20}
-modal-t>title{flex:1;display:block;height:30px;font-size:18px;line-height:30px;color:#fff;white-space:pre-line;word-break:break-word}
-modal-t>icc{display:inline-block;width:30px;height:30px;line-height:30px;font-size:28px;color:#fff;margin-right:20px}
+modal>mbox{display:block;width:100vw;height:100vh;background:rgba(255,255,255,.95);overflow:hidden auto;transform:translateZ(0);will-change:transform}
+body[dark] modal>mbox{background:rgba(0,0,0,.95)}
+modal-t{display:flex;width:100%;height:40px;padding:10px 4px 0 4px;overflow:hidden;background:rgba(255,255,255,.8);position:sticky;top:0;z-index:20}
+body[dark] modal-t{background:rgba(0,0,0,.8)}
+modal-t>title{flex:1;display:block;height:30px;font-size:20px;line-height:30px;padding-left:10px;color:black}
+modal-t>title[s10]{font-size:16px}
+modal-t>title[s12]{font-size:14px}
+modal-t>title[s14]{font-size:14px;line-height:15px}
+modal-t>icc{display:inline-block;width:30px;height:30px;line-height:30px;font-size:28px;color:black;margin-right:20px}
+body[dark] modal-t>title,body[dark] modal-t>icc{color:white}
 modal-c{display:flex;flex-direction:column;padding:0 12px 50px 12px;min-height:calc(100vh - 40px)}
-modal-c>svg{flex:.6;display:block;width:70%;margin:1vh 15%}
-modal-c>div{display:inline-block;line-height:16px;font-size:12px;color:#999;padding:2px 0}
+modal-c>div{display:inline-block;line-height:16px;font-size:12px;color:#777;padding:2px 0}
+body[dark] modal-c>div{color:#999}
+modal-c b,modal-c [b]{font-size:15px;margin-top:-4px}
 modal-c>div>div{float:left;display:inline-block;margin-right:10px;line-height:2}
 modal-c>div>div[c]{text-decoration:underline;text-underline-offset:3px}
 modal-c>video{display:block;object-fit:contain;margin-top:12px;border-radius:3px}
-modal-c>[VL]{border-top:1px solid rgba(255,255,255,.02)}
+modal-c>[VL]{border-top:1px solid rgba(0,0,0,.02)}
+body[dark] modal-c>[VL]{border-top-color:rgba(255,255,255,.02)}
 modal-c>[VL]>[VL]{display:block;height:30px;line-height:30px;text-align:left;width:auto}
 modal-c>[VL]>[VL]:nth-child(2){float:right;text-align:right}
-modal-c>[VS],modal-c>[BF]{padding:6px;border-radius:3px;background:rgb(172 0 255 / 17%)}}
-modal-c>[VS]>toogle{clear:both;left:unset!important;display:block!important;width:90px!important;height:90px!important;line-height:90px;text-align:center;font-size:60px!important;border-radius:100%;box-shadow:2px 2px 5px rgba(255,255,255,.06);position:absolute!important;top:-80px!important;right:-50px!important}
-
+modal-c>[tg]{display:flex;white:100%}
+modal-c>[tg]>div{margin-left:auto;margin-bottom:-30px;margin-right:-8px;font-size:40px;line-height:40px;width:40px;height:40px;border-radius:100%;z-index:10}
+modal-c>[VS],modal-c>[BF]{padding:6px;border-radius:3px;background:rgb(0,0,0,.1)}
+body[dark] modal-c>[VS],body[dark] modal-c>[BF]{background:rgba(255,255,255,.1)}
+modal-c>[VS][x]>*:nth-child(n+14){display:none}
+modal-c>[VS][x]::after{content:'···';float:left;display:inline-block;margin-right:10px;line-height:2;font-size:14px}
 modal-c>[BF]{font-size:12px;line-height:1.5}
 modal[DK] modal-c>*:not(video){visibility:hidden}
 modal[DK] modal-c>video{position:absolute;left:0;right:0;bottom:50px;width:100vw;margin-top:unset}
@@ -332,15 +357,10 @@ modal[DK] modal-c>video{position:absolute;left:0;right:0;bottom:50px;width:100vw
 @media(min-aspect-ratio:18 / 9){
 	grid-c{width:calc((100vw - 18px) / 8 - 2px);height:calc(((100vw - 18px) / 8 - 2px) * 1.34)}
 }
-
 @media(pointer:coarse){
 	grid-c:hover{background:initial}
-	grid-c:focus-visible,modal-c>div>div:focus-visible{
-		outline:6px solid #fff;
-		outline-offset:6px;
-		transform:scale(1.05);
-		transition:transform 0.1s;
-	}
+	grid-c:focus-visible,modal-c>div>div:focus-visible{outline:6px solid black;outline-offset:6px;transform:scale(1.05);transition:transform 0.1s}
+	body[dark] grid-c:focus-visible,body[dark] modal-c>div>div:focus-visible{outline-color:white}
 }`;
 	const render=()=>{
 		log('渲染页面，构建 DOM 树')
@@ -367,6 +387,7 @@ modal[DK] modal-c>video{position:absolute;left:0;right:0;bottom:50px;width:100vw
 	const K=IX.key=crypto.randomUUID()
 	'https://api.olelive.com/v1/pub/vod/list/type'.get(o=>{
 			if(!o||K!=IX.key)return
+			log('分类数据',o)
 			o.data.filter(_=>_.typeId<5).forEach(_=>(IX.tmap[_.typeId]={name:_.typeName,areas:_.area,years:_.year,types:_.children.map(x=>(x.typeId+'').startsWith(_.typeId+'')?(x.typeId+':'+x.typeName):null).filter(_=>_)}))
 			IX.tmap['']={name:'收藏夹',areas:[],years:[],types:[]}
 			IX.tmap['?']={name:'搜索',areas:[],years:[],types:[]}
