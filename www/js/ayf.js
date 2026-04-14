@@ -285,7 +285,9 @@ window.IX={
 
 	run:()=>{ // 启动执行
 		log('进入页面，自定义样式')
-		$O.$('head>style[ix]').innerHTML=`body{display:flex!important;flex-direction:column!important}`
+		$O.$('head>style[ix]').innerHTML=`
+body{display:flex!important;flex-direction:column!important}
+tab:not(tab:first-of-type):not(tab:last-of-type){padding-left:60px}`
 		const render=()=>{
 			log('渲染页面，构建 DOM 树')
 			let o=`<tab T='category'>${Object.keys(IX.tmap).map(_=>`<div V='${_}' onclick='run("IX","tab_click",WI)(this)'>${IX.tmap[_].name}</div>`).join('')}</tab>`
