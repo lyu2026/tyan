@@ -123,7 +123,7 @@ window.IX={
 				time=_.$('.content_date').innerText.replace(/\-/g,'/').trim();
 				O.$$('p').forEach(_=>{
 					if(_.innerText.trim()==''&&!_.$('img'))return
-					const img=_.$('img'),x=$O.node('img',{src:im.g.src})
+					const img=_.$('img'),x=$O.node('img',{src:img.src})
 					_.parentNode.replaceChild(x,_)
 				})
 				o=O.html().split('--- END ---').shift().replace(/\< *\/? *br *\>|\< *br *\/? *\>/g,'<br>').replace(/^[\s\t\n\r]*\<br\>[\s\t\n\r]*|[\s\t\n\r]*\<br\>[\s\t\n\r]*$|[\s\t]*[\n\r][\s\t]*/g,'').replace(/(\<img src\=[^\>]+\>)([\r\n\d\t]*\<br\>[\r\n\d\t]*)*([^\<]+)(?=\<br\>)(\<br\>)+/g,'$1<div center>$3</div><br>').replace(/\<br\>/g,'<br>&emsp;&emsp;').trim()
