@@ -211,7 +211,7 @@ window.IX={
 			o=o.data.list.filter(_=>_.mediaUrl).sort((a,b)=>parseInt(a.resolution)-parseInt(b.resolution)).pop()
 			if(!o||!o.mediaUrl)return
 			IX.hls.loadSource(o.mediaUrl);
-			(IX.mk+'_ayf_part_url').sc([mk,vid])
+			(IX.mk+'_ayf_part_url').sc(vid)
 		},{mediaKey:mk,videoId:vid,videoType:1},'json')
 	},
 

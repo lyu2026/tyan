@@ -83,7 +83,6 @@ window.IX={
 			}).filter(Boolean)
 			else o=[]
 			log('列表数据',o)
-
 			o&&gbox.append(...o.map(({I,N,brief,time,cover})=>$O.node('grid-c',{I,N,W:IX.filters.category,onclick:'run("IX","card_click",WI)(this)'},`${cover?`<img src='${IX.cover}' s='${cover}'/>`:''}<div><div>${N}</div><div>${brief}</div>${time?`<div>${time}</div>`:''}</div>`)))
 			go(true)
 		},{},'html')
@@ -116,8 +115,6 @@ window.IX={
 					if(_.tagName=='FONT'&&!_.innerText.trim())_.remove()
 				});
 				o=O.html().replace(/((\s|\n|&nbsp;)*<br\/?>|(<br\/?>){2,})/g,'<br/>').replace(/(<br\/?>){2,}/g,'<br/>&emsp;&emsp;').split(/<br\/?>(\s|\n|&nbsp;)*延伸阅读(\s|\n|&nbsp;)*<br\/?>/).shift().replaceAll('【菲龙网专讯】','').trim()
-				log('<pre>'+o.replace(/&/g,'&amp;').replace(/\</g,'&lt;').replace(/\>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')+'<pre>')
-			
 			}else if(W=='fhw'){
 				const O=_.$('.content_content>div');
 				time=_.$('.content_date').innerText.replace(/\-/g,'/').trim();
@@ -126,7 +123,7 @@ window.IX={
 					const img=_.$('img'),x=$O.node('img',{src:img.src})
 					_.parentNode.replaceChild(x,_)
 				})
-				o=O.html().split('--- END ---').shift().replace(/\< *\/? *br *\>|\< *br *\/? *\>/g,'<br>').replace(/^[\s\t\n\r]*\<br\>[\s\t\n\r]*|[\s\t\n\r]*\<br\>[\s\t\n\r]*$|[\s\t]*[\n\r][\s\t]*/g,'').replace(/(\<img src\=[^\>]+\>)([\r\n\d\t]*\<br\>[\r\n\d\t]*)*([^\<]+)(?=\<br\>)(\<br\>)+/g,'$1<div center>$3</div><br>').replace(/\<br\>/g,'<br>&emsp;&emsp;').trim()
+				o=O.html().split(/\-\-\- END \-\-\-|了解更多请搜索/).shift().replace(/\< *\/? *br *\>|\< *br *\/? *\>/g,'<br>').replace(/^[\s\t\n\r]*\<br\>[\s\t\n\r]*|[\s\t\n\r]*\<br\>[\s\t\n\r]*$|[\s\t]*[\n\r][\s\t]*/g,'').replace(/(\<img src\=[^\>]+\>)([\r\n\d\t]*\<br\>[\r\n\d\t]*)*([^\<]+)(?=\<br\>)(\<br\>)+/g,'$1<div center>$3</div><br>').replace(/\<br\>/g,'<br>&emsp;&emsp;').trim()
 			}else if(W=='fsb'){
 				
 			}else return
