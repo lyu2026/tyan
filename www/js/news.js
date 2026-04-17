@@ -64,8 +64,8 @@ window.IX={
 			if(o===null)return go(false)
 			if(TS!=JSON.stringify(IX.filters))return go(true)
 			if(IX.filters.category=='fsb')o=o.$$('.conlist').map(_=>{
-				const a=_.$('.contt>a'),brief=_.$('.container').innerText.replace(/\n{2,}/g,'\n').replace(/^\n+|\n+$/g,'\n').trim()
-				return {I:a.href,N:a.innerText,brief,time:_.$('.conpubtime').innerText}
+				const a=_.$('.contt>a'),brief=_.$('.container').innerText.replace(/\n{2,}/g,'\n').replace(/^\n+|\n+$/g,'\n').trim().f2j()
+				return {I:a.href,N:a.innerText.f2j(),brief,time:_.$('.conpubtime').innerText}
 			})
 			else if(IX.filters.category=='fhw')o=o.$$('.li_item').map(_=>{
 				const I='https://www.phhua.com/'+_.$('.li_item_img>a').href.split('///').pop(),N=_.$('.li_item_title').innerText.trim()
