@@ -173,10 +173,24 @@ window.IX={
 		}
 		await X(bm,null)
 		log('已载书签')
-		const uri=URL.createObjectURL(await ndoc.getFile())
-		log('新档链接: '+uri)
-		cordova.plugins.Downloader.download({uri,title:'下载中...',destinationUri:'file:///storage/emulated/0/'+N,notificationVisibility:1},_=>log('文件保存在: '+_),e=>log(e))
-		URL.revokeObjectURL(uri)
+		const pdf=await ndoc.getFile(),ps=cordova.plugins.permissions
+		ps.requestPermission(permissions.WRITE_EXTERNAL_STORAGE,s=>{
+			if(s.hasPermission){
+				resolveLocalFileSystemURL(cordova.file.externalRootDirectory,e=>{
+					e.getFile(N,{create:true},f=>{
+						f.createWriter(w=>{
+							w.onwriteend=()=>log('文件已保存到：'+f.nativeURL)
+							w.onerror=e=>log(e)
+							w.write(pdf)
+						})
+					})
+				},e=>log('下载失败',e,'error'))
+			}else log('权限被拒绝，请去设置里开启','error')
+		},e=>log('请求权限出错',e,'error'))
+		// const uri=URL.createObjectURL()
+		// log('新档链接: '+uri)
+		// cordova.plugins.Downloader.download({uri,title:'下载中...',destinationUri:'file:///storage/emulated/0/'+N,notificationVisibility:1},_=>log('文件保存在: '+_),e=>log(e))
+		// URL.revokeObjectURL(uri)
 	},
 
  iframe_show:me=>{
