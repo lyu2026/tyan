@@ -174,7 +174,7 @@ window.IX={
 		await X(bm,null)
 		log('已载书签')
 		const pdf=await ndoc.getFile(),ps=cordova.plugins.permissions
-		ps.requestPermission(permissions.WRITE_EXTERNAL_STORAGE,s=>{
+		ps.requestPermission(ps.WRITE_EXTERNAL_STORAGE,s=>{
 			if(s.hasPermission){
 				resolveLocalFileSystemURL(cordova.file.externalRootDirectory,e=>{
 					e.getFile(N,{create:true},f=>{
