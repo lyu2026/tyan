@@ -48,7 +48,7 @@
 				return _.join('<br>')
 			}).filter(Boolean)
 			if(!type){
-				type=s.length>0&&['info','error','warn','debug'].includes(s[s.length-1])?s[s.length-1]:null
+				type=s.length>0&&['info','success','error','warn','debug'].includes(s[s.length-1])?s[s.length-1]:null
 				if(type)s.length-=1
 			}
 			$.prepend($O.node('div',{type},prx+': '+s.join('<br>')))
@@ -59,7 +59,10 @@
 			if(!error.stack.includes('.js'))error.stack='at '+source+':'+lineno+':'+colno+')'
 			log(message,error)
 		}
-		window.addEventListener('unhandledrejection',e=>log(e.reason.message,e.reason))
+		window.addEventListener('unhandledrejection',e=>{
+			if(!e.reason)e.promise.catch(_=>log(_?.message||'UnHandledRejection',_,'error'))
+			else log(e.reason.message,e.reason,'error')
+		})
 
 		// 页面正在加载
 		document.addEventListener('DOMContentLoaded',()=>{

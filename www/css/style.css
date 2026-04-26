@@ -65,6 +65,7 @@ modal-t>title[s14]{font-size:14px;line-height:15px}
 modal-t>icc{display:inline-block;width:30px;height:30px;line-height:30px;font-size:28px;color:black;margin-right:20px}
 body[dark] modal-t>title,body[dark] modal-t>icc{color:white}
 modal-c{display:flex;flex-direction:column;padding:0 12px 50px 12px;min-height:calc(100vh - 40px)}
+modal-c>iframe{flex:1;display:black;outline:0;border:0;margin:0;background:rgba(255,255,255,.1)}
 modal-c>div{display:inline-block;line-height:16px;font-size:12px;color:#777;padding:2px 0}
 body[dark] modal-c>div{color:#999}
 modal-c b,modal-c [b]{font-size:15px;margin-top:-4px}
@@ -83,7 +84,7 @@ modal-c>[VS]{margin-bottom:2px}
 modal-c>[VS][x]>*:nth-child(n+14){display:none}
 modal-c>[VS][x]::after{content:'···';float:left;display:inline-block;margin-right:10px;line-height:2;font-size:14px}
 modal-c>[BF]{font-size:12px;line-height:1.5}
-modal[DK] modal-c>*:not(video){visibility:hidden}
+modal[DK] modal-c>*:not(video):not(iframe){visibility:hidden}
 modal[DK] modal-c>video{position:absolute;left:0;right:0;bottom:50px;width:100vw;margin-top:unset}
 
 @media(min-aspect-ratio:16 / 9){
@@ -122,15 +123,17 @@ sk[x6]{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px}
 /* @media(prefers-reduced-motion){sk[n],sk[c],sk[q],sk[b]{animation:none;background:var(--b)}} */
 
 /* 系统日志输出 */
-#w_logs{display:flex;flex-direction:column;max-height:80vh;overflow:hidden;overflow-y:auto;position:fixed;bottom:0;left:0;right:0;z-index:100000000000;background:#aaa;color:black;font-size:12px;line-height:1.6}
-body[dark] #w_logs{background:#333;color:white}
+#w_logs{display:flex;flex-direction:column;max-height:80vh;overflow:hidden;overflow-y:auto;position:fixed;bottom:0;left:0;right:0;z-index:100000000000;background:#ddd;color:black;font-size:12px;line-height:1.6}
+body[dark] #w_logs{background:#222;color:white}
 #w_logs>*{color:black;font-weight:blod;margin:4px 4px 0 4px;padding:3px 4px;box-shadow:0 0 20px rgba(255,255,255,.15) inset;border-radius:2px;background:rgba(0,0,0,0)}
 body[dark] #w_logs>*{color:white;box-shadow:0 0 20px rgba(0,0,0,.15) inset}
 #w_logs>*:last-child{margin-bottom:30px}
 #w_logs>*[type='error']{color:#ff4d4f!important}
 #w_logs>*[type='warn']{color:#faad14!important}
-#w_logs>*[type='debug']{color:#8e44ad!important}
-#w_logs>*[type='success']{color:#52c41a!important}
+#w_logs>*[type='debug']{color:#0F6CB5!important}
+body[dark] #w_logs>*[type='debug']{color:#00C7FF!important}
+#w_logs>*[type='success']{color:#3CA40C!important}
+body[dark] #w_logs>*[type='success']{color:#53F305!important}
 #w_logs>* pre{margin:0!important;max-height:120px;border-radius:2px;padding:2px;white-space:pre;font-family:'SF Mono','Monaco','Inconsolata','Fira Code','Courier New',monospace;overflow:auto;tab-size:1;background:rgba(255,255,255,.1)}
 body[dark] #w_logs>* pre{background:rgba(0,0,0,.1)}
 

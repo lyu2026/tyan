@@ -8,9 +8,6 @@ window.IX={
 	// 所有监听对象
 	observer:{},
 
-	// 卡片默认封面
-	cover:`data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA0MTkuNTI4IDU5NS4yNzYiPg0KPHJlY3QgeD0iLTkuOTM2IiB5PSItOS43NjYiIHN0eWxlPSJmaWxsOiM3NzciIHdpZHRoPSI0MzkuMTQ5IiBoZWlnaHQ9IjYxMy43ODciLz4NCjxnPg0KCTxnPg0KCQk8cmVjdCB4PSI0Mi4zNzUiIHk9IjgwLjEzNCIgc3R5bGU9ImZpbGw6bm9uZSIgd2lkdGg9IjIwNS4yNzciIGhlaWdodD0iMTguMzgzIi8+DQoJCTx0ZXh0IHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEgNDIuMzc1NSA5Mi4yMDQpIiBzdHlsZT0iZmlsbDojMzYzNjM0O2ZvbnQtZmFtaWx5OidBemVyZXRNb25vLUxpZ2h0Jztmb250LXNpemU6MTdweCI+WU9VIEFSRSBJTlZJVEVEIFRPPC90ZXh0Pg0KCTwvZz4NCgk8Zz4NCgkJPHJlY3QgeD0iNDIuMzc1IiB5PSIxMTIuNTE3IiBzdHlsZT0iZmlsbDpub25lIiB3aWR0aD0iMzE3LjA1IiBoZWlnaHQ9IjExMS44MyIvPg0KCQk8dGV4dCB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDQyLjM3NTUgMTUwLjg1NjMpIj48dHNwYW4geD0iMCIgeT0iMCIgc3R5bGU9ImZpbGw6IzM2MzYzNDtmb250LWZhbWlseTonQXplcmV0TW9uby1CbGFjayc7Zm9udC1zaXplOjU0cHgiPlRIRSBHUkFORCA8L3RzcGFuPjx0c3BhbiB4PSIwIiB5PSI1MCIgc3R5bGU9ImZpbGw6IzM2MzYzNDtmb250LWZhbWlseTonQXplcmV0TW9uby1CbGFjayc7Zm9udC1zaXplOjU0cHgiPk9QRU5JTkc8L3RzcGFuPjwvdGV4dD4NCgk8L2c+DQoJPGc+DQoJCTxyZWN0IHg9IjQwLjM4NCIgeT0iNDQwLjExMyIgc3R5bGU9ImZpbGw6bm9uZSIgd2lkdGg9IjEyNy4xMTciIGhlaWdodD0iMTIyLjA2NCIvPg0KCQk8dGV4dCB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDQwLjM4MzggNTA0LjcwODQpIj48dHNwYW4geD0iMCIgeT0iMCIgc3R5bGU9ImZpbGw6I0ZGRkZGRjtmb250LWZhbWlseTonQXplcmV0TW9uby1CbGFjayc7Zm9udC1zaXplOjkwLjk4MThweCI+MDI8L3RzcGFuPjx0c3BhbiB4PSIwIiB5PSI1NC41ODkiIHN0eWxlPSJmaWxsOiNGRkZGRkY7Zm9udC1mYW1pbHk6J0F6ZXJldE1vbm8tQmxhY2snO2ZvbnQtc2l6ZTo2MS40MTI3cHgiPlNFUDwvdHNwYW4+PC90ZXh0Pg0KCTwvZz4NCgk8Zz4NCgkJPHJlY3QgeD0iMjAxLjYxNyIgeT0iNDQxLjY2NiIgc3R5bGU9ImZpbGw6bm9uZSIgd2lkdGg9IjE4MC4xMDYiIGhlaWdodD0iODYuMDQzIi8+DQoJCTx0ZXh0IHRyYW5zZm9ybT0ibWF0cml4KDEgMCAwIDEgMjAxLjYxNzQgNDUwLjE4NjEpIj48dHNwYW4geD0iMCIgeT0iMCIgc3R5bGU9ImZpbGw6IzM2MzYzNDtmb250LWZhbWlseTonQXplcmV0TW9uby1MaWdodCc7Zm9udC1zaXplOjEycHgiPkpvaW4gdXMgZm9yIGV4Y2x1c2l2ZSBzdXJwcmlzZXMsIDwvdHNwYW4+PHRzcGFuIHg9IjAiIHk9IjE5IiBzdHlsZT0iZmlsbDojMzYzNjM0O2ZvbnQtZmFtaWx5OidBemVyZXRNb25vLVNlbWlCb2xkJztmb250LXNpemU6MTJweCI+YWN0aXZpdGllcywgYW5kIHJlZnJlc2htZW50czwvdHNwYW4+PHRzcGFuIHg9IjEzNy4wMzUiIHk9IjE5IiBzdHlsZT0iZmlsbDojMzYzNjM0O2ZvbnQtZmFtaWx5OidBemVyZXRNb25vLUxpZ2h0Jztmb250LXNpemU6MTJweCI+4oCUZG9u4oCZdCA8L3RzcGFuPjx0c3BhbiB4PSIwIiB5PSIzOCIgc3R5bGU9ImZpbGw6IzM2MzYzNDtmb250LWZhbWlseTonQXplcmV0TW9uby1MaWdodCc7Zm9udC1zaXplOjEycHgiPm1pc3Mgb3V0ITwvdHNwYW4+PC90ZXh0Pg0KCTwvZz4NCgk8Zz4NCgkJPHJlY3QgeD0iMjAxLjYxNyIgeT0iNTUyLjM5NyIgc3R5bGU9ImZpbGw6bm9uZSIgd2lkdGg9IjE2NS41NTMiIGhlaWdodD0iOS42NSIvPg0KCQk8dGV4dCB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDIwMS42MTczIDU2MC45MTY5KSIgc3R5bGU9ImZpbGw6IzM2MzYzNDtmb250LWZhbWlseTonQXplcmV0TW9uby1MaWdodCc7Zm9udC1zaXplOjEycHgiPk9uZSBTdC4gOSBMQSAsQ0EgMTIzNDwvdGV4dD4NCgk8L2c+DQoJPGc+DQoJCTxyZWN0IHg9IjIwMS42MTciIHk9IjUzNC40MTgiIHN0eWxlPSJmaWxsOm5vbmUiIHdpZHRoPSIxNTkuNDI2IiBoZWlnaHQ9IjExLjg0NCIvPg0KCQk8dGV4dCB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDIwMS42MTczIDU0Mi45MzgyKSIgc3R5bGU9ImZpbGw6IzM2MzYzNDtmb250LWZhbWlseTonQXplcmV0TW9uby1MaWdodCc7Zm9udC1zaXplOjEycHgiPnd3dy55b3Vyd2Vic2l0ZS5jb208L3RleHQ+DQoJPC9nPg0KCTxwb2x5bGluZSBzdHlsZT0iZmlsbDpub25lO3N0cm9rZTojMzYzNjM0O3N0cm9rZS13aWR0aDoyO3N0cm9rZS1taXRlcmxpbWl0OjEwIiBwb2ludHM9IjQ0LjcwMiw0MDMuMjI1IDQ0LjcwMiwyNTQuNDUzIA0KCQkxOTAuNTMsNDA0Ljg0MyAxOTIuNzczLDI1NC40NTMgMzc3LjEyOCw0MjAuNDc0IDM3Ny4xMjgsODEuMTU1IAkiLz4NCgk8Zz4NCgkJCTxlbGxpcHNlIHRyYW5zZm9ybT0ibWF0cml4KDAuMjQ3MSAtMC45NjkgMC45NjkgMC4yNDcxIC0zNS44MDc1IDUyMi45NTEpIiBzdHlsZT0iZmlsbDojRkZGRkZGIiBjeD0iMzE4LjYwNiIgY3k9IjI4NC41MTciIHJ4PSIzMi41NTMiIHJ5PSIzOS44MyIvPg0KCQkJPHRleHQgdHJhbnNmb3JtPSJtYXRyaXgoMC45Njk5IDAuMjQzMyAtMC4yNDMzIDAuOTY5OSAyOTYuOTM3MSAyNzQuMDEzKSIgc3R5bGU9ImZpbGw6IzM2MzYzNDtmb250LWZhbWlseTonQXplcmV0TW9uby1SZWd1bGFyJztmb250LXNpemU6MTNweCI+MDI6MDBQTTwvdGV4dD4NCgkJCTx0ZXh0IHRyYW5zZm9ybT0ibWF0cml4KDAuOTY5OSAwLjI0MzMgLTAuMjQzMyAwLjk2OTkgMjkyLjg5MSAyODkuNTg4OCkiIHN0eWxlPSJmaWxsOiMzNjM2MzQ7Zm9udC1mYW1pbHk6J0F6ZXJldE1vbm8tUmVndWxhcic7Zm9udC1zaXplOjEzcHgiPjA1OjAwUE08L3RleHQ+DQoJPC9nPg0KCTxnPg0KCQk8cGF0aCBzdHlsZT0iZmlsbDpub25lO3N0cm9rZTojMzYzNjM0O3N0cm9rZS1taXRlcmxpbWl0OjEwIiBkPSJNMjU4LjYwMyw1NC4xNDJoLTk3LjY3OGMtNS44MTEsMC0xMC41MjEtNC43MTEtMTAuNTIxLTEwLjUyMQ0KCQkJbDAsMGMwLTUuODExLDQuNzExLTEwLjUyMSwxMC41MjEtMTAuNTIxaDk3LjY3OGM1LjgxMSwwLDEwLjUyMiw0LjcxMSwxMC41MjIsMTAuNTIxbDAsMA0KCQkJQzI2OS4xMjQsNDkuNDMxLDI2NC40MTQsNTQuMTQyLDI1OC42MDMsNTQuMTQyeiIvPg0KCQk8Zz4NCgkJCTxyZWN0IHg9IjE2MS4wNzgiIHk9IjM5LjQzMiIgc3R5bGU9ImZpbGw6bm9uZSIgd2lkdGg9Ijk3LjM3MiIgaGVpZ2h0PSI5LjE5MSIvPg0KCQkJPHRleHQgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMSAxNzYuNzIyMSA0Ny45NTE5KSIgc3R5bGU9ImZpbGw6IzM2MzYzNDtmb250LWZhbWlseTonQXplcmV0TW9uby1MaWdodCc7Zm9udC1zaXplOjEycHgiPlZJQ1RPUiAmYW1wO1ZJQzwvdGV4dD4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjwvc3ZnPg0K`,
-
 	// 筛选设置
 	filters:{category:'',type:''},
 
@@ -20,9 +17,6 @@ window.IX={
 		flw:{name:'菲龙网',types:['40:本地','82:华人','157:国内','91:国际']},
 		fhw:{name:'菲华网',types:['news:快讯','hots:热贴','visa:签证','travel:旅游']},
 	},page:0,key:null,
-
-	// 节点监听器
-	load_more:null,img_lazy:null,get_nodes:null,
 
 	tab_click:(me,go=_=>true)=>{ // 筛选视频
 		let key,val
@@ -83,7 +77,7 @@ window.IX={
 			}).filter(Boolean)
 			else o=[]
 			log('列表数据',o)
-			o&&gbox.append(...o.map(({I,N,brief,time,cover})=>$O.node('grid-c',{I,N,W:IX.filters.category,onclick:'run("IX","card_click",WI)(this)'},`${cover?`<img src='${IX.cover}' s='${cover}'/>`:''}<div><div>${N}</div><div>${brief}</div>${time?`<div>${time}</div>`:''}</div>`)))
+			o&&gbox.append(...o.map(({I,N,brief,time,cover})=>$O.node('grid-c',{I,N,W:IX.filters.category,onclick:'run("IX","card_click",WI)(this)'},`${cover?`<img crossorigin='anonymous' src='${NCVR}' s='${cover}'/>`:''}<div><div>${N}</div><div>${brief}</div>${time?`<div>${time}</div>`:''}</div>`)))
 			go(true)
 		},{},'html')
 	},
@@ -140,7 +134,7 @@ window.IX={
 					if(_.includes('<img '))return [..._.matchAll(/<img\b[^>]*\bsrc\s*=\s*['"]?([^'"\s>]+)/gi)].map(_=>_[1]).map(_=>{
 						if(!_.startsWith('http')&&W=='flw')_=`https://www.flw.ph/${_}`
 						_=_.replaceAll(':////','://').replace('http:','https:')
-						if(_.startsWith('https://'))return `<img src='${_}'/>`
+						if(_.startsWith('https://'))return `<img crossorigin='anonymous' src='${_}'/>`
 						return ''
 					}).join('')
 					return null
@@ -166,7 +160,7 @@ window.IX={
 					let iu=_.split('src="').pop().split('"').shift()
 					if(!iu.startsWith('http'))iu=`https://www.flw.ph/${iu}`
 					iu=iu.replaceAll(':////','://').replace('http:','https:')
-					return `<img src='${iu}'/>`
+					return `<img crossorigin='anonymous' src='${iu}'/>`
 				}
 				if(_=='<br>')return null
 				if(_.startsWith('<b>'))return `<div p>&emsp;${_}</div>`
@@ -223,8 +217,10 @@ grid-c{float:unset;display:flex;width:100%;height:auto;margin-bottom:3px;backgro
 grid-c>img{display:block;width:30%;aspect-ratio:5/3;object-fit:cover;margin-right:3px}
 grid-c>div{flex:1;display:flex;flex-direction:column}
 grid-c>div>*:first-child{color:darkorange;font-size:13px;font-weight:700;line-height:1.2;border-top:1px solid rgba(0,0,0,.3);border-bottom:1px solid rgba(0,0,0,.1);padding:2px}
-grid-c>div>*:nth-child(2){color:lightgreen;font-size:10px;padding:4px;background:rgba(0,0,0,.06);line-height:1.2}
-grid-c>div>*:nth-child(3){color:cyan;font-size:11px;padding:4px;line-height:1.1}
+grid-c>div>*:nth-child(2){color:darkgreen;font-size:10px;padding:4px;background:rgba(0,0,0,.06);line-height:1.2}
+body[dark] grid-c>div>*:nth-child(2){color:lightgreen}
+grid-c>div>*:nth-child(3){color:grey;font-size:11px;padding:4px;line-height:1.1}
+body[dark] grid-c>div>*:nth-child(3){color:cyan}
 body[dark] grid-c>div>*:first-child{border-top:1px solid rgba(255,255,255,.3);border-bottom:1px solid rgba(255,255,255,.1)}
 body[dark] grid-c{background:rgba(255,255,255,.1)}
 body[dark] grid-c>div>*:nth-child(2){background:rgba(255,255,255,.1)}
@@ -232,7 +228,8 @@ body[dark] grid-c>div>*:nth-child(2){background:rgba(255,255,255,.1)}
 modal-c{display:flex;flex-direction:column;line-height:1.3;font-size:12px;padding:10px 12px 50px 12px;min-height:calc(100vh - 40px)}
 modal-c>*{display:block;line-height:1.4;font-size:16px}
 modal-c>div:first-child{font-size:18px;line-height:1.2;color:darkorange!important}
-modal-c>div:nth-child(2){font-size:14px;line-height:1.2;color:cyan!important}
+modal-c>div:nth-child(2){font-size:14px;line-height:1.2;color:grey!important}
+body[dark] modal-c>div:nth-child(2){color:cyan!important}
 modal-c>div[c]{line-height:1.5;margin-bottom:10px;text-align:center}
 modal-c>div[p]{color:black!important;font-size:15px!important;line-height:1.5!important;margin-bottom:5px}
 body[dark] modal-c>div[p]{color:white!important}

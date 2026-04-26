@@ -1,21 +1,25 @@
 {
-	"name":"tyan",
-	"version":"2026.4.14",
-	"description":"...",
-	"displayName":"廷琰",
-	"dependencies":{
-		"cordova":"latest",
-		"cordova-android":"13.0.0",
-		"cordova-plugin-whitelist":"*",
-		"cordova-plugin-advanced-http":"*",
-		"cordova-plugin-screen-orientation":"*"
+	'name':'tyan',
+	'version':'2026.4.14',
+	'description':'...',
+	'displayName':'廷琰',
+	'dependencies':{
+		'cordova':'latest',
+		'cordova-android':'13.0.0',
+		'cordova-plugin-file':'*',
+		'cordova-plugin-whitelist':'*',
+		'cordova-plugin-advanced-http':'*',
+		'@e-is/cordova-plugin-downloader':'*',
+		'cordova-plugin-screen-orientation':'*'
 	},
-	"cordova":{
-		"plugins":{
-			"cordova-plugin-whitelist":{},
-			"cordova-plugin-advanced-http":{},
-			"cordova-plugin-screen-orientation":{}
+	'cordova':{
+		'plugins':{
+			'cordova-plugin-file':{},
+			'cordova-plugin-whitelist':{},
+			'cordova-plugin-advanced-http':{},
+			'@e-is/cordova-plugin-downloader':{},
+			'cordova-plugin-screen-orientation':{}
 		},
-		"platforms":["android"]
+		'platforms':['android']
 	}
 }
