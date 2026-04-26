@@ -63,9 +63,11 @@ modal-t>title[s10]{font-size:16px}
 modal-t>title[s12]{font-size:14px}
 modal-t>title[s14]{font-size:14px;line-height:15px}
 modal-t>icc{display:inline-block;width:30px;height:30px;line-height:30px;font-size:28px;color:black;margin-right:20px}
+modal-t>icc:last-child{margin-right:10px}
 body[dark] modal-t>title,body[dark] modal-t>icc{color:white}
 modal-c{display:flex;flex-direction:column;padding:0 12px 50px 12px;min-height:calc(100vh - 40px)}
-modal-c>iframe{flex:1;display:black;outline:0;border:0;margin:0;background:rgba(255,255,255,.1)}
+modal-c>iframe:not([hide]){flex:1;display:black;outline:0;border:0;margin:0;background:rgba(255,255,255,.1)}
+modal-c>sk{flex:1}
 modal-c>div{display:inline-block;line-height:16px;font-size:12px;color:#777;padding:2px 0}
 body[dark] modal-c>div{color:#999}
 modal-c b,modal-c [b]{font-size:15px;margin-top:-4px}

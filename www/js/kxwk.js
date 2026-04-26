@@ -130,7 +130,7 @@ window.IX={
 		},{},'html')
 	},
 
- download:async()=>{
+ download:async()=>{ // 下载pdf
 		if(!IX.ready)return
 		const doc=IX.$w.pdf.pdfViewer.currentPDFDoc,N=IX.curr.N+'.PDF'
 		const count=doc.info.pageCount,id=doc.id,api=doc.api
@@ -173,27 +173,31 @@ window.IX={
 		}
 		await X(bm,null)
 		log('已载书签')
-		const pdf=await ndoc.getFile(),ps=cordova.plugins.permissions
-		ps.requestPermission(ps.WRITE_EXTERNAL_STORAGE,s=>{
-			if(s.hasPermission){
-				resolveLocalFileSystemURL(cordova.file.externalRootDirectory,e=>{
-					e.getFile(N,{create:true},f=>{
-						f.createWriter(w=>{
-							w.onwriteend=()=>log('文件已保存到：'+f.nativeURL)
-							w.onerror=e=>log(e)
-							w.write(pdf)
-						})
-					})
-				},e=>log('下载失败',e,'error'))
-			}else log('权限被拒绝，请去设置里开启','error')
-		},e=>log('请求权限出错',e,'error'))
-		// const uri=URL.createObjectURL()
-		// log('新档链接: '+uri)
-		// cordova.plugins.Downloader.download({uri,title:'下载中...',destinationUri:'file:///storage/emulated/0/'+N,notificationVisibility:1},_=>log('文件保存在: '+_),e=>log(e))
-		// URL.revokeObjectURL(uri)
+		const pdf=await ndoc.getFile(),reader=new FileReader()
+		reader.onloadend=()=>{
+			const href=reader.result,a=$O.node('a',{download:N,href,onclick:_=>_.remove()},'下载中...')
+			log(href.slice(0,200))
+			$O.$('modal-c').append(a)
+		}
+		reader.readAsDataURL(pdf)
 	},
 
- iframe_show:me=>{
+	card_click:me=>{ // 打开详情弹层
+		const K=IX.key=crypto.randomUUID()
+		const id=IX.id=me.ga('I'),books='kxwk_favorite_books'.gc({})
+		const sk=`<br><sk w100 p10 f fv g4><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h20></sk><sk n h8></sk><sk n h50></sk></sk>`
+		const mbox=$O.$('modal-c').html(`${sk}<iframe hide crossorigin='anonymous' onload='run("IX","iframe_show",WI)(this)' src='https://book.sciencereading.cn/!'></iframe>`)
+		IX.curr={N:me.ga('N'),C:me.$('img').ga('s')}
+		$O.$('modal-t [SC]').innerText=id in books?'♡':'⊕'
+		$O.body.sa('ns')
+		$O.$('grid').da('a')
+		$O.$('modal').da('hide').$('modal-t>title').da('s10','s12','s14').html(IX.curr.N.length>14?(IX.curr.N.substring(0,14)+'\n'+IX.curr.N.substring(14)):IX.curr.N)
+		if(IX.curr.N.length>14)$O.$('modal-t>title').sa('s14')
+		else if(IX.curr.N.length>12)$O.$('modal-t>title').sa('s12')
+		else if(IX.curr.N.length>10)$O.$('modal-t>title').sa('s10');
+	},
+
+ iframe_show:me=>{ // iframe初始化
 		IX.ready=false
 		const $w=IX.$w=me?.contentWindow,$o=IX.$o=me?.contentDocument
 		if(!$o?.body)return
@@ -211,13 +215,13 @@ window.IX={
 		}
 		$o.head.appendChild($o.node('link',{rel:'stylesheet',href:'/kxwk5_style/lib/UIExtension.css',onload:_=>{
 			log('载入 UIExtension.css')
-			const tdark='dark'.gc(null)=='yes'
+			const tdark='dark'.gc(null)=='yes',N=IX.id+'.PDF'
 			$o.head.innerHTML+=`<style>
 			html,body,.fv__ui-pdfviewer,.fv__pdf-page-container{background:rgba(0,0,0,0)}
 			.context-menu-list,.fv__ui-layer{visibility:hidden!important}.fv__ui-layer-modal{display:none!important}
 			.fv__pdf-view-mode-item{margin:0 auto!important;border-top:1.3px solid rgba(${tdark?'255,255,255,.1':'0,0,0,.1'})}
 			${tdark?'.fv__pdf-page-content-container{filter:invert(1) hue-rotate(180deg)}':''}
-			.fv__ui-page-scroll-button{background-color:#${tdark?'222':'ddd'};color:#${tdark?'ddd':'222'}}
+			.fv__ui-page-scroll-button{background-color:rgba(${tdark?'255,255,255,.1':'0,0,0,.1'});font-size:16px;padding-top:3px;color:#${tdark?'ddd':'222'}}
 			</style>`
 			$o.head.appendChild($o.node('script',{src:'/kxwk5_style/lib/license-key.js',onload:_=>{
 				log('载入 license-key.js')
@@ -231,8 +235,6 @@ window.IX={
 							workerPath:'/kxwk5_style/lib/',
 							licenseKey:$w.licenseKey,
 							licenseSN:$w.licenseSN,
-							background:'#1E1E1E',
-							foreground:'#FFFFFF',
 						})
 						$w.pdf=new $w.UIExtension.PDFUI({
 							viewerOptions:{
@@ -258,6 +260,7 @@ window.IX={
 						let lp,es=$w.UIExtension.PDFViewCtrl.Events
 						$w.pdf.addViewerEventListener(es.beforeOpenFile,()=>(lp=$w.pdf.loading()))
 						$w.pdf.addViewerEventListener(es.openFileSuccess,async()=>{
+							me.da('hide').previousElementSibling?.remove()
 							lp.then(_=>_.close())
 							IX.ready=true
 						})
@@ -278,9 +281,26 @@ window.IX={
 						log('解密信息',{cmisdoc,appID,userToken,contentKey})
 						if(!cmisdoc)return
 
-						const buff=await $w.fetch(`https://cws-wkreader.sciencereading.cn/cpdfapi/v1/documents/download-file?cmisdoc=${cmisdoc}`,{method:'get',headers:{'Access-Token':userToken,'Foxit-App-Name':'Creader_client_mobile'}}).then(_=>_.arrayBuffer())
-						if(!buff)return
-						$w.pdf.openPDFByFile(buff,{cdrm:{appID,userToken,contentKey,encrptType:1,hasPermission:true}})
+						resolveLocalFileSystemURL(cordova.file.dataDirectory+N,e=>{
+							e.file(f=>{
+								const r=new FileReader()
+								r.onloadend=()=>{
+									const buff=r.result instanceof ArrayBuffer?r.result.slice(0):r.result
+									log(cordova.file.dataDirectory+N+' 从缓存中获取成功','success')
+									$w.pdf.openPDFByFile(buff,{cdrm:{appID,userToken,contentKey,encrptType:1,hasPermission:true}})
+								}
+								r.readAsArrayBuffer(f)
+							})
+						},e=>{
+							log(N+' 从缓存中获取失败，拉取数据','warn')
+							$w.fetch(`https://cws-wkreader.sciencereading.cn/cpdfapi/v1/documents/download-file?cmisdoc=${cmisdoc}`,{method:'get',headers:{'Access-Token':userToken,'Foxit-App-Name':'Creader_client_mobile'}}).then(_=>_.arrayBuffer()).then(buff=>{
+								if(!buff)return
+								const b=structuredClone(buff)
+								log(b.byteLength)
+								resolveLocalFileSystemURL(cordova.file.dataDirectory,o=>o.getFile(N,{create:true},e=>e.createWriter(w=>w.write(b))))
+								$w.pdf.openPDFByFile(buff,{cdrm:{appID,userToken,contentKey,encrptType:1,hasPermission:true}})
+							})
+						})
 
 					}}))
 				}}))
@@ -288,19 +308,6 @@ window.IX={
 		}}))
 		$o.body.innerHTML=`<div id='pdf'></div>`
  },
-
-	card_click:me=>{ // 打开详情弹层
-		const K=IX.key=crypto.randomUUID()
-		const id=IX.id=me.ga('I'),books='kxwk_favorite_books'.gc({}),mbox=$O.$('modal-c').html(`<iframe crossorigin='anonymous' onload='run("IX","iframe_show",WI)(this)' src='https://book.sciencereading.cn/!'></iframe>`)
-		IX.curr={N:me.ga('N'),C:me.$('img').ga('s')}
-		$O.$('modal-t [SC]').innerText=id in books?'♡':'⊕'
-		$O.body.sa('ns')
-		$O.$('grid').da('a')
-		$O.$('modal').da('hide').$('modal-t>title').da('s10','s12','s14').html(IX.curr.N.length>14?(IX.curr.N.substring(0,14)+'\n'+IX.curr.N.substring(14)):IX.curr.N)
-		if(IX.curr.N.length>14)$O.$('modal-t>title').sa('s14')
-		else if(IX.curr.N.length>12)$O.$('modal-t>title').sa('s12')
-		else if(IX.curr.N.length>10)$O.$('modal-t>title').sa('s10');
-	},
 
 	collect_toggle:me=>{ // 视频收藏切换
 		const uncollected=me.innerText=='⊕',books='kxwk_favorite_books'.gc({})
@@ -361,7 +368,6 @@ window.IX={
 			let o=`<tab T='category'>${['','?',...Object.keys(IX.tmap).filter(_=>_!==''&&_!='?')].map(_=>`<div V='${_}' onclick='run("IX","tab_click",WI)(this)'>${IX.tmap[_].name}</div>`).join('')}</tab>`
 			o+=`<grid></grid><modal hide><mbox><modal-t><title></title>`
 			o+=`<icc SC onclick='run("IX","collect_toggle",WI)(this)' style='line-height:33px'>⊕</icc>`
-			o+=`<icc onclick='run("IX","download",WI)(this)' style='line-height:33px'>〶</icc>`
 			o+=`<icc onclick='run("IX","modal_close",WI)()'>╳</icc>`
 			o+=`</modal-t><modal-c></modal-c></mbox></modal>`
 			$O.$$('body>*:not(#w_logs)').forEach(_=>_.remove())
