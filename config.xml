@@ -61,12 +61,6 @@
 		<preference name="android-minSdkVersion" value="24" />
 		<preference name="android-targetSdkVersion" value="34" />
 
-		<!-- 硬件特性声明 -->
-		<config-file parent="/manifest" target="AndroidManifest.xml">
-			<uses-feature android:name="android.hardware.camera" android:required="false" />
-			<uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
-		</config-file>
-
 		<!-- 兼容 Android 10 文件访问 -->
 		<edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
 			<application android:requestLegacyExternalStorage="true" />
