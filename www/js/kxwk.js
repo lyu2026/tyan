@@ -275,7 +275,7 @@ window.IX={
 
 		}}))
 		$o.body.innerHTML=`<div id='pdf'></div>`
-},
+	},
 
 	collect_toggle:me=>{ // 视频收藏切换
 		const uncollected=me.innerText=='⊕',books='kxwk_favorite_books'.gc({})
@@ -332,12 +332,20 @@ window.IX={
 		}
 		await X(bm,null)
 		log('已载书签')
-		const pdf=await ndoc.getFile(),reader=new FileReader()
-		reader.onloadend=()=>{
-			const href=reader.result,a=$O.node('a',{download:N,href,onclick:_=>_.remove()},'下载中...')
-			$O.$('modal-c').append(a)
-		}
-		reader.readAsDataURL(pdf)
+		const pdf=await ndoc.getFile()
+		const dir=cordova.file.externalDataDirectory;
+		const de=await new Promise((res,rej)=>resolveLocalFileSystemURL(dir,res,rej))
+		const fe=await new Promise((res,rej)=>de.getFile(N,{create:true},res,rej))
+		await new Promise((res,rej)=>{
+			fe.createWriter(w=>{
+				w.onwriteend=()=>{
+					log('文件保存成功！路径：'+fe.nativeURL)
+					res()
+				}
+				w.onerror=rej
+				w.write(pdf)
+			},rej)
+		})
 	},
 
 	modal_close:async()=>{ // 关闭详情弹层
