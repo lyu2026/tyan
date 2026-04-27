@@ -6,17 +6,17 @@ on:
 jobs:
   generate-keystore:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-      
+
       - name: 生成签名
         id: keystore
         run: |
@@ -30,14 +30,14 @@ jobs:
 		          -storepass Tyan2026 \
 		          -keypass Tyan2026 \
 		          -dname "CN=Tyan, OU=Dev, O=Tyan, L=City, ST=State, C=CN"
-          
+
           # 转为 Base64
           KEYSTORE_BASE64=$(base64 -w 0 tyan.keystore)
-          
+
           # 保存为 output，供后续步骤使用
           echo "keystore_base64=$KEYSTORE_BASE64" >> $GITHUB_OUTPUT
           echo "✅ Keystore 生成完成"
-      
+
       - name: 设置参数
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -46,42 +46,42 @@ jobs:
           # 获取仓库的公钥（加密 Secrets 需要）
           PUBLIC_KEY=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
             "https://api.github.com/repos/$REPO/actions/secrets/public-key")
-          
+
           KEY_ID=$(echo "$PUBLIC_KEY" | jq -r '.key')
           KEY=$(echo "$PUBLIC_KEY" | jq -r '.key_id')
-          
+
           # 加密函数
           encrypt_secret() {
             local secret_value="$1"
             local public_key="$2"
-            
+
             # 使用 Python 或 Node.js 加密
             python3 -c "
             import base64
             import json
             import sys
             from nacl import encoding, public
-            
+
             def encrypt(public_key: str, secret_value: str) -> str:
                 public_key = public.PublicKey(public_key.encode('utf-8'), encoding.Base64Encoder())
                 sealed_box = public.SealedBox(public_key)
                 encrypted = sealed_box.encrypt(secret_value.encode('utf-8'))
                 return base64.b64encode(encrypted).decode('utf-8')
-            
+
             print(encrypt('$public_key', '$secret_value'))
             " 2>/dev/null
           }
-          
+
           # 检查依赖
           pip3 install pynacl --quiet
-          
+
           # 上传各个 Secret
           upload_secret() {
             local secret_name="$1"
             local secret_value="$2"
-            
+
             ENCRYPTED_VALUE=$(encrypt_secret "$secret_value" "$KEY")
-            
+
             curl -s -X PUT \
               -H "Authorization: token $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.v3+json" \
@@ -89,12 +89,11 @@ jobs:
               -d "{\"encrypted_value\":\"$ENCRYPTED_VALUE\",\"key_id\":\"$KEY_ID\"}" \
               -o /dev/null -w "%{http_code}"
           }
-          
+
           echo "上传 KEYSTORE_BASE64..."
           STATUS=$(upload_secret "KEYSTORE_BASE64" "${{ steps.keystore.outputs.keystore_base64 }}")
           echo "状态: $STATUS"
-          
           echo "🎉 所有 Secrets 上传完成！"
-      
+
       - name: 清空
         run: rm -f tyan.keystore
