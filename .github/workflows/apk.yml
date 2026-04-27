@@ -43,15 +43,12 @@ jobs:
       - name: 安装项目依赖
         run: npm install
 
-      - name: 添加 Android 平台
+      - name: 添加安卓平台
         run: cordova platform add android
 
-      - name: 创建网络安全配置目录
+      - name: 创建跨域配置
         run: |
           mkdir -p platforms/android/app/src/main/res/xml
-
-      - name: 创建网络安全配置文件
-        run: |
           cat > platforms/android/app/src/main/res/xml/network_security_config.xml << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <network-security-config>
@@ -65,17 +62,17 @@ jobs:
           </network-security-config>
           EOF
 
-      - name: 修改 AndroidManifest 开启外部存储访问
+      - name: 开启外存访问
         run: |
           MANIFEST="platforms/android/app/src/main/AndroidManifest.xml"
           sed -i 's|<application|<application android:requestLegacyExternalStorage="true"|' "$MANIFEST"
           echo "✓ AndroidManifest 已添加 requestLegacyExternalStorage 属性"
 
-      - name: 调用签名生成器
+      - name: 调用签名生成
         id: keystore
         uses: ./.github/actions/keystore
 
-      - name: 分 CPU 架构打签名包
+      - name: 区分架构打包
         run: |
           # 从 Action 输出读取签名参数
           KEYSTORE_PATH="${{ steps.keystore.outputs.keystore_path }}"
@@ -105,7 +102,7 @@ jobs:
             echo ">>> $ABI 打包完成"
           done
 
-      - name: 获取版本号
+      - name: 获取版本编号
         id: version
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -124,7 +121,7 @@ jobs:
           export TZ='Asia/Shanghai'
           echo "datetime=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
 
-      - name: 获取 APK 信息
+      - name: 获取附件信息
         id: apk_info
         run: |
           cd output
@@ -132,15 +129,15 @@ jobs:
           # 生成文件列表和 SHA256
           echo "### 📦 APK 文件清单" > ../release_body.md
           echo "" >> ../release_body.md
-          echo "| 架构 | 文件名 | 大小 | SHA256 |" >> ../release_body.md
-          echo "|------|--------|------|--------|" >> ../release_body.md
+          echo "| 文件名 | 大小 | SHA256 |" >> ../release_body.md
+          echo "|--------|------|--------|" >> ../release_body.md
           
           for apk in *.apk; do
             SIZE=$(ls -lh "$apk" | awk '{print $5}')
             SHA256=$(sha256sum "$apk" | cut -d ' ' -f 1)
             ARCH=${apk%.apk}
             
-            echo "| $ARCH | $apk | $SIZE | \`$SHA256\` |" >> ../release_body.md
+            echo "| $apk | $SIZE | \`$SHA256\` |" >> ../release_body.md
             
             # 保存到输出变量
             echo "${ARCH}_sha256=$SHA256" >> $GITHUB_OUTPUT
@@ -151,15 +148,14 @@ jobs:
           
           # 生成完整的 Release Body
           cat >> release_body_full.md << EOF
-          ## 🫧 廷琰 v${{ steps.version.outputs.version }}
+          ## 🫧 廷琰 V${{ steps.version.outputs.version }}
           
           ### 📦 版本信息
           | 项目 | 信息 |
           |------|------|
-          | 版本号 | v${{ steps.version.outputs.version }} |
+          | 版本号 | V${{ steps.version.outputs.version }} |
           | 构建时间 | ${{ steps.time.outputs.datetime }} |
           | 构建类型 | Release（签名） |
-          | 网络支持 | ✓ 支持跨域访问 |
           
           $(cat release_body.md)
           
@@ -173,12 +169,6 @@ jobs:
           
           ### 🔍 查看 CPU 架构
           如不确定手机架构，可安装 [Device Info HW](https://play.google.com/store/apps/details?id=ru.andr7e.deviceinfohw) 查看
-          
-          ### 🌐 网络特性
-          本版本已启用以下网络特性：
-          - ✓ 支持 HTTP/HTTPS 混合内容
-          - ✓ 完全的跨域资源访问
-          - ✓ 支持自定义协议跳转
           EOF
 
       - name: 创建 Release 并上传 APK
