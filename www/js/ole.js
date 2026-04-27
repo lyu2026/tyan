@@ -46,6 +46,7 @@ window.IX={
 	},sm:{},hls:null,page:0,id:null,curr:null,wait:true,key:null,
 
 	tab_click:(me,go=_=>true)=>{ // 筛选视频
+		CF()
 		let key,val
 		const K=IX.key=crypto.randomUUID(),gbox=$O.$('grid').da('_').sa('a')
 		if(me){
@@ -146,6 +147,7 @@ window.IX={
 	},
 
 	card_click:me=>{ // 打开详情弹层
+		CF()
 		const K=IX.key=crypto.randomUUID()
 		const id=IX.id=me.ga('I'),videos='ole_favorite_videos'.gc({}),mbox=$O.$('modal-c').html(`<sk pt30 f fv g12><sk f g12><sk q w20 h40></sk><sk q w10 h40></sk><sk q w33 h40></sk><sk q f1 h40></sk></sk><sk f g12><sk q w20 h40></sk><sk q f1 h40></sk></sk><sk x6 g16>${'<sk b h20></sk>'.repeat(6)}</sk><sk q r169></sk><sk f g20><sk b w40 h12></sk><sk f1></sk><sk b w h12></sk></sk><sk q r219></sk></sk>`)
 		IX.curr={N:me.ga('N'),C:me.$('img').ga('s'),S:me.$('score').innerText}
@@ -157,7 +159,7 @@ window.IX={
 		else if(IX.curr.N.length>12)$O.$('modal-t>title').sa('s12')
 		else if(IX.curr.N.length>10)$O.$('modal-t>title').sa('s10');
 
-		`https://api.olelive.com/v1/pub/vod/detail/${id}/true`.get(_=>{
+		`https://api.olelive.com/v1/pub/vod/detail/${id}/true`.get(async _=>{
 			if(IX.key!=K)return
 			log('详情数据',_)
 			const {area,year,director,actor,urls,content}=_.data,o=[]
@@ -170,6 +172,18 @@ window.IX={
 			o.push(`<div VL><div VL S onclick='run("IX","trim_click",WI)(false)'>╟ ${Number(trim_start).dt()}</div><div VL W onclick='run("IX","trim_click",WI)(true)'>${Number(-trim_end).dt()} ╢</div></div>`)
 			o.push(`<div BF>${content}</div>`)
 			mbox.html(o.join(''))
+
+			if(!window.Hls){
+				let hls=await DG(DX,'o','hls.js')||''
+				if(''===hls){
+					hls=await $w.fetch('https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.6.13/hls.light.min.js').then(_=>_.text())
+					await DA(DX,'o','hls.js',hls)
+				}
+				$O.head.appendChild($o.node('script',{ix:''},hls))
+				log('载入 hls.js')
+				while(true)if(window.Hls)break
+			}
+
 			const V=$O.$('video')
 			IX.hls=new Hls({enableWorker:false,levelTargetDuration:8,maxBufferLength:50,maxBufferSize:1000*1000*2})
 			IX.hls.attachMedia(V)
@@ -213,6 +227,7 @@ window.IX={
 	},
 
 	part_click:me=>{ // 切换视频源
+		CF()
 		IX.wait=true
 		const url=me.ga('u')
 		log('视频源链',url)
@@ -241,6 +256,7 @@ window.IX={
 	},
 
 	modal_close:async()=>{ // 关闭详情弹层
+		CF()
 		const video=$O.$('video')
 		video&&(IX.id+'_ole_part_ctime').sc($O.$('[VS]>[c]').ga('u')+'$'+video.currentTime)
 		IX.wait=false

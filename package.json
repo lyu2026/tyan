@@ -1,27 +1,45 @@
 {
-	"name":"tyan",
-	"version":"2026.4.14",
-	"description":"...",
-	"displayName":"廷琰",
-	"dependencies":{
-		"cordova":"latest",
-		"cordova-android":"13.0.0",
-		"cordova-plugin-file":"*",
-		"cordova-plugin-whitelist":"*",
-		"cordova-plugin-advanced-http":"*",
-		"@e-is/cordova-plugin-downloader":"*",
-		"cordova-plugin-screen-orientation":"*",
-		"cordova-plugin-android-permissions":"*"
+	"name": "tyan",
+	"version": "2026.4.27",
+	"description": "...",
+	"displayName": "廷琰",
+	"dependencies": {
+		"cordova": "latest",
+		"cordova-android": "13.0.0",
+		"cordova-plugin-file": "*",
+		"cordova-plugin-device": "*",
+		"cordova-plugin-dialogs": "*",
+		"cordova-plugin-whitelist": "*",
+		"cordova-plugin-camera": "*",
+		"cordova-plugin-contacts": "*",
+		"cordova.plugins.diagnostic": "*",
+		"cordova-plugin-geolocation": "*",
+		"cordova-plugin-advanced-http": "*",
+		"@e-is/cordova-plugin-downloader": "*",
+		"cordova-plugin-screen-orientation": "*",
+		"cordova-plugin-android-permissions": "*"
 	},
-	"cordova":{
-		"plugins":{
-			"cordova-plugin-file":{},
-			"cordova-plugin-whitelist":{},
-			"cordova-plugin-advanced-http":{},
-			"@e-is/cordova-plugin-downloader":{},
-			"cordova-plugin-screen-orientation":{},
-			"cordova-plugin-android-permissions":{}
+	"cordova": {
+		"plugins": {
+			"cordova-plugin-file": {},
+			"cordova-plugin-device": {},
+			"cordova-plugin-dialogs": {},
+			"cordova-plugin-camera": {
+				"ANDROIDX_CORE_VERSION": "1.6+"
+			},
+			"cordova-plugin-whitelist": {},
+			"cordova-plugin-contacts": {},
+			"cordova.plugins.diagnostic": {},
+			"cordova-plugin-geolocation": {
+				"GPS_REQUIRED": "true"
+			},
+			"cordova-plugin-advanced-http": {},
+			"@e-is/cordova-plugin-downloader": {},
+			"cordova-plugin-screen-orientation": {},
+			"cordova-plugin-android-permissions": {}
 		},
-		"platforms":["android"]
+		"platforms": [
+			"android"
+		]
 	}
 }

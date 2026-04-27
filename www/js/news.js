@@ -19,6 +19,7 @@ window.IX={
 	},page:0,key:null,
 
 	tab_click:(me,go=_=>true)=>{ // 筛选视频
+		CF()
 		let key,val
 		const K=IX.key=crypto.randomUUID(),gbox=$O.$('grid').da('_').sa('a')
 		if(me){
@@ -83,6 +84,7 @@ window.IX={
 	},
 
 	card_click:me=>{ // 打开详情弹层
+		CF()
 		const K=IX.key=crypto.randomUUID(),N=me.ga('N'),U=me.ga('I'),W=me.ga('W')
 		const mbox=$O.$('modal-c').html(`<sk pt30 f fv g12><sk f g12><sk q w20 h40></sk><sk q w10 h40></sk><sk q w33 h40></sk><sk q f1 h40></sk></sk><sk f g12><sk q w20 h40></sk><sk q f1 h40></sk></sk><sk x6 g16>${'<sk b h20></sk>'.repeat(6)}</sk><sk q r169></sk><sk f g20><sk b w40 h12></sk><sk f1></sk><sk b w h12></sk></sk><sk q r219></sk></sk>`)
 		$O.body.sa('ns')
@@ -171,6 +173,7 @@ window.IX={
 	},
 
 	modal_close:async()=>{ // 关闭详情弹层
+		CF()
 		$O.$('modal').sa('hide','_I').$('modal-t>title').html('')
 		$O.$('modal-c').html('')
 		$O.body.da('ns')

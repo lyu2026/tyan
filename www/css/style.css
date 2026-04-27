@@ -103,36 +103,84 @@ modal[DK] modal-c>video{position:absolute;left:0;right:0;bottom:50px;width:100vw
 
 /* 骨架屏核心组件 */
 sk{display:block}
-sk[n],sk[c],sk[q],sk[b]{--b:#ddd;--h:#aaa;background:linear-gradient(90deg,var(--b) 25%,var(--h) 50%,var(--b) 75%);background-size:200% 100%;animation:sk 1.4s infinite;-webkit-animation:sk 1.4s infinite;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:background-position;border-radius:2px}
-body[dark] sk[n],body[dark] sk[c],body[dark] sk[q],body[dark] sk[b]{--b:#111;--h:#333}
-sk[c]{border-radius:50%}sk[q]{border-radius:4px}sk[b]{border-radius:40px}
-sk[h8]{height:8px}sk[h12]{height:12px}sk[h16]{height:16px}sk[h20]{height:20px}sk[h24]{height:24px}sk[h32]{height:32px}sk[h40]{height:40px}sk[h50]{height:50px}sk[h80]{height:80px}sk[h100]{height:100px}sk[h110]{height:110px}sk[h120]{height:120px}sk[h130]{height:130px}
-sk[w10]{width:10%}sk[w20]{width:20%}sk[w25]{width:25%}sk[w33]{width:33.33%}sk[w50]{width:50%}sk[w60]{width:60%}sk[w66]{width:66.66%}sk[w75]{width:75%}sk[w80]{width:80%}sk[w90]{width:90%}sk[w100]{width:100%}
-sk[a32]{width:32px;height:32px}sk[a40]{width:40px;height:40px}sk[a48]{width:48px;height:48px}sk[a56]{width:56px;height:56px}sk[a64]{width:64px;height:64px}
-sk[a60]{width:60px;height:60px}sk[a72]{width:72px;height:72px}sk[a80]{width:80px;height:80px}sk[a100]{width:100px;height:100px}
-sk[r169]{aspect-ratio:16/9}sk[r23]{aspect-ratio:2/3}sk[ro]{aspect-ratio:1/1}sk[r219]{aspect-ratio:21/9}sk[r73]{aspect-ratio:7/3}
-sk[f]{display:flex}sk[fv]{flex-direction:column}sk[f1]{flex:1}sk[fw]{flex-wrap:wrap}
-sk[g4]{gap:4px}sk[g8]{gap:8px}sk[g12]{gap:12px}sk[g16]{gap:16px}sk[g20]{gap:20px}sk[g30]{gap:30px}
+sk[n],sk[c],sk[q],sk[b]{
+	--b:#2a2a2a;--h:#1a1a1a;--d:1.6s;--o:0s;
+	background:linear-gradient(115deg,var(--b) 25%,var(--h) 50%,var(--b) 100%);
+	background-size:300% 100%;
+	animation:sk var(--d) var(--o) infinite linear;
+	-webkit-animation:sk var(--d) var(--o) infinite linear;
+	transform:translateZ(0);-webkit-transform:translateZ(0);
+	will-change:background-position;
+	border-radius:2px
+}
+/* 暗色模式 */
+body[dark] sk[n],body[dark] sk[c],body[dark] sk[q],body[dark] sk[b]{
+	--b:#1a1a1a;--h:#2a2a2a
+}
+/* 错落起步：让相邻元素动画不同步 */
+sk:nth-child(2n){--o:0.2s}
+sk:nth-child(3n){--o:0.4s}
+sk:nth-child(4n){--o:0.6s}
+sk:nth-child(5n){--o:0.15s}
+sk:nth-child(6n){--o:0.35s}
+sk:nth-child(7n){--o:0.5s}
+/* 形状 */
+sk[c]{border-radius:50%}
+sk[q]{border-radius:4px}
+sk[b]{border-radius:40px}
+/* 高度 */
+sk[h8]{height:8px}sk[h12]{height:12px}sk[h16]{height:16px}sk[h20]{height:20px}
+sk[h24]{height:24px}sk[h32]{height:32px}sk[h40]{height:40px}sk[h50]{height:50px}
+sk[h80]{height:80px}sk[h100]{height:100px}sk[h110]{height:110px}
+sk[h120]{height:120px}sk[h130]{height:130px}
+/* 宽度 */
+sk[w10]{width:10%}sk[w20]{width:20%}sk[w25]{width:25%}sk[w33]{width:33.33%}
+sk[w50]{width:50%}sk[w60]{width:60%}sk[w66]{width:66.66%}
+sk[w75]{width:75%}sk[w80]{width:80%}sk[w90]{width:90%}sk[w100]{width:100%}
+/* 正方形头像 */
+sk[a32]{width:32px;height:32px}sk[a40]{width:40px;height:40px}
+sk[a48]{width:48px;height:48px}sk[a56]{width:56px;height:56px}
+sk[a64]{width:64px;height:64px}sk[a60]{width:60px;height:60px}
+sk[a72]{width:72px;height:72px}sk[a80]{width:80px;height:80px}
+sk[a100]{width:100px;height:100px}
+/* 宽高比 */
+sk[r169]{aspect-ratio:16/9}sk[r23]{aspect-ratio:2/3}
+sk[ro]{aspect-ratio:1/1}sk[r219]{aspect-ratio:21/9}sk[r73]{aspect-ratio:7/3}
+/* Flex */
+sk[f]{display:flex}sk[fv]{flex-direction:column}
+sk[f1]{flex:1}sk[fw]{flex-wrap:wrap}
+/* Gap */
+sk[g4]{gap:4px}sk[g8]{gap:8px}sk[g12]{gap:12px}
+sk[g16]{gap:16px}sk[g20]{gap:20px}sk[g30]{gap:30px}
+/* Padding */
 sk[p10]{padding:10px}sk[p20]{padding:20px}sk[p30]{padding:30px}
 sk[pt30]{padding-top:30px}sk[pt60]{padding-top:60px}sk[pt100]{padding-top:100px}
+/* Grid */
 sk[x2]{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 sk[x3]{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 sk[x4]{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
 sk[x5]{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:6px}
 sk[x6]{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;gap:4px}
+/* 动画 */
 @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @-webkit-keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
-/* @media(prefers-reduced-motion){sk[n],sk[c],sk[q],sk[b]{animation:none;background:var(--b)}} */
 
 /* 系统日志输出 */
-#w_logs{display:flex;flex-direction:column;max-height:80vh;overflow:hidden;overflow-y:auto;position:fixed;bottom:0;left:0;right:0;z-index:100000000000;background:#ddd;color:black;font-size:12px;line-height:1.6}
-body[dark] #w_logs{background:#222;color:white}
-#w_logs>*{color:black;font-weight:blod;margin:4px 4px 0 4px;padding:3px 4px;box-shadow:0 0 20px rgba(255,255,255,.15) inset;border-radius:2px;background:rgba(0,0,0,0)}
-body[dark] #w_logs>*{color:white;box-shadow:0 0 20px rgba(0,0,0,.15) inset}
-#w_logs>*:last-child{margin-bottom:30px}
+#w_logs{color:black;background:rgba(255,255,255,.6);box-shadow:0 -2px 10px rgba(0,0,0,.4);font-weight:800;font-size:8px;line-height:1.2;display:flex;flex-direction:column;max-height:40vh;overflow:hidden auto;position:fixed;bottom:0;left:0;right:0;z-index:100000000000}
+body[dark] #w_logs{color:white;background:rgba(0,0,0,.6);box-shadow:0 2px 10px rgba(255,255,255,.4)}
+#w_logs>*:not(#w_logs>*:last-child){box-shadow:0 0 10px rgba(0,0,0,.02) inset;padding:2px 2px 0 2px}
+body[dark] #w_logs>*:not(#w_logs>*:last-child){box-shadow:0 0 10px rgba(255,255,255,.02) inset}
+#w_logs>*:not([x]):not(#w_logs>*:last-child){animation:w-log 0.9s ease-out}
+body[dark] #w_logs>*:not([x]):not(#w_logs>*:last-child){animation:w-log-dark 0.9s ease-out}
+@keyframes w-log{0%,100%{background:transparent}16%{background:#ffff0088}33%{background:transparent}50%{background:#ffff0088}66%{background:transparent}83%{background:#ffff0088}}
+@keyframes w-log-dark{0%,100%{background:transparent}16%{background:#00ffff88}33%{background:transparent}50%{background:#00ffff88}66%{background:transparent}83%{background:#00ffff88}}
+#w_logs>*:last-child{position:sticky;bottom:6px;height:24px;line-height:24px;margin:3px 16px 6px 16px;text-align:center;background:#5ba3ec;background:linear-gradient(180deg,#7bb8f0 0%,#4a90d9 100%);border:1px solid #3a7bc8;border-bottom:5px solid #2563a0;border-radius:10px;color:white;font-size:12px;font-weight:bold;transition:all 0.1s ease;user-select:none}
+#w_logs>*:last-child:hover{background:linear-gradient(180deg,#8dc4f5 0%,#5ba3ec 100%)}
+#w_logs>*:last-child:active{border-bottom-width:2px;transform:translateY(3px)}
+#w_logs>*:last-child:focus-visible{box-shadow:0 0 0 3px rgba(91,163,236,0.5)}
 #w_logs>*[type='error']{color:#ff4d4f!important}
 #w_logs>*[type='warn']{color:#faad14!important}
-#w_logs>*[type='debug']{color:#0F6CB5!important}
+#w_logs>*[type='debug']{color:#207BC3!important}
 body[dark] #w_logs>*[type='debug']{color:#00C7FF!important}
 #w_logs>*[type='success']{color:#3CA40C!important}
 body[dark] #w_logs>*[type='success']{color:#53F305!important}

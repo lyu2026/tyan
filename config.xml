@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.tyan" version="2026.4.14"
+<widget id="com.tyan" version="2026.4.27"
 	xmlns="http://www.w3.org/ns/widgets"
 	xmlns:cdv="http://cordova.apache.org/ns/1.0">
 
 	<name>廷琰</name>
-	<author>该隐</author>
-	<description>视频资源库</description>
+	<author>雍爷</author>
+	<description>瑞士军刀</description>
 
 	<content src="index.html"/>
 
@@ -22,19 +22,78 @@
 	<preference name="scheme" value="http"/>
 	<preference name="hostname" value="localhost"/>
 
+	<!-- 禁用启动屏 -->
+	<preference name="SplashScreenDelay" value="0"/>
+	<preference name="AutoHideSplashScreen" value="true"/>
+	<preference name="ShowSplashScreen" value="false"/>
+	<preference name="ShowSplashScreenSpinner" value="false"/>
+	<preference name="FadeSplashScreen" value="false"/>
+	<preference name="FadeSplashScreenDuration" value="0"/>
+
+	<!-- UI设置 -->
 	<preference name="Fullscreen" value="true"/>
 	<preference name="Orientation" value="default"/>
-	<preference name="SplashScreenDelay" value="1"/>
-	<preference name="AutoHideSplashScreen" value="true"/>
 	<preference name="loadUrlTimeoutValue" value="70000"/>
 	<preference name="StatusBarOverlaysWebView" value="false"/>
 	<preference name="StatusBarBackgroundColor" value="#000000"/>
+
+	<!-- 插件声明 -->
+	<plugin name="cordova-plugin-file" spec="*"/>
+	<plugin name="cordova-plugin-device" spec="*"/>
+	<plugin name="cordova-plugin-dialogs" spec="*"/>
+	<plugin name="cordova-plugin-camera" spec="*">
+		<variable name="ANDROIDX_CORE_VERSION" value="1.6+"/>
+	</plugin>
+	<plugin name="cordova-plugin-whitelist" spec="*"/>
+	<plugin name="cordova-plugin-contacts" spec="*"/>
+	<plugin name="cordova-plugin-geolocation" spec="*">
+		<variable name="GPS_REQUIRED" value="true"/>
+	</plugin>
+	<plugin name="cordova.plugins.diagnostic" spec="*"/>
+	<plugin name="cordova-plugin-advanced-http" spec="*"/>
+	<plugin name="@e-is/cordova-plugin-downloader" spec="*"/>
+	<plugin name="cordova-plugin-screen-orientation" spec="*"/>
+	<plugin name="cordova-plugin-android-permissions" spec="*"/>
 
 	<platform name="android">
 
 		<!-- SDK版本配置 -->
 		<preference name="android-minSdkVersion" value="24"/>
 		<preference name="android-targetSdkVersion" value="34"/>
+
+		<!-- 网络 -->
+		<uses-permission android:name="android.permission.INTERNET"/>
+		<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+		<!-- 文件读写 -->
+		<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+		<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
+		<!-- Android 13+ 细分媒体权限 -->
+		<uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+		<uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+		<uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+
+		<!-- 拍照 -->
+		<uses-permission android:name="android.permission.CAMERA"/>
+		<uses-feature android:name="android.hardware.camera" android:required="false"/>
+		<uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
+		<!-- 拍视频需要录音 -->
+		<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+
+		<!-- 通讯录 -->
+		<uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+		<uses-permission android:name="android.permission.READ_CONTACTS"/>
+		<uses-permission android:name="android.permission.WRITE_CONTACTS"/>
+
+		<!-- 定位 -->
+		<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+		<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+		<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+
+		<!-- 兼容 Android 10 文件访问 -->
+		<edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+			<application android:requestLegacyExternalStorage="true"/>
+		</edit-config>
 
 		<!-- 硬件加速配置 -->
 		<preference name="AndroidHardwareAcceleration" value="true"/>
@@ -56,12 +115,5 @@
 		<icon src="icons/xxxhdpi.png" density="xxxhdpi"/>
 
 	</platform>
-
-	<plugin name="cordova-plugin-file"/>
-	<plugin name="cordova-plugin-whitelist"/>
-	<plugin name="cordova-plugin-advanced-http"/>
-	<plugin name="@e-is/cordova-plugin-downloader"/>
-	<plugin name="cordova-plugin-screen-orientation"/>
-	<plugin name="cordova-plugin-android-permissions"/>
 
 </widget>

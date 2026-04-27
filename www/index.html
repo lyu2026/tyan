@@ -37,7 +37,7 @@
 		window.log=function(){
 			if('yes'!=='debug'.gc(null))return
 			let $=$O.$('#w_logs'),prx=(window.IX?.name||'...').toUpperCase()
-			if(!$)$O.body.appendChild($=$O.node('div',{id:'w_logs'}))
+			if(!$)$O.body.appendChild($=$O.node('div',{id:'w_logs'},`<div onclick='this.parentElement.remove()'>清空日志</div>`))
 			let type=null,s=Array.from(arguments).map(_=>{
 				if(_===null||_===undefined)return null
 				const t=typeof _=='object',e=t&&Object.prototype.toString.call(_).includes('Error')
@@ -51,17 +51,18 @@
 				type=s.length>0&&['info','success','error','warn','debug'].includes(s[s.length-1])?s[s.length-1]:null
 				if(type)s.length-=1
 			}
+			if(type&&['info','success','error','warn','debug'].includes(s[s.length-1]))s.length-=1
 			$.prepend($O.node('div',{type},prx+': '+s.join('<br>')))
 		}
 
 		// 系统错误拦截
 		window.onerror=(message,source,lineno,colno,error)=>{
 			if(!error.stack.includes('.js'))error.stack='at '+source+':'+lineno+':'+colno+')'
-			log(message,error)
+			log('捕获 (onerror): '+message,error)
 		}
 		window.addEventListener('unhandledrejection',e=>{
-			if(!e.reason)e.promise.catch(_=>log(_?.message||'UnHandledRejection',_,'error'))
-			else log(e.reason.message,e.reason,'error')
+			if(!e.reason)e.promise.catch(_=>log('捕获 (unhandledrejection): '+(_?.message||'UnHandledRejection'),_,'error'))
+			else log('捕获 (unhandledrejection): '+e.reason.message,e.reason.stack,'error')
 		})
 
 		// 页面正在加载
@@ -74,11 +75,8 @@
 		let WI=crypto.randomUUID()
 		document.addEventListener('deviceready',()=>{
 			document.head.appendChild(document.node('script',{src:`./js/core.js?_=${crypto.randomUUID()}`,onload:_=>{
-				log('载入 HLS.JS')
-				$O.head.appendChild($O.node('script',{src:`./js/hls.js`,onload:_=>{
-					log('载入 HOME.JS')
-					$O.head.appendChild($O.node('script',{ix:'',src:`./js/home.js?_=${crypto.randomUUID()}`}))
-				}}))
+				log('载入 HOME.JS')
+				$O.head.appendChild($O.node('script',{ix:'',src:`./js/home.js?_=${crypto.randomUUID()}`}))
 			}}))
 		})
 	</script>
