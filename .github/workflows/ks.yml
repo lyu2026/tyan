@@ -25,15 +25,15 @@ jobs:
           STORE_PASSWORD=$(openssl rand -base64 32 | tr -d /=+ | cut -c1-16)
           
           echo "生成 Keystore..."
-          keytool -genkey -v \
-            -keystore tyan.keystore \
-            -alias tyan \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000000000 \
-            -storepass "$STORE_PASSWORD" \
-            -keypass "$KEY_PASSWORD" \
-            -dname "CN=CI Build, OU=Development, O=YourOrg, L=City, S=State, C=US"
+          keytool -genkeypair -v \
+		          -keystore tyan.keystore \
+		          -alias tyan \
+		          -keyalg RSA \
+		          -keysize 2048 \
+		          -validity 10000 \
+		          -storepass Tyan2026 \
+		          -keypass Tyan2026 \
+		          -dname "CN=Tyan, OU=Dev, O=Tyan, L=City, ST=State, C=CN"
           
           # 转为 Base64
           KEYSTORE_BASE64=$(base64 -w 0 tyan.keystore)
