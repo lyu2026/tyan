@@ -170,6 +170,33 @@ window.IX={
 		let DX=await DB('o','o')
 		if(!DX)DX=await DB('o','o')
 
+		let {licenseSN,licenseKey,text,cmisdoc,appID,userToken,contentKey}=JSON.parse(await DG(DX,'o',IX.id+'-decrypt')||'{}')
+		if(!licenseSN||!licenseKey||!cmisdoc){
+			text=await $w.fetch(`https://book.sciencereading.cn/shop/book/Booksimple/onlineRead.do?id=${IX.id}&readMark=0`).then(_=>_.text()).then(_=>{
+				_=(new $w.DOMParser()).parseFromString(_,'text/html')
+				_=_.querySelector('#AESCode')
+				return _.value.trim()
+			}).catch(e=>null)
+			if(!text)return
+			log('已得密文','success')
+			const body=new $w.FormData()
+			body.append('text',text)
+			const xx=await $w.fetch(`https://cws-wkreader.sciencereading.cn/cpdfapi/v2/documents/science-server-info-decrypt`,{method:'post',body}).then(_=>_.json()).then(_=>_.data).catch(e=>({}))
+			if('appID' in xx)appID=xx.appID
+			if('cmisdoc' in xx)cmisdoc=xx.cmisdoc
+			if('userToken' in xx)userToken=xx.userToken
+			if('contentKey' in xx)contentKey=xx.contentKey
+			if(xx.cmisdoc)log('已得密钥','success')
+			await $w.fetch('/kxwk5_style/lib/license-key.js').then(_=>_.text()).then(_=>{
+				$w.licenseSN=licenseSN=_.split('licenseSN:"').pop().split('"').shift()
+				$w.licenseKey=licenseKey=_.split('licenseKey:"').pop().split('"').shift()
+			}).catch(e=>{})
+			if(!$w.licenseSN||!$w.licenseKey||!cmisdoc)return
+			log('已得许可','success')
+			await DA(DX,'o',IX.id+'-decrypt',JSON.stringify({licenseSN,licenseKey,text,cmisdoc,appID,userToken,contentKey}))
+		}
+		log('许可密钥',{licenseSN,licenseKey,text,cmisdoc,appID,userToken,contentKey})
+
 		let css=await DG(DX,'o','UIExtension.css')||''
 		if(''===css){
 			css=await $w.fetch('/kxwk5_style/lib/UIExtension.css').then(_=>_.text()).catch(e=>null)
@@ -177,103 +204,84 @@ window.IX={
 			await DA(DX,'o','UIExtension.css',css)
 		}
 		$o.head.appendChild($o.node('style',{},`${css}html,body,.fv__ui-pdfviewer,.fv__pdf-page-container{background:rgba(0,0,0,0)}.context-menu-list,.fv__ui-layer{visibility:hidden!important}.fv__ui-layer-modal{display:none!important}.fv__pdf-view-mode-item{margin:0 auto!important;border-top:1.3px solid rgba(${tdark?'255,255,255,.1':'0,0,0,.1'})}${tdark?'.fv__pdf-page-content-container{filter:invert(1) hue-rotate(180deg)}':''}.fv__ui-page-scroll-button{background-color:rgba(${tdark?'255,255,255,.1':'0,0,0,.1'});font-size:16px;padding-top:3px;color:#${tdark?'ddd':'222'}}`))
-		log('载入 UIExtension.css')
+		log('载入 UIExtension.css','success')
 
-		$o.head.appendChild($o.node('script',{src:'/kxwk5_style/lib/license-key.js',onload:async _=>{
-			log('载入 license-key.js')
+		let worker=await DG(DX,'o','preload-jr-worker.js')||''
+		if(''===worker){
+			worker=await $w.fetch('/kxwk5_style/lib/preload-jr-worker.js').then(_=>_.text()).catch(e=>null)
+			if(!worker)return
+			await DA(DX,'o','preload-jr-worker.js',worker)
+		}
+		let ui=await DG(DX,'o','UIExtension.full.js')||''
+		if(''===ui){
+			ui=await $w.fetch('/kxwk5_style/lib/UIExtension.full.js').then(_=>_.text()).catch(e=>null)
+			if(!ui)return
+			await DA(DX,'o','UIExtension.full.js',ui)
+		}
 
-			let worker=await DG(DX,'o','preload-jr-worker.js')||''
-			if(''===worker){
-				worker=await $w.fetch('/kxwk5_style/lib/preload-jr-worker.js').then(_=>_.text()).catch(e=>null)
-				if(!worker)return
-				await DA(DX,'o','preload-jr-worker.js',worker)
-			}
-			let ui=await DG(DX,'o','UIExtension.full.js')||''
-			if(''===ui){
-				ui=await $w.fetch('/kxwk5_style/lib/UIExtension.full.js').then(_=>_.text()).catch(e=>null)
-				if(!ui)return
-				await DA(DX,'o','UIExtension.full.js',ui)
-			}
+		$o.head.appendChild($o.node('script',{},worker+'\n\n'+ui))
+		log('载入 Preload-jr-worker.js + UIExtension.full.js','success')
 
-			$o.head.appendChild($o.node('script',{},worker+'\n\n'+ui))
-			log('载入 Preload-jr-worker.js + UIExtension.full.js')
+		const __n=Date.now(),__x=setInterval(()=>(Date.now()-__n>5000||$w.preloadJrWorker&&$w.UIExtension)&&clearInterval(__x),200)
+		if(!$w.preloadJrWorker||!$w.UIExtension)return log('插件 UIExtension 载入失败','error')
 
-			while(true)if($w.preloadJrWorker&&$w.UIExtension)break
+		$w.readyWorker=$w.preloadJrWorker({
+			enginePath:'/kxwk5_style/lib/jr-engine/gsdk',
+			fontPath:'/kxwk5_style/external/brotli',
+			workerPath:'/kxwk5_style/lib/',
+			licenseKey,licenseSN,
+		})
+		$w.pdf=new $w.UIExtension.PDFUI({
+			viewerOptions:{
+				libPath:'/kxwk5_style/lib',jr:{readyWorker:$w.readyWorker},
+				customs:{
+					closeDocBefore:void 0,
+					PageCustomRender:function(){
+						function F(ec,pr){this.eCustom=ec;this.pdfPageRender=pr}
+						F.prototype.destroy=function(){this.eCustom.innerHTML=''}
+						F.prototype.render=function(){return this.pdfPageRender.getPDFPage().then(_=>(_.getIndex()+1))}
+						return F
+					}(),
+					ScrollWrap:$w.UIExtension.PDFViewCtrl.CustomScrollWrap
+				}
+			},
+			renderTo:'#pdf',template:IX.tpl,
+			appearance:$w.UIExtension.appearances.adaptive,
+			addons:'/kxwk5_style/lib/uix-addons/allInOne.mobile.js'
+		})
 
-			$w.readyWorker=$w.preloadJrWorker({
-				enginePath:'/kxwk5_style/lib/jr-engine/gsdk',
-				fontPath:'/kxwk5_style/external/brotli',
-				workerPath:'/kxwk5_style/lib/',
-				licenseKey:$w.licenseKey,
-				licenseSN:$w.licenseSN,
-			})
-			$w.pdf=new $w.UIExtension.PDFUI({
-				viewerOptions:{
-					libPath:'/kxwk5_style/lib',jr:{readyWorker:$w.readyWorker},
-					customs:{
-						closeDocBefore:void 0,
-						PageCustomRender:function(){
-							function F(ec,pr){this.eCustom=ec;this.pdfPageRender=pr}
-							F.prototype.destroy=function(){this.eCustom.innerHTML=''}
-							F.prototype.render=function(){return this.pdfPageRender.getPDFPage().then(_=>(_.getIndex()+1))}
-							return F
-						}(),
-						ScrollWrap:$w.UIExtension.PDFViewCtrl.CustomScrollWrap
-					}
-				},
-				renderTo:'#pdf',template:IX.tpl,
-				appearance:$w.UIExtension.appearances.adaptive,
-				addons:'/kxwk5_style/lib/uix-addons/allInOne.mobile.js'
-			})
+		$w.UIExtension.PDFViewCtrl.shared.setThemeColor([{dom:$o.body,colors:{background:tdark?'#000000':'#FFFFFF'}}])
 
-			$w.UIExtension.PDFViewCtrl.shared.setThemeColor([{dom:$o.body,colors:{background:tdark?'#000000':'#FFFFFF'}}])
+		let lp,es=$w.UIExtension.PDFViewCtrl.Events
+		$w.pdf.addViewerEventListener(es.beforeOpenFile,()=>(lp=$w.pdf.loading()))
+		$w.pdf.addViewerEventListener(es.openFileSuccess,async()=>{
+			await (await $w.pdf.pdfViewer.currentPDFDoc.getViewPreference()).setPageLayout($w.UIExtension.PDFViewCtrl.PDF.constant.PageLayout.OneColumn)
+			me.da('hide').previousElementSibling?.remove()
+			lp.then(_=>_.close())
+			IX.ready=true
+		})
+		$w.pdf.addViewerEventListener(es.openFileFailed,_=>{if(_&&_.error===3)return;lp?.then(_=>_.close())})
+		$w.pdf.addViewerEventListener(es.renderFileSuccess,()=>$w.pdf.goToPage((IX.id+'_index').gc(2)-1))
 
-			let lp,es=$w.UIExtension.PDFViewCtrl.Events
-			$w.pdf.addViewerEventListener(es.beforeOpenFile,()=>(lp=$w.pdf.loading()))
-			$w.pdf.addViewerEventListener(es.openFileSuccess,async()=>{
-				await (await $w.pdf.pdfViewer.currentPDFDoc.getViewPreference()).setPageLayout($w.UIExtension.PDFViewCtrl.PDF.constant.PageLayout.OneColumn)
-				me.da('hide').previousElementSibling?.remove()
-				lp.then(_=>_.close())
-				IX.ready=true
-			})
-			$w.pdf.addViewerEventListener(es.openFileFailed,_=>{if(_&&_.error===3)return;lp?.then(_=>_.close())})
-			$w.pdf.addViewerEventListener(es.renderFileSuccess,()=>$w.pdf.goToPage((IX.id+'_index').gc(2)-1))
-
-			const text=await $w.fetch(`https://book.sciencereading.cn/shop/book/Booksimple/onlineRead.do?id=${IX.id}&readMark=0`).then(_=>_.text()).then(_=>{
-				_=(new $w.DOMParser()).parseFromString(_,'text/html')
-				_=_.querySelector('#AESCode')
-				return _.value.trim()
-			}).catch(e=>null)
-			if(!text)return
-			log('密钥信息: '+text)
-
-			const body=new $w.FormData()
-			body.append('text',text)
-			const {cmisdoc,appID,userToken,contentKey}=await $w.fetch(`https://cws-wkreader.sciencereading.cn/cpdfapi/v2/documents/science-server-info-decrypt`,{method:'post',body}).then(_=>_.json()).then(_=>_.data).catch(e=>({}))
-			if(!cmisdoc)return
-			log('私密信息: ',{cmisdoc,appID,userToken,contentKey})
-
-			resolveLocalFileSystemURL(cordova.file.dataDirectory+N,e=>{
-				e.file(f=>{
-					const r=new FileReader()
-					r.onloadend=()=>{
-						const buff=r.result instanceof ArrayBuffer?r.result.slice(0):r.result
-						log(cordova.file.dataDirectory+N+' 从缓存中获取成功','success')
-						$w.pdf.openPDFByFile(buff,{cdrm:{appID,userToken,contentKey,encrptType:1,hasPermission:true}})
-					}
-					r.readAsArrayBuffer(f)
-				})
-			},e=>{
-				log(N+' 从缓存中获取失败，拉取数据','warn')
-				$w.fetch(`https://cws-wkreader.sciencereading.cn/cpdfapi/v1/documents/download-file?cmisdoc=${cmisdoc}`,{method:'get',headers:{'Access-Token':userToken,'Foxit-App-Name':'Creader_client_mobile'}}).then(_=>_.arrayBuffer()).then(buff=>{
-					if(!buff)return
-					const b=structuredClone(buff)
-					resolveLocalFileSystemURL(cordova.file.dataDirectory,o=>o.getFile(N,{create:true},e=>e.createWriter(w=>w.write(b))))
+		resolveLocalFileSystemURL(cordova.file.dataDirectory+N,e=>{
+			e.file(f=>{
+				const r=new FileReader()
+				r.onloadend=()=>{
+					const buff=r.result instanceof ArrayBuffer?r.result.slice(0):r.result
+					log(cordova.file.dataDirectory+N+' 从缓存中获取成功','success')
 					$w.pdf.openPDFByFile(buff,{cdrm:{appID,userToken,contentKey,encrptType:1,hasPermission:true}})
-				}).catch(e=>log(e))
+				}
+				r.readAsArrayBuffer(f)
 			})
-
-		}}))
+		},e=>{
+			log(N+' 从缓存中获取失败，拉取数据','warn')
+			$w.fetch(`https://cws-wkreader.sciencereading.cn/cpdfapi/v1/documents/download-file?cmisdoc=${cmisdoc}`,{method:'get',headers:{'Access-Token':userToken,'Foxit-App-Name':'Creader_client_mobile'}}).then(_=>_.arrayBuffer()).then(buff=>{
+				if(!buff)return
+				const b=structuredClone(buff)
+				resolveLocalFileSystemURL(cordova.file.dataDirectory,o=>o.getFile(N,{create:true},e=>e.createWriter(w=>w.write(b))))
+				$w.pdf.openPDFByFile(buff,{cdrm:{appID,userToken,contentKey,encrptType:1,hasPermission:true}})
+			}).catch(e=>log(e))
+		})
 		$o.body.innerHTML=`<div id='pdf'></div>`
 	},
 
@@ -292,60 +300,68 @@ window.IX={
 		CF()
 		if(!IX.ready)return
 		const doc=IX.$w.pdf.pdfViewer.currentPDFDoc,N=IX.curr.N+'.PDF'
-		const count=doc.info.pageCount,id=doc.id,api=doc.api
-		log(N+' 总页数: '+count)
-		let X=async o=>{
+		const {id,api,info}=doc,{pageCount,pageSizes}=info,{width,height}=pageSizes[1]||{}
+		log('文档信息',{id,width,height,pageCount})
+		const X=async o=>{
 			if(!o.hasChild)return o
-			const c=await Promise.all((await api.getBookmarkChildren({path:'jr/doc'},id,o.id)).map(X))
+			const c=await IX.$w.Promise.all((await api.getBookmarkChildren({path:'jr/doc'},id,o.id)).map(X))
 			return {o,c}
 		}
-		const s=await Promise.all((await api.getBookmarkChildren({path:'jr/doc'},id)).map(X))
+		const s=await IX.$w.Promise.all((await api.getBookmarkChildren({path:'jr/doc'},id)).map(X))
 		const bm=s.length>1?s:s.pop()
-		log('书签数据',bm)
-		for(let i=0;i<count;i++)await doc.getPageByIndex(i)
-		await doc.setPagesBox({indexes:Array.from(new Array(count).keys()).slice(1),removeWhiteMargin:false})
-		log('边缘去空')
-		let file=await doc.extractPages([[0,count-1]]).then(_=>{
+		log('提取书签',bm,'success')
+		for(let i=0;i<pageCount;i++)await doc.getPageByIndex(i)
+		await doc.setPagesBox({indexes:IX.$w.Array.from(new IX.$w.Array(pageCount).keys()).slice(1),removeWhiteMargin:false})
+		log('清除留白','success')
+		const file=await doc.extractPages([[0,pageCount-1]]).then(_=>{
 			let x=0
 			for(let b of _)x+=b.byteLength
-			const o=new ArrayBuffer(x),z=new Uint8Array(o)
+			const o=new IX.$w.ArrayBuffer(x),z=new IX.$w.Uint8Array(o)
 			x=0
-			for(let b of _){const v=new Uint8Array(b);z.set(v,x);x+=v.length}
+			for(let b of _){const v=new IX.$w.Uint8Array(b);z.set(v,x);x+=v.length}
 			return o
 		})
-		log('已创空档')
-		const ndoc=await IX.$w.pdf.createNewDoc(N)
-		await ndoc.insertPages({file,startIndex:0,endIndex:count-1})
-		log('已填新档')
+		log('提取数据','success')
+		const ndoc=await IX.$w.pdf.createNewDoc(N,'雍爷')
+		log('已创新档','success')
+		await ndoc.insertPages({file,startIndex:0,endIndex:pageCount-1})
+		log('已填新档','success')
 		await ndoc.removePage(ndoc.getPageCount()-1)
-		log('已去杂页')
+		log('清除白页','success')
 		const bs=await IX.$w.pdf.getBookmarkDataService()
-		X=async(n,p)=>{
+		const Z=async(n,p)=>{
 			if(!n)return
-			let o=n.o?n.o:n
+			if(_T(n,'array')){
+				await IX.$w.Promise.all(n.map(c=>Z(c,p)))
+				return
+			}
+			if(!_T(n,'object'))return
+			const o=n.o||n
 			o.id=await bs.addBookmark({
 				destination:{pageIndex:o.page,left:o.left,top:o.top,zoomFactor:o.zoomFactor,zoomMode:o.zoomMode},
 				style:{bold:o.isBold,italic:o.isItalic},color:o.color,
 				title:o.title,destId:p?p.id:undefined,relationship:1
 			})
-			if(n.c)await Promise.all(n.c.map(c=>X(c,n.o)))
+			if(n.c)await IX.$w.Promise.all(n.c.map(c=>Z(c,n.o)))
 		}
-		await X(bm,null)
-		log('已载书签')
-		const pdf=await ndoc.getFile()
-		const dir=cordova.file.externalDataDirectory;
-		const de=await new Promise((res,rej)=>resolveLocalFileSystemURL(dir,res,rej))
-		const fe=await new Promise((res,rej)=>de.getFile(N,{create:true},res,rej))
-		await new Promise((res,rej)=>{
-			fe.createWriter(w=>{
-				w.onwriteend=()=>{
-					log('文件保存成功！路径：'+fe.nativeURL)
-					res()
-				}
-				w.onerror=rej
-				w.write(pdf)
-			},rej)
-		})
+		await Z(bm,null)
+		log('已载书签','success')
+		const O=await ndoc.getFile(),r=new FileReader()
+		log(N+' 大小: '+O.size.usage())
+		resolveLocalFileSystemURL(cordova.file.externalDataDirectory,de=>{
+			de.getFile(N,{create:true},fe=>{
+				fe.createWriter(w=>{
+					r.onerror=e=>log('FileReader',e,'error')
+					w.onerror=e=>log('fe.createWriter',e,'error')
+					r.onload=()=>w.write(r.result)
+					w.onwriteend=()=>{
+						log('文件保存成功！路径：'+fe.nativeURL,'success')
+						ndoc.destroy()
+					}
+					r.readAsArrayBuffer(O)
+				},e=>log('fe.createWriter',e,'error'))
+			},e=>log('de.getFile',e,'error'))
+		},e=>log('resolveLocalFileSystemURL',e,'error'))
 	},
 
 	modal_close:async()=>{ // 关闭详情弹层
@@ -399,6 +415,7 @@ window.IX={
 			let o=`<tab T='category'>${['','?',...Object.keys(IX.tmap).filter(_=>_!==''&&_!='?')].map(_=>`<div V='${_}' onclick='run("IX","tab_click",WI)(this)'>${IX.tmap[_].name}</div>`).join('')}</tab>`
 			o+=`<grid></grid><modal hide><mbox><modal-t><title></title>`
 			o+=`<icc SC onclick='run("IX","collect_toggle",WI)(this)' style='line-height:33px'>⊕</icc>`
+			o+=`<icc SC onclick='run("IX","download",WI)(this)' style='line-height:33px'>〶</icc>`
 			o+=`<icc onclick='run("IX","modal_close",WI)()'>╳</icc>`
 			o+=`</modal-t><modal-c></modal-c></mbox></modal>`
 			$O.$$('body>*:not(#w_logs)').forEach(_=>_.remove())

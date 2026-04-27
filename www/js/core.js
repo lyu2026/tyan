@@ -621,7 +621,7 @@
 	// 数据类型获取/验证
 	W._T=(a,b)=>{
 		const _=Object.prototype.toString.call(a).split(' ').pop().replace(/]$/,'').toLowerCase()
-		if(b=='element')return _.includes(b)&&a.isConnected
+		if(b=='element'||b=='error')return _.includes(b)
 		return b?_.includes(b):_
 	}
 

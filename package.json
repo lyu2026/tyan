@@ -3,9 +3,6 @@
 	"version": "2026.4.27",
 	"description": "...",
 	"displayName": "廷琰",
-	"scripts": {
-		"postbuild": "node fix-manifest.js"
-	},
 	"dependencies": {
 		"cordova": "latest",
 		"cordova-android": "13.0.0",
@@ -20,7 +17,8 @@
 		"cordova-plugin-advanced-http": "*",
 		"@e-is/cordova-plugin-downloader": "*",
 		"cordova-plugin-screen-orientation": "*",
-		"cordova-plugin-android-permissions": "*"
+		"cordova-plugin-android-permissions": "*",
+		"cordova-plugin-network-information": "*"
 	},
 	"cordova": {
 		"plugins": {
@@ -39,7 +37,8 @@
 			"cordova-plugin-advanced-http": {},
 			"@e-is/cordova-plugin-downloader": {},
 			"cordova-plugin-screen-orientation": {},
-			"cordova-plugin-android-permissions": {}
+			"cordova-plugin-android-permissions": {},
+			"cordova-plugin-network-information": {}
 		},
 		"platforms": [
 			"android"

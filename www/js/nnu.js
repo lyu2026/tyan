@@ -171,7 +171,8 @@ window.IX={
 				}
 				$O.head.appendChild($O.node('script',{ix:''},hls))
 				log('载入 hls.js')
-				while(true)if(window.Hls)break
+				const __n=Date.now(),__x=setInterval(()=>(Date.now()-__n>5000||window.Hls)&&clearInterval(__x),200)
+				if(!window.Hls)return log('插件 HLS 载入失败','error')
 			}
 
 			const V=$O.$('video')

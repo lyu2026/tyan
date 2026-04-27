@@ -38,13 +38,16 @@
 			if('yes'!=='debug'.gc(null))return
 			let $=$O.$('#w_logs'),prx=(window.IX?.name||'...').toUpperCase()
 			if(!$)$O.body.appendChild($=$O.node('div',{id:'w_logs'},`<div onclick='this.parentElement.remove()'>清空日志</div>`))
-			let type=null,s=Array.from(arguments).map(_=>{
+			let type=null,fx='',s=Array.from(arguments).map((_,i)=>{
 				if(_===null||_===undefined)return null
-				const t=typeof _=='object',e=t&&Object.prototype.toString.call(_).includes('Error')
+				const t=typeof _=='object',e=t&&_T(_,'error')
 				if(!t)return _
 				if(!e)return '<pre>'+JSON.stringify(_,null,2)+'</pre>'
 				type='error'
-				_=_.stack.split('\n').map(v=>v.trim().replace(/\(?file\:\/\/\/android_asset\/www\//,'').replace(/\.js\?_\=[^\:]*\:/,'.js ').replace(/\)$/,'')) // .filter(_=>_.includes('.js'))
+				fx=_.message
+				_=_.stack.split('\n').map(v=>v.trim().replace(/\(?file\:\/\/\/android_asset\/www\/|\(\:/g,'').replace(/\.js\?_\=[^\:]*\:?/,'.js ').replace(/ \:/,' ').replace(/(\d)\)$/,'$1')).filter(Boolean)
+				_.shift()
+				// .filter(_=>_.match(/\d+\:\d+/))
 				return _.join('<br>')
 			}).filter(Boolean)
 			if(!type){
@@ -52,17 +55,18 @@
 				if(type)s.length-=1
 			}
 			if(type&&['info','success','error','warn','debug'].includes(s[s.length-1]))s.length-=1
+			if(fx!=='')s[0]+=': '+fx
 			$.prepend($O.node('div',{type},prx+': '+s.join('<br>')))
 		}
 
 		// 系统错误拦截
 		window.onerror=(message,source,lineno,colno,error)=>{
 			if(!error.stack.includes('.js'))error.stack='at '+source+':'+lineno+':'+colno+')'
-			log('捕获 (onerror): '+message,error)
+			log('捕获 (onerror)',error)
 		}
 		window.addEventListener('unhandledrejection',e=>{
-			if(!e.reason)e.promise.catch(_=>log('捕获 (unhandledrejection): ',_||'UnHandledRejection','error'))
-			else log('捕获 (unhandledrejection): ',e.reason,'error')
+			if(!e.reason)e.promise.catch(_=>log('捕获 (1:unhandledrejection): UnHandledRejection','error'))
+			else log('捕获 (2:unhandledrejection)',e.reason,'error')
 		})
 
 		// 页面正在加载

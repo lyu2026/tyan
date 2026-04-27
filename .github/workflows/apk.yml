@@ -46,6 +46,12 @@ jobs:
       - name: 添加 Android 平台
         run: cordova platform add android
 
+      - name: 修改 AndroidManifest 开启外部存储访问
+        run: |
+          MANIFEST="platforms/android/app/src/main/AndroidManifest.xml"
+          sed -i 's|<application|<application android:requestLegacyExternalStorage="true"|' "$MANIFEST"
+          echo "✓ AndroidManifest 已添加 requestLegacyExternalStorage 属性"
+
       - name: 创建网络安全配置目录
         run: |
           mkdir -p platforms/android/app/src/main/res/xml

@@ -54,6 +54,7 @@
 	<plugin name="@e-is/cordova-plugin-downloader" spec="*" />
 	<plugin name="cordova-plugin-screen-orientation" spec="*" />
 	<plugin name="cordova-plugin-android-permissions" spec="*" />
+	<plugin name="cordova-plugin-network-information" spec="*" />
 
 	<platform name="android">
 
