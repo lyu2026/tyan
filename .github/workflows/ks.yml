@@ -29,12 +29,46 @@ jobs:
             -storepass Tyan2026 \
             -keypass Tyan2026 \
             -dname "CN=Tyan, OU=Dev, O=Tyan, L=City, ST=State, C=CN"
-
           KEYSTORE_BASE64=$(base64 -w 0 tyan.keystore)
           echo "keystore_base64=$KEYSTORE_BASE64" >> $GITHUB_OUTPUT
           echo "✅ Keystore 生成完成"
 
-      - name: 设置参数
+      - name: 写入加密脚本
+        run: |
+          cat > encrypt_secret.py << 'EOF'
+          import sys
+          import base64
+          from nacl import encoding, public
+
+          key = sys.argv[1]
+          val = sys.argv[2]
+
+          pk = public.PublicKey(key.encode('utf-8'), encoding.Base64Encoder())
+          box = public.SealedBox(pk)
+          enc = box.encrypt(val.encode('utf-8'))
+          print(base64.b64encode(enc).decode('utf-8'))
+          EOF
+
+      - name: 写入上传脚本
+        run: |
+          cat > upload_secret.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          name="$1"
+          value="$2"
+          ENCRYPTED=$(python3 encrypt_secret.py "$KEY" "$value")
+          STATUS=$(curl -s -X PUT \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/$REPO/actions/secrets/$name" \
+            -d "{\"encrypted_value\":\"$ENCRYPTED\",\"key_id\":\"$KEY_ID\"}" \
+            -w "%{http_code}" -o /dev/null)
+          echo "上传 $name: HTTP $STATUS"
+          EOF
+          chmod +x upload_secret.sh
+
+      - name: 上传 Secrets
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
           REPO: ${{ github.repository }}
@@ -47,41 +81,14 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/$REPO/actions/secrets/public-key")
 
-          KEY_ID=$(echo "$PUBLIC_KEY" | jq -r '.key_id')
-          KEY=$(echo "$PUBLIC_KEY" | jq -r '.key')
-
+          export KEY_ID=$(echo "$PUBLIC_KEY" | jq -r '.key_id')
+          export KEY=$(echo "$PUBLIC_KEY" | jq -r '.key')
           echo "Key ID: $KEY_ID"
 
-          # 上传函数
-          upload_secret() {
-            local name="$1"
-            local value="$2"
-
-            ENCRYPTED=$(python3 << EOF
-             import base64
-             from nacl import encoding, public
-             key = '$KEY'
-             val = '$value'
-             pk = public.PublicKey(key.encode('utf-8'), encoding.Base64Encoder())
-             box = public.SealedBox(pk)
-             enc = box.encrypt(val.encode('utf-8'))
-             print(base64.b64encode(enc).decode('utf-8'))
-             EOF
-            )
-
-            STATUS=$(curl -s -X PUT \
-              -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              -H "Content-Type: application/json" \
-              "https://api.github.com/repos/$REPO/actions/secrets/$name" \
-              -d "{\"encrypted_value\":\"$ENCRYPTED\",\"key_id\":\"$KEY_ID\"}" \
-              -w "%{http_code}" -o /dev/null)
-
-            echo "上传 $name: HTTP $STATUS"
-          }
-
-          upload_secret "KEYSTORE_BASE64" "$KEYSTORE_BASE64"
+          # 上传
+          export GITHUB_TOKEN REPO KEY_ID KEY
+          ./upload_secret.sh "KEYSTORE_BASE64" "$KEYSTORE_BASE64"
           echo "🎉 完成！"
 
       - name: 清空
-        run: rm -f tyan.keystore
+        run: rm -f tyan.keystore encrypt_secret.py upload_secret.sh
