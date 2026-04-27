@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: 拉取项目代码
         uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
 
       - name: 配置 JV17 库
         uses: actions/setup-java@v4
@@ -141,7 +143,25 @@ jobs:
           done
           
           cd ..
-          
+
+          # 获取上次 tag
+          PREV_TAG=$(git tag --sort=-creatordate | grep -A1 "${{ steps.version.outputs.tag_name }}" | tail -1)
+
+          # 生成提交记录
+          if [ -n "$PREV_TAG" ]; then
+            echo "### 📝 更新内容" > release_changelog.md
+            echo "" >> release_changelog.md
+            git log "$PREV_TAG..${{ steps.version.outputs.tag_name }}" \
+              --pretty=format:"- %s (%h, @%an)" \
+              --no-merges \
+              >> release_changelog.md
+            echo "" >> release_changelog.md
+            echo "" >> release_changelog.md
+            CHANGELOG=$(cat release_changelog.md)
+          else
+            CHANGELOG="### 📝 更新内容\n\n首次发布 🎉\n\n"
+          fi
+
           # 生成完整的 Release Body
           cat >> release_body_full.md << EOF
           ## 🫧 廷琰 V${{ steps.version.outputs.version }}
@@ -153,6 +173,7 @@ jobs:
           | 构建时间 | ${{ steps.time.outputs.datetime }} |
           | 构建类型 | Release（签名） |
           
+          $CHANGELOG
           $(cat release_body.md)
           
           ### 📥 安装说明

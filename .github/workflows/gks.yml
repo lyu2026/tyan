@@ -25,7 +25,7 @@ jobs:
             -alias tyan \
             -keyalg RSA \
             -keysize 2048 \
-            -validity 10000 \
+            -validity 9999 \
             -storepass Tyan2026 \
             -keypass Tyan2026 \
             -dname "CN=Tyan, OU=Dev, O=Tyan, L=City, ST=State, C=CN"
