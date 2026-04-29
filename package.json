@@ -40,7 +40,10 @@
 			"@e-is/cordova-plugin-downloader": {},
 			"cordova-plugin-screen-orientation": {},
 			"cordova-plugin-android-permissions": {},
-			"cordova-plugin-network-information": {}
+			"cordova-plugin-network-information": {},
+			"cordova-plugin-foxit": {
+				"spec":"https://github.com/lyu2026/cordova-plugin-foxit.git"
+			}
 		},
 		"platforms": [
 			"android"

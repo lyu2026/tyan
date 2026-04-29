@@ -66,13 +66,13 @@ window.IX={
 		let uri=(me.ga('s')||me.ga('src')||'').split('?').shift()
 		if(!uri.startsWith('http'))return
 		uri+='?w=1200'
-		log(uri)
+		log('图片链接: '+uri)
 		cordova.plugins.Downloader.download({
 			uri,title:'图片下载',description:'正在下载图片文件',
 			destinationInExternalPublicDir:{
 				dirType:'Download',subPath:uri.split('-').pop().trim()
 			}
-		},p=>log('下载完成，保存路径：'+p),e=>log('下载失败：',e))
+		},p=>log('下载完成，保存路径：'+p,'success'),e=>log('下载失败：',e,'error'))
 	},
 
 	watch:()=>{ // 监听节点

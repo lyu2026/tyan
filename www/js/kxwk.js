@@ -55,7 +55,7 @@ window.IX={
 				if(IX.filters.category==''){
 					log(`获取收藏`)
 					gbox.da('_')
-					const books='kxwk_favorite_books'.gc({})
+					const books='kxwk_favorite'.gc({})
 					gbox.append(...Object.keys(books).map(_=>$O.node('grid-c',{I:_,N:books[_].N,onclick:'run("IX","card_click",WI)(this)'},`<img crossorigin='anonymous' src='${VCVR}' s='${books[_].C}'/><title>${books[_].N}</title>`)))
 					return
 				}
@@ -134,9 +134,9 @@ window.IX={
 	card_click:me=>{ // 打开详情弹层
 		CF()
 		const K=IX.key=crypto.randomUUID()
-		const id=IX.id=me.ga('I'),books='kxwk_favorite_books'.gc({})
+		const id=IX.id=me.ga('I'),books='kxwk_favorite'.gc({})
 		const sk=`<br><sk w100 p10 f fv g4><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h20></sk><sk n h8></sk><sk n h50></sk></sk>`
-		const mbox=$O.$('modal-c').html(`${sk}<iframe hide crossorigin='anonymous' sandbox='allow-scripts allow-same-origin allow-storage-access-by-user-activation' allow='storage-access' onload='run("IX","iframe_show",WI)(this)' src='https://book.sciencereading.cn/!'></iframe>`)
+		const mbox=$O.$('modal-c').html(`${sk}<iframe hide sandbox onload='run("IX","iframe_show",WI)(this)' srcdoc='<!DOCTYPE html><html><head></head><body><div id="pdf"></div></body></html>'></iframe>`)
 		IX.curr={N:me.ga('N'),C:me.$('img').ga('s')}
 		$O.$('modal-t [SC]').innerText=id in books?'♡':'⊕'
 		$O.body.sa('ns')
@@ -152,11 +152,6 @@ window.IX={
 		const $w=IX.$w=me?.contentWindow,$o=IX.$o=me?.contentDocument
 		if(!$o?.body)return
 
-		$w.eval(`const __LS__={_:{},getItem(k){return this._[k]||null},setItem(k,v){this._[k]=v},removeItem(k){delete this._[k]},clear(){this._={}}}
-		try{
-			Object.defineProperty(window,'sessionStorage',{get:()=>__LS__,configurable:true})
-			Object.defineProperty(window,'localStorage',{get:()=>__LS__,configurable:true})
-		}catch(e){alert(e.stack)}`)
 		$w.Document.prototype.node=function(tag='div',attrs={},html=''){
 			const o=this.createElement(tag)
 			for(let k in attrs){
@@ -192,7 +187,7 @@ window.IX={
 			if('userToken' in xx)userToken=xx.userToken
 			if('contentKey' in xx)contentKey=xx.contentKey
 			if(xx.cmisdoc)log('已得密钥','success')
-			await $w.fetch('/kxwk5_style/lib/license-key.js').then(_=>_.text()).then(_=>{
+			await $w.fetch('https://book.sciencereading.cn/kxwk5_style/lib/license-key.js').then(_=>_.text()).then(_=>{
 				$w.licenseSN=licenseSN=_.split('licenseSN:"').pop().split('"').shift()
 				$w.licenseKey=licenseKey=_.split('licenseKey:"').pop().split('"').shift()
 			}).catch(e=>{})
@@ -204,7 +199,7 @@ window.IX={
 
 		let css=await DG(DX,'o','UIExtension.css')||''
 		if(''===css){
-			css=await $w.fetch('/kxwk5_style/lib/UIExtension.css').then(_=>_.text()).catch(e=>null)
+			css=await $w.fetch('https://book.sciencereading.cn/kxwk5_style/lib/UIExtension.css').then(_=>_.text()).catch(e=>null)
 			if(!css)return
 			await DA(DX,'o','UIExtension.css',css)
 		}
@@ -213,30 +208,37 @@ window.IX={
 
 		let worker=await DG(DX,'o','preload-jr-worker.js')||''
 		if(''===worker){
-			worker=await $w.fetch('/kxwk5_style/lib/preload-jr-worker.js').then(_=>_.text()).catch(e=>null)
+			worker=await $w.fetch('https://book.sciencereading.cn/kxwk5_style/lib/preload-jr-worker.js').then(_=>_.text()).catch(e=>null)
 			if(!worker)return
 			await DA(DX,'o','preload-jr-worker.js',worker)
 		}
 		let ui=await DG(DX,'o','UIExtension.full.js')||''
 		if(''===ui){
-			ui=await $w.fetch('/kxwk5_style/lib/UIExtension.full.js').then(_=>_.text()).catch(e=>null)
+			ui=await $w.fetch('https://book.sciencereading.cn/kxwk5_style/lib/UIExtension.full.js').then(_=>_.text()).catch(e=>null)
 			if(!ui)return
 			await DA(DX,'o','UIExtension.full.js',ui)
 		}
 
-		$w.eval(worker+'\n\n'+ui)
-		if(!$w.preloadJrWorker||!$w.UIExtension)return log('插件 UIExtension 载入失败','error')
+		const ready=await new Promise((res,rej)=>{
+			$o.head.appendChild($o.node('script',{},worker+'\n\n'+ui))
+			const x=Date.now()
+			try{
+				while(true)if($w.preloadJrWorker&&$w.UIExtension||Date.now()-x>4000)break
+				res($w.preloadJrWorker&&$w.UIExtension)
+			}catch(e){log('插件 UIExtension 载入失败',e,'error')}
+		})
+		if(!ready)return
 		log('载入 Preload-jr-worker.js + UIExtension.full.js','success')
 
 		$w.readyWorker=$w.preloadJrWorker({
-			enginePath:'/kxwk5_style/lib/jr-engine/gsdk',
-			fontPath:'/kxwk5_style/external/brotli',
-			workerPath:'/kxwk5_style/lib/',
+			enginePath:'https://book.sciencereading.cn/kxwk5_style/lib/jr-engine/gsdk',
+			fontPath:'https://book.sciencereading.cn/kxwk5_style/external/brotli',
+			workerPath:'https://book.sciencereading.cn/kxwk5_style/lib/',
 			licenseKey,licenseSN,
 		})
 		$w.pdf=new $w.UIExtension.PDFUI({
 			viewerOptions:{
-				libPath:'/kxwk5_style/lib',jr:{readyWorker:$w.readyWorker},
+				libPath:'https://book.sciencereading.cn/kxwk5_style/lib',jr:{readyWorker:$w.readyWorker},
 				customs:{
 					closeDocBefore:void 0,
 					PageCustomRender:function(){
@@ -250,7 +252,7 @@ window.IX={
 			},
 			renderTo:'#pdf',template:IX.tpl,
 			appearance:$w.UIExtension.appearances.adaptive,
-			addons:'/kxwk5_style/lib/uix-addons/allInOne.mobile.js'
+			addons:'https://book.sciencereading.cn/kxwk5_style/lib/uix-addons/allInOne.mobile.js'
 		})
 
 		$w.UIExtension.PDFViewCtrl.shared.setThemeColor([{dom:$o.body,colors:{background:tdark?'#000000':'#FFFFFF'}}])
@@ -285,18 +287,17 @@ window.IX={
 				$w.pdf.openPDFByFile(buff,{cdrm:{appID,userToken,contentKey,encrptType:1,hasPermission:true}})
 			}).catch(e=>log(e))
 		})
-		$o.body.innerHTML=`<div id='pdf'></div>`
 	},
 
 	collect_toggle:me=>{ // 视频收藏切换
-		const uncollected=me.innerText=='⊕',books='kxwk_favorite_books'.gc({})
+		const uncollected=me.innerText=='⊕',books='kxwk_favorite'.gc({})
 		me.innerText=uncollected?'♡':'⊕'
 		if(uncollected)books[IX.id]=IX.curr
 		else if(IX.id in books){
 			delete books[IX.id]
 			if(IX.filters.category=='')$O.$(`grid-c[I='${IX.id}']`).remove()
 		}
-		'kxwk_favorite_books'.sc(books)
+		'kxwk_favorite'.sc(books)
 	},
 
 	download:async()=>{ // 下载pdf
