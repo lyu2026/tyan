@@ -32,23 +32,23 @@
 	<preference name="StatusBarOverlaysWebView" value="false" />
 	<preference name="StatusBarBackgroundColor" value="#000000" />
 
-	<!-- 插件（版本号锁定至最新兼容版本） -->
+	<!-- 插件 -->
 	<plugin name="cordova-plugin-file" spec="8.1.2" />
 	<plugin name="cordova-plugin-device" spec="3.0.0" />
 	<plugin name="cordova-plugin-dialogs" spec="2.0.2" />
-	<plugin name="cordova-plugin-camera" spec="8.0.0">
+	<plugin name="cordova-plugin-camera" spec="7.0.0">
 		<variable name="ANDROIDX_CORE_VERSION" value="1.6+" />
 	</plugin>
 	<plugin name="cordova-plugin-contacts" spec="3.0.2" />
 	<plugin name="cordova-plugin-geolocation" spec="5.0.0">
 		<variable name="GPS_REQUIRED" value="true" />
 	</plugin>
-	<plugin name="cordova.plugins.diagnostic" spec="8.0.0" />
+	<plugin name="cordova.plugins.diagnostic" spec="7.2.0" />
 	<plugin name="cordova-plugin-nativestorage" spec="2.3.2" />
 	<plugin name="cordova-plugin-advanced-http" spec="3.3.1" />
-	<plugin name="@e-is/cordova-plugin-downloader" spec="1.0.0" />
-	<plugin name="cordova-plugin-screen-orientation" spec="3.0.3" />
-	<plugin name="cordova-plugin-android-permissions" spec="1.1.5" />
+	<plugin name="@e-is/cordova-plugin-downloader" spec="1.2.0" />
+	<plugin name="cordova-plugin-screen-orientation" spec="3.0.2" />
+	<plugin name="cordova-plugin-android-permissions" spec="1.1.2" />
 	<plugin name="cordova-plugin-network-information" spec="3.0.0" />
 
 	<platform name="android">
