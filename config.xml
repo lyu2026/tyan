@@ -42,9 +42,9 @@
 
 	<platform name="android">
 		<!-- 开屏 -->
-		<preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/splashscreen.xml" />
-		<resource-file src="res/colors.xml" target="app/src/main/res/values/colors.xml" />
-		<resource-file src="res/dark-colors.xml" target="app/src/main/res/values-night/colors.xml" />
+		<preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/screen/android/splashscreen.xml" />
+		<resource-file src="res/android/values/colors.xml" target="app/src/main/res/values/colors.xml" />
+		<resource-file src="res/android/values-night/colors.xml" target="app/src/main/res/values-night/colors.xml" />
 
 		<!-- SDK -->
 		<preference name="android-minSdkVersion" value="24" />
