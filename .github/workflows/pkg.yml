@@ -74,6 +74,15 @@ jobs:
           }
           EOF
 
+      - name: 拷贝网络安全配置
+        run: |
+          # 确保 res/xml 目录存在
+          mkdir -p platforms/android/app/src/main/res/xml
+          # 拷贝网络安全配置文件
+          cp res/xml/network_security_config.xml platforms/android/app/src/main/res/xml/network_security_config.xml
+          # 验证文件已正确放置
+          ls -la platforms/android/app/src/main/res/xml/network_security_config.xml
+
       - name: 解密签名信息
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/tyan.keystore"
