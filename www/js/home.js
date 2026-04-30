@@ -30,13 +30,13 @@ window.IX={
 		if(x)_.dc()
 		else _.sc('yes')
 		if(_=='debug'){
-			me.html('打印日志: '+(x?'🔴':'🟢'))
+			me.html('日志打印: '+(x?'🔴':'🟢'))
 			const o=$O.$('#w_logs')
 			if(x&&o)o.remove()
 		}else if(_=='dark'){
-			log(`主题模式，切换为 ${x?'浅色':'深色'}模式`)
+			log(`深色模式，切换为 ${x?'否':'是'}`)
 			$O.body[x?'da':'sa']('dark')
-			me.html('主题模式: '+(x?'⚪':'⚫'))
+			me.html('深色模式: '+(x?'🔴':'🟢'))
 		}
 	},
 
@@ -79,7 +79,7 @@ body[dark] card>.back p{color:#ddd}card h1,card h2{margin:0}card h2{font-size:18
 card h1{margin-top:8px;font-size:24px;text-shadow:2px 2px rgba(255,255,255,.18),4px 4px rgba(255,255,255,.14),6px 6px rgba(255,255,255,.1),8px 8px rgba(255,255,255,.06),10px 10px rgba(255,255,255,.02)}
 `
 		let i=0
-		const o=[`<nav><div k='debug' onclick='run("IX","toggle",WI)(this)'>打印日志: ${'debug'.gc(null)=='yes'?'🟢':'🔴'}</div><div k='dark' onclick='run("IX","toggle",WI)(this)'>主题模式: ${'dark'.gc(null)=='yes'?'⚫':'⚪'}</div></nav>`]
+		const o=[`<nav><div k='debug' onclick='run("IX","toggle",WI)(this)'>日志打印: ${'debug'.gc(null)=='yes'?'🟢':'🔴'}</div><div k='dark' onclick='run("IX","toggle",WI)(this)'>深色模式: ${'dark'.gc(null)=='yes'?'🟢':'🔴'}</div></nav>`]
 		for(let {key,name,title,brief} of IX.cards)o.push(`<card${(i++)%2<1?' v':''} onclick='run("IX","goto",WI)(this)' K='${key}'><div class='front' style='--u:url(./img/${key}.webp)'><h1>${name}</h1></div><div class='back'><h2>${title}</h2><p>${brief}</p></div></card>`)
 		log('渲染页面，构建 DOM 树')
 		$O.body.html(o.join('')+($O.$('#w_logs')?.html(true)||''))

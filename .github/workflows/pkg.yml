@@ -167,7 +167,7 @@ jobs:
           cd output
           for apk in *.apk; do
             ABI=$(basename "$apk" .apk)
-            mv "$apk" "tyan-v${VERSION}-${ABI}.apk"
+            mv "$apk" "${ABI}.apk"
           done
           ls -lh
 

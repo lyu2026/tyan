@@ -50,6 +50,7 @@
 	<plugin name="cordova-plugin-screen-orientation" spec="*" />
 	<plugin name="cordova-plugin-android-permissions" spec="*" />
 	<plugin name="cordova-plugin-network-information" spec="*" />
+	<plugin name="cordova-plugin-Journiv" spec="https://github.com/lyu2026/cordova-plugin-journiv" />
 
 	<platform name="android">
 		<!-- SDK -->
