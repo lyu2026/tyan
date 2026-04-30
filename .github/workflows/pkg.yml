@@ -21,29 +21,33 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/repos/${{ github.repository }}/actions/runs?per_page=100" \
-            | jq -r '.workflow_runs[] | "\(.id) \(.head_branch) \(.status) \(.conclusion) \(.run_attempt)"')
+            | jq -r '.workflow_runs[] | "\(.id)|\(.head_branch)|\(.status)|\(.conclusion)|\(.run_attempt)|\(.display_title)"')
           if [ -z "$ALL_RUNS" ]; then
             echo ">>> 没有找到任何 workflow runs"
             exit 0
           fi
           echo ">>> 当前 tag: ${{ github.ref_name }}"
+          echo ">>> 当前 run: #${{ github.run_number }} (ID: ${{ github.run_id }}, attempt: ${{ github.run_attempt }})"
           DELETE_IDS=""
           while IFS= read -r line; do
-            ID=$(echo "$line" | awk '{print $1}')
-            BRANCH=$(echo "$line" | awk '{print $2}')
-            STATUS=$(echo "$line" | awk '{print $3}')
-            CONCLUSION=$(echo "$line" | awk '{print $4}')
-            ATTEMPT=$(echo "$line" | awk '{print $5}')
-            # 跳过当前正在运行的 build（同名 tag + 同一次 attempt）
-            if [ "$BRANCH" = "${{ github.ref_name }}" ] && [ "$ATTEMPT" = "${{ github.run_attempt }}" ]; then
-              echo ">>> 跳过当前 run: $ID (attempt $ATTEMPT)"
+            ID=$(echo "$line" | cut -d'|' -f1)
+            BRANCH=$(echo "$line" | cut -d'|' -f2)
+            STATUS=$(echo "$line" | cut -d'|' -f3)
+            CONCLUSION=$(echo "$line" | cut -d'|' -f4)
+            ATTEMPT=$(echo "$line" | cut -d'|' -f5)
+            TITLE=$(echo "$line" | cut -d'|' -f6)
+            # 跳过当前正在运行的 build
+            if [ "$ID" = "${{ github.run_id }}" ]; then
+              echo ">>> 跳过当前 run: #${{ github.run_number }} $ID (attempt $ATTEMPT)"
               continue
             fi
-            # 删除：同名 tag + (失败 或 取消)
-            if [ "$BRANCH" = "${{ github.ref_name }}" ]; then
-              if [ "$CONCLUSION" = "failure" ] || [ "$STATUS" = "cancelled" ] || [ "$CONCLUSION" = "cancelled" ]; then
-                echo ">>> 标记删除: $ID (status=$STATUS, conclusion=$CONCLUSION)"
-                DELETE_IDS="$DELETE_IDS $ID"
+            # 只处理当前 workflow（签名打包）且同 tag 的 runs
+            if echo "$TITLE" | grep -q "签名打包"; then
+              if [ "$BRANCH" = "${{ github.ref_name }}" ] || echo "$BRANCH" | grep -q "^${{ github.ref_name }}"; then
+                if [ "$CONCLUSION" = "failure" ] || [ "$STATUS" = "cancelled" ] || [ "$CONCLUSION" = "cancelled" ]; then
+                  echo ">>> 标记删除: $ID (branch=$BRANCH, status=$STATUS, conclusion=$CONCLUSION)"
+                  DELETE_IDS="$DELETE_IDS $ID"
+                fi
               fi
             fi
           done <<< "$ALL_RUNS"
@@ -53,11 +57,16 @@ jobs:
             echo ">>> 正在删除..."
             for ID in $DELETE_IDS; do
               echo ">>> 删除 run $ID"
-              curl -s -X DELETE \
+              STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
                 -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                 -H "Accept: application/vnd.github+json" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
-                "https://api.github.com/repos/${{ github.repository }}/actions/runs/$ID"
+                "https://api.github.com/repos/${{ github.repository }}/actions/runs/$ID")
+              if [ "$STATUS_CODE" = "204" ]; then
+                echo "    ✅ 删除成功"
+              else
+                echo "    ❌ 删除失败 (HTTP $STATUS_CODE)"
+              fi
             done
             echo ">>> 清理完成"
           fi
