@@ -60,13 +60,8 @@
 		<preference name="AndroidHardwareAcceleration" value="true" />
 		<preference name="AndroidPersistentFileLocation" value="Compatibility" />
 
-		<!-- 允许明文流量（HTTP） -->
+		<!-- 允许明文流量 -->
 		<preference name="android-usesCleartextTraffic" value="true" />
-
-		<!-- 网络安全配置：改用 config-file 直接注入 AndroidManifest.xml -->
-		<config-file target="AndroidManifest.xml" parent="/manifest/application">
-			<application android:networkSecurityConfig="@xml/network_security_config" />
-		</config-file>
 
 		<!-- 允许 WebView 不安全文件访问 -->
 		<preference name="AndroidInsecureFileModeEnabled" value="true" />
