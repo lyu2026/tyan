@@ -60,12 +60,12 @@
 		<preference name="AndroidInsecureFileModeEnabled" value="true" />
 
 		<!-- 图标 -->
-		<icon src="icons/ldpi.png" density="ldpi" />
-		<icon src="icons/mdpi.png" density="mdpi" />
-		<icon src="icons/hdpi.png" density="hdpi" />
-		<icon src="icons/xhdpi.png" density="xhdpi" />
-		<icon src="icons/xxhdpi.png" density="xxhdpi" />
-		<icon src="icons/xxxhdpi.png" density="xxxhdpi" />
+		<icon src="res/icons/ldpi.png" density="ldpi" />
+		<icon src="res/icons/mdpi.png" density="mdpi" />
+		<icon src="res/icons/hdpi.png" density="hdpi" />
+		<icon src="res/icons/xhdpi.png" density="xhdpi" />
+		<icon src="res/icons/xxhdpi.png" density="xxhdpi" />
+		<icon src="res/icons/xxxhdpi.png" density="xxxhdpi" />
 
 	</platform>
 
