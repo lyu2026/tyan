@@ -13,6 +13,24 @@ jobs:
       contents: write
 
     steps:
+      - name: 清理垃圾执行
+        run: |
+          echo ">>> 获取当前仓库所有失败的 workflow runs"
+          RUN_IDS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=failure" \
+            | jq -r '.workflow_runs[].id')
+          if [ -z "$RUN_IDS" ]; then
+            echo ">>> 没有失败的 runs，跳过"
+          else
+            echo ">>> 正在删除失败的 runs..."
+            for ID in $RUN_IDS; do
+              echo ">>> 删除 run $ID"
+              curl -s -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                "https://api.github.com/repos/${{ github.repository }}/actions/runs/$ID"
+            done
+            echo ">>> 删除完成"
+          fi
+
       - name: 拉取项目代码
         uses: actions/checkout@v4
         with:
@@ -199,16 +217,6 @@ jobs:
         run: |
           export TZ='Asia/Shanghai'
           echo "datetime=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
-
-      - name: 重命名安装包
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          cd output
-          for apk in *.apk; do
-            ABI=$(basename "$apk" .apk)
-            mv "$apk" "${ABI}.apk"
-          done
-          ls -lh
 
       - name: 生成发布信息
         id: apk_info
