@@ -55,7 +55,6 @@
 	<plugin name="cordova-plugin-screen-orientation" spec="*" />
 	<plugin name="cordova-plugin-android-permissions" spec="*" />
 	<plugin name="cordova-plugin-network-information" spec="*" />
-	<plugin name="cordova-plugin-foxit" spec="https://github.com/lyu2026/cordova-plugin-foxit.git" />
 
 	<platform name="android">
 
