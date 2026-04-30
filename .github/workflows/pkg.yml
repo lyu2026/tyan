@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*'
-      - 'release-*'
 
 jobs:
   build:
@@ -18,19 +17,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 配置 J17 库
+      - name: 配置 Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: 配置 N20 库
+      - name: 配置 Node 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: 安装安卓SDK
         uses: android-actions/setup-android@v3
+
+      - name: 接受SDK许可
+        run: yes | sdkmanager --licenses
 
       - name: 安装打包组件
         run: |
@@ -39,16 +41,26 @@ jobs:
             "platforms;android-34" \
             "build-tools;34.0.0"
 
-      - name: 安装科尔多瓦
-        run: npm install -g cordova@latest
+      - name: 缓存 Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: 安装 Cordova
+        run: npm install -g cordova@^13.0.0
 
       - name: 安装项目依赖
         run: npm install
 
       - name: 添加安卓平台
-        run: cordova platform add android@13.0
+        run: cordova platform add android@13.0.0
 
-      - name: 配置 ABI 过滤支持
+      - name: 配置 ABI 过滤
         run: |
           cat > platforms/android/app/build-extras.gradle << 'EOF'
           android {
@@ -61,7 +73,6 @@ jobs:
               }
           }
           EOF
-          echo "✓ build-extras.gradle 已写入"
 
       - name: 解密签名信息
         run: |
@@ -70,13 +81,11 @@ jobs:
       - name: 区分架构打包
         run: |
           KEYSTORE_PATH="$GITHUB_WORKSPACE/tyan.keystore"
-          ABIS=("arm64-v8a" "armeabi-v7a" "x86_64")
+          ABIS=("arm64-v8a" "armeabi-v7a")
           mkdir -p output
 
           for ABI in "${ABIS[@]}"; do
             echo ">>> 正在打包架构：$ABI"
-
-            cordova clean android
 
             cordova build android --release -- \
               --packageType=apk \
@@ -106,9 +115,20 @@ jobs:
           export TZ='Asia/Shanghai'
           echo "datetime=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
 
+      - name: 重命名 APK
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd output
+          for apk in *.apk; do
+            ABI=$(basename "$apk" .apk)
+            mv "$apk" "tyan-v${VERSION}-${ABI}.apk"
+          done
+          ls -lh
+
       - name: 生成发布信息
         id: apk_info
         run: |
+          VERSION="${{ steps.version.outputs.version }}"
           cd output
           {
             echo "### 📦 APK 文件清单"
@@ -141,7 +161,6 @@ jobs:
 
           CHANGELOG=$(cat release_changelog.md)
           MANIFEST=$(cat release_body.md)
-          VERSION="${{ steps.version.outputs.version }}"
           DATETIME="${{ steps.time.outputs.datetime }}"
 
           {
@@ -159,15 +178,10 @@ jobs:
             echo "${MANIFEST}"
             echo ""
             echo "### 📥 安装说明"
-            echo "1. 根据手机 CPU 架构选择对应的 APK"
-            echo "   - 大多数现代手机选择 \`arm64-v8a\`"
-            echo "   - 老旧手机选择 \`armeabi-v7a\`"
-            echo "   - 模拟器选择 \`x86_64\`"
-            echo "2. 下载后在手机上允许\"安装未知来源应用\""
-            echo "3. 点击 APK 进行安装"
-            echo ""
-            echo "### 🔍 查看 CPU 架构"
-            echo "如不确定手机架构，可安装 [Device Info HW](https://play.google.com/store/apps/details?id=ru.andr7e.deviceinfohw) 查看"
+            echo "1. 大多数现代手机选择 \`arm64-v8a\`"
+            echo "2. 老旧手机选择 \`armeabi-v7a\`"
+            echo "3. 下载后在手机上允许安装未知来源应用"
+            echo "4. 点击 APK 进行安装"
           } > release_body_full.md
 
       - name: 发布并上传包

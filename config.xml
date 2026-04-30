@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.tyan" version="2026.4.30" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.tyan" version="2026.4.27"
+	xmlns="http://www.w3.org/ns/widgets"
+	xmlns:cdv="http://cordova.apache.org/ns/1.0">
 
 	<name>廷琰</name>
 	<author>雍爷</author>
@@ -7,77 +9,79 @@
 
 	<content src="index.html" />
 
+	<!-- 跨域请求：允许所有来源 -->
 	<access origin="*" />
-	<allow-navigation href="*" />
+
+	<!-- 允许所有HTTP/HTTPS导航 -->
+	<allow-navigation href="http://*/*" />
+	<allow-navigation href="https://*/*" />
+
+	<!-- 允许自定义协议 -->
 	<allow-intent href="tyan://*" />
+
+	<!-- 允许打开外部应用/浏览器 -->
 	<allow-intent href="http://*/*" />
 	<allow-intent href="https://*/*" />
 
+	<!-- 使用HTTP加载，避免自动HTTPS -->
 	<preference name="scheme" value="http" />
 	<preference name="hostname" value="localhost" />
 
-	<!-- UI -->
+	<!-- UI设置 -->
 	<preference name="Fullscreen" value="true" />
 	<preference name="Orientation" value="default" />
-	<preference name="loadUrlTimeoutValue" value="70000" />
+	<preference name="loadUrlTimeoutValue" value="30000" />
 	<preference name="StatusBarOverlaysWebView" value="false" />
 	<preference name="StatusBarBackgroundColor" value="#000000" />
 
-	<!-- 插件 -->
-	<plugin name="cordova-plugin-file" spec="*" />
-	<plugin name="cordova-plugin-device" spec="*" />
-	<plugin name="cordova-plugin-dialogs" spec="*" />
-	<plugin name="cordova-plugin-camera" spec="*">
+	<!-- 插件声明 -->
+	<plugin name="cordova-plugin-file" spec="^8.1.0" />
+	<plugin name="cordova-plugin-device" spec="^3.0.0" />
+	<plugin name="cordova-plugin-dialogs" spec="^2.0.2" />
+	<plugin name="cordova-plugin-camera" spec="^7.0.0">
 		<variable name="ANDROIDX_CORE_VERSION" value="1.6+" />
 	</plugin>
-	<plugin name="cordova-plugin-geolocation" spec="*">
+	<plugin name="cordova-plugin-contacts" spec="^3.0.2" />
+	<plugin name="cordova-plugin-geolocation" spec="^5.0.0">
 		<variable name="GPS_REQUIRED" value="true" />
 	</plugin>
-	<plugin name="cordova.plugins.diagnostic" spec="*" />
-	<plugin name="cordova-plugin-advanced-http" spec="*" />
-	<plugin name="@e-is/cordova-plugin-downloader" spec="*" />
-	<plugin name="cordova-plugin-screen-orientation" spec="*" />
-	<plugin name="cordova-plugin-android-permissions" spec="*" />
-	<plugin name="cordova-plugin-network-information" spec="*" />
-	<plugin name="cordova-plugin-nativestorage" spec="*" />
+	<plugin name="cordova.plugins.diagnostic。" spec="^7.2.0" />
+	<plugin name="cordova-plugin-nativestorage" spec="^2.3.2" />
+	<plugin name="cordova-plugin-advanced-http" spec="^3.3.1" />
+	<plugin name="@e-is/cordova-plugin-downloader" spec="^1.0.0" />
+	<plugin name="cordova-plugin-screen-orientation" spec="^3.0.2" />
+	<plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
+	<plugin name="cordova-plugin-network-information" spec="^3.0.0" />
 
 	<platform name="android">
-		<!-- 开屏 -->
-		<preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/screen/android/splashscreen.xml" />
-		<resource-file src="res/android/values/colors.xml" target="app/src/main/res/values/colors.xml" />
-		<resource-file src="res/android/values-night/colors.xml" target="app/src/main/res/values-night/colors.xml" />
-
-		<!-- SDK -->
+		<!-- SDK版本 -->
 		<preference name="android-minSdkVersion" value="24" />
 		<preference name="android-targetSdkVersion" value="34" />
-		<preference name="android-versionCode" value="20260430" />
 
-		<!-- 性能 -->
+		<!-- 硬件加速 -->
 		<preference name="AndroidHardwareAcceleration" value="true" />
 		<preference name="AndroidPersistentFileLocation" value="Compatibility" />
 
-		<!-- 网络 -->
+		<!-- 允许HTTP明文通信 -->
 		<preference name="android-usesCleartextTraffic" value="true" />
+
+		<!-- 自定义网络安全配置（允许HTTP + 信任用户证书） -->
+		<preference name="android-networkSecurityConfig" value="@xml/network_security_config" />
+
+		<!-- 允许WebView不安全文件访问 -->
 		<preference name="AndroidInsecureFileModeEnabled" value="true" />
+		<resource-file src="res/xml/network_security_config.xml" target="app/src/main/res/xml/network_security_config.xml" />
 
-		<!-- 网络安全配置 -->
-		<resource-file src="res/android/xml/network_security_config.xml" target="app/src/main/res/xml/network_security_config.xml" />
+		<!-- 禁用启动屏 -->
+		<preference name="AndroidWindowSplashScreenAnimatedIcon" value="@android:color/transparent" />
+		<preference name="AndroidWindowSplashScreenBackground" value="@android:color/transparent" />
 
-		<edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
-			<application
-				xmlns:android="http://schemas.android.com/apk/res/android"
-				android:requestLegacyExternalStorage="true"
-				android:networkSecurityConfig="@xml/network_security_config" />
-		</edit-config>
-
-		<!-- 图标 -->
+		<!-- 应用图标 -->
 		<icon src="res/icons/ldpi.png" density="ldpi" />
-		<icon src="res/icons/mdpi.png" density="mdpi" />
 		<icon src="res/icons/hdpi.png" density="hdpi" />
+		<icon src="res/icons/mdpi.png" density="mdpi" />
 		<icon src="res/icons/xhdpi.png" density="xhdpi" />
 		<icon src="res/icons/xxhdpi.png" density="xxhdpi" />
 		<icon src="res/icons/xxxhdpi.png" density="xxxhdpi" />
-
 	</platform>
-
 </widget>
