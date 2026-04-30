@@ -63,12 +63,12 @@
 		<!-- 允许明文流量（HTTP） -->
 		<preference name="android-usesCleartextTraffic" value="true" />
 
-		<!-- 网络安全配置引用 -->
-		<edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+		<!-- 网络安全配置：改用 config-file 直接注入 AndroidManifest.xml -->
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<application android:networkSecurityConfig="@xml/network_security_config" />
-		</edit-config>
+		</config-file>
 
-		<!-- 拷贝网络安全配置文件 -->
+		<!-- 拷贝网络安全配置文件（确保仅拷贝 network_security_config.xml） -->
 		<resource-file src="res/xml/network_security_config.xml" target="app/src/main/res/xml/network_security_config.xml" />
 
 		<!-- 允许 WebView 不安全文件访问 -->
