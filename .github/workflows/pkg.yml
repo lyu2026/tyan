@@ -59,7 +59,9 @@ jobs:
         run: npm install
 
       - name: 添加安卓平台
-        run: cordova platform add android@13.0.0
+        run: |
+          rm -rf platforms/android/app/build platforms/android/build platforms/android/.gradle output
+          cordova platform add android@13.0.0
 
       - name: 强制统一 Kotlin 版本
         run: |
@@ -70,41 +72,32 @@ jobs:
             GRADLE_FILE="platforms/android/app/build.gradle"
             USE_KTS=false
           fi
-          
           echo ">>> 检测到文件: $GRADLE_FILE"
-          
           if grep -q "kotlin-stdlib.*1.9.22" "$GRADLE_FILE"; then
             echo ">>> Kotlin 版本已锁定，跳过"
           else
             echo ">>> 正在锁定 Kotlin 版本到 1.9.22"
-            
             if [ "$USE_KTS" = true ]; then
-              cat >> "$GRADLE_FILE" << 'GRADLE_EOF'
-              
-              configurations.all {
-                  resolutionStrategy {
-                      force("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")
-                      force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22")
-                      force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")
-                  }
-              }
-              GRADLE_EOF
+              echo "" >> "$GRADLE_FILE"
+              echo "configurations.all {" >> "$GRADLE_FILE"
+              echo "    resolutionStrategy {" >> "$GRADLE_FILE"
+              echo '        force("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")' >> "$GRADLE_FILE"
+              echo '        force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22")' >> "$GRADLE_FILE"
+              echo '        force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")' >> "$GRADLE_FILE"
+              echo "    }" >> "$GRADLE_FILE"
+              echo "}" >> "$GRADLE_FILE"
             else
-              cat >> "$GRADLE_FILE" << 'GRADLE_EOF'
-              
-              configurations.all {
-                  resolutionStrategy {
-                      force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
-                      force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22'
-                      force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22'
-                  }
-              }
-              GRADLE_EOF
+              echo "" >> "$GRADLE_FILE"
+              echo "configurations.all {" >> "$GRADLE_FILE"
+              echo "    resolutionStrategy {" >> "$GRADLE_FILE"
+              echo "        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'" >> "$GRADLE_FILE"
+              echo "        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22'" >> "$GRADLE_FILE"
+              echo "        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22'" >> "$GRADLE_FILE"
+              echo "    }" >> "$GRADLE_FILE"
+              echo "}" >> "$GRADLE_FILE"
             fi
-            
             echo ">>> Kotlin 版本锁定完成"
           fi
-          
           echo ">>> 验证当前配置"
           grep -A4 "resolutionStrategy" "$GRADLE_FILE" || echo "(未找到 resolutionStrategy)"
 
