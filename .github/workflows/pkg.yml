@@ -41,7 +41,7 @@ jobs:
             fi
             # 状态：失败 或 取消
             if [ "$CONCLUSION" = "failure" ] || [ "$CONCLUSION" = "cancelled" ] || [ "$STATUS" = "cancelled" ] || [ "$BRANCH" = "${{ github.ref_name }}" ]; then
-              echo ">>> 标记删除: $ID (branch=$BRANCH, status=$STATUS, conclusion=$CONCLUSION)"
+              echo ">>> 标记删除: $ID ($BRANCH, $STATUS, $CONCLUSION)"
               DELETE_IDS="$DELETE_IDS $ID"
             fi
           done <<< "$ALL_RUNS"
