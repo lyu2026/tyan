@@ -43,7 +43,6 @@
 	<plugin name="cordova-plugin-geolocation" spec="*">
 		<variable name="GPS_REQUIRED" value="true" />
 	</plugin>
-	<plugin name="cordova-sqlite-storage" spec="*" />
 	<plugin name="cordova.plugins.diagnostic" spec="*" />
 	<plugin name="cordova-plugin-nativestorage" spec="*" />
 	<plugin name="cordova-plugin-advanced-http" spec="*" />
