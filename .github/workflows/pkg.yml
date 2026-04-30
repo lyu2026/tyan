@@ -34,12 +34,10 @@ jobs:
             STATUS=$(echo "$line" | cut -d'|' -f3)
             CONCLUSION=$(echo "$line" | cut -d'|' -f4)
             TITLE=$(echo "$line" | cut -d'|' -f5)
-            # 跳过当前正在运行的 build
             if [ "$ID" = "${{ github.run_id }}" ]; then
               echo ">>> 跳过当前 run: #${{ github.run_number }} $ID"
               continue
             fi
-            # 状态：失败 或 取消
             if [ "$CONCLUSION" = "failure" ] || [ "$CONCLUSION" = "cancelled" ] || [ "$STATUS" = "cancelled" ] || [ "$BRANCH" = "${{ github.ref_name }}" ]; then
               echo ">>> 标记删除: $ID ($BRANCH, $STATUS, $CONCLUSION)"
               DELETE_IDS="$DELETE_IDS $ID"
@@ -162,8 +160,20 @@ jobs:
                       }
                   }
               }
+              packagingOptions {
+                  jniLibs {
+                      useLegacyPackaging = true
+                  }
+              }
           }
           EOF
+
+      - name: 验证 SO 库件
+        run: |
+          echo ">>> 检查 libsqlcipher.so"
+          find platforms/android -name "libsqlcipher.so" -exec ls -lh {} \; || echo "❌ 未找到 libsqlcipher.so"
+          echo ">>> 检查 libstlport_shared.so（SQLCipher 依赖）"
+          find platforms/android -name "libstlport_shared.so" -exec ls -lh {} \; || echo "⚠ 未找到 libstlport_shared.so，SQLCipher 4.x 不需要此文件"
 
       - name: 注入网络配置
         run: |
