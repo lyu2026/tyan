@@ -102,8 +102,9 @@ jobs:
         run: |
           rm -rf platforms/android/app/build platforms/android/build platforms/android/.gradle output
           cordova platform add android@13.0.0
+          sed -i 's|gradle-.*-bin.zip|gradle-8.7-bin.zip|' platforms/android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null || true
 
-      - name: 强制Kotlin版本
+      - name: 强制Ktln版本
         run: |
           if [ -f "platforms/android/app/build.gradle.kts" ]; then
             GRADLE_FILE="platforms/android/app/build.gradle.kts"
