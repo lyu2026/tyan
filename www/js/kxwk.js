@@ -136,7 +136,7 @@ window.IX={
 		const K=IX.key=crypto.randomUUID()
 		const id=IX.id=me.ga('I'),books='kxwk_favorite'.gc({})
 		const sk=`<br><sk w100 p10 f fv g4><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h130></sk><sk n h20></sk><sk n h8></sk><sk n h50></sk></sk>`
-		const mbox=$O.$('modal-c').html(`${sk}<iframe hide sandbox onload='run("IX","iframe_show",WI)(this)' srcdoc='<!DOCTYPE html><html><head></head><body><div id="pdf"></div></body></html>'></iframe>`)
+		const mbox=$O.$('modal-c').html(`${sk}<iframe hide crossorigin='anonymous' sandbox='allow-scripts allow-same-origin allow-storage-access-by-user-activation' allow='storage-access' onload='run("IX","iframe_show",WI)(this)' src='https://book.sciencereading.cn/!'></iframe>`)
 		IX.curr={N:me.ga('N'),C:me.$('img').ga('s')}
 		$O.$('modal-t [SC]').innerText=id in books?'♡':'⊕'
 		$O.body.sa('ns')
@@ -172,7 +172,7 @@ window.IX={
 
 		let {licenseSN,licenseKey,text,cmisdoc,appID,userToken,contentKey}=JSON.parse(await DG(DX,'o',IX.id+'-decrypt')||'{}')
 		if(!licenseSN||!licenseKey||!cmisdoc){
-			text=await $w.fetch(`https://book.sciencereading.cn/shop/book/Booksimple/onlineRead.do?id=${IX.id}&readMark=0`).then(_=>_.text()).then(_=>{
+			text=await $w.fetch(`/shop/book/Booksimple/onlineRead.do?id=${IX.id}&readMark=0`).then(_=>_.text()).then(_=>{
 				_=(new $w.DOMParser()).parseFromString(_,'text/html')
 				_=_.querySelector('#AESCode')
 				return _.value.trim()
@@ -187,7 +187,7 @@ window.IX={
 			if('userToken' in xx)userToken=xx.userToken
 			if('contentKey' in xx)contentKey=xx.contentKey
 			if(xx.cmisdoc)log('已得密钥','success')
-			await $w.fetch('https://book.sciencereading.cn/kxwk5_style/lib/license-key.js').then(_=>_.text()).then(_=>{
+			await $w.fetch('/kxwk5_style/lib/license-key.js').then(_=>_.text()).then(_=>{
 				$w.licenseSN=licenseSN=_.split('licenseSN:"').pop().split('"').shift()
 				$w.licenseKey=licenseKey=_.split('licenseKey:"').pop().split('"').shift()
 			}).catch(e=>{})
@@ -199,7 +199,7 @@ window.IX={
 
 		let css=await DG(DX,'o','UIExtension.css')||''
 		if(''===css){
-			css=await $w.fetch('https://book.sciencereading.cn/kxwk5_style/lib/UIExtension.css').then(_=>_.text()).catch(e=>null)
+			css=await $w.fetch('/kxwk5_style/lib/UIExtension.css').then(_=>_.text()).catch(e=>null)
 			if(!css)return
 			await DA(DX,'o','UIExtension.css',css)
 		}
@@ -208,37 +208,31 @@ window.IX={
 
 		let worker=await DG(DX,'o','preload-jr-worker.js')||''
 		if(''===worker){
-			worker=await $w.fetch('https://book.sciencereading.cn/kxwk5_style/lib/preload-jr-worker.js').then(_=>_.text()).catch(e=>null)
+			worker=await $w.fetch('/kxwk5_style/lib/preload-jr-worker.js').then(_=>_.text()).catch(e=>null)
 			if(!worker)return
 			await DA(DX,'o','preload-jr-worker.js',worker)
 		}
 		let ui=await DG(DX,'o','UIExtension.full.js')||''
 		if(''===ui){
-			ui=await $w.fetch('https://book.sciencereading.cn/kxwk5_style/lib/UIExtension.full.js').then(_=>_.text()).catch(e=>null)
+			ui=await $w.fetch('/kxwk5_style/lib/UIExtension.full.js').then(_=>_.text()).catch(e=>null)
 			if(!ui)return
 			await DA(DX,'o','UIExtension.full.js',ui)
 		}
 
-		const ready=await new Promise((res,rej)=>{
-			$o.head.appendChild($o.node('script',{},worker+'\n\n'+ui))
-			const x=Date.now()
-			try{
-				while(true)if($w.preloadJrWorker&&$w.UIExtension||Date.now()-x>4000)break
-				res($w.preloadJrWorker&&$w.UIExtension)
-			}catch(e){log('插件 UIExtension 载入失败',e,'error')}
-		})
-		if(!ready)return
+		$w.eval(worker+'\n\n'+ui)
+		if(!$w.preloadJrWorker||!$w.UIExtension)return log('插件 UIExtension 载入失败','error')
 		log('载入 Preload-jr-worker.js + UIExtension.full.js','success')
+		$o.body.innerHTML=`<div id='pdf'></div>`
 
 		$w.readyWorker=$w.preloadJrWorker({
-			enginePath:'https://book.sciencereading.cn/kxwk5_style/lib/jr-engine/gsdk',
-			fontPath:'https://book.sciencereading.cn/kxwk5_style/external/brotli',
-			workerPath:'https://book.sciencereading.cn/kxwk5_style/lib/',
+			enginePath:'/kxwk5_style/lib/jr-engine/gsdk',
+			fontPath:'/kxwk5_style/external/brotli',
+			workerPath:'/kxwk5_style/lib/',
 			licenseKey,licenseSN,
 		})
 		$w.pdf=new $w.UIExtension.PDFUI({
 			viewerOptions:{
-				libPath:'https://book.sciencereading.cn/kxwk5_style/lib',jr:{readyWorker:$w.readyWorker},
+				libPath:'/kxwk5_style/lib',jr:{readyWorker:$w.readyWorker},
 				customs:{
 					closeDocBefore:void 0,
 					PageCustomRender:function(){
@@ -252,7 +246,7 @@ window.IX={
 			},
 			renderTo:'#pdf',template:IX.tpl,
 			appearance:$w.UIExtension.appearances.adaptive,
-			addons:'https://book.sciencereading.cn/kxwk5_style/lib/uix-addons/allInOne.mobile.js'
+			addons:'/kxwk5_style/lib/uix-addons/allInOne.mobile.js'
 		})
 
 		$w.UIExtension.PDFViewCtrl.shared.setThemeColor([{dom:$o.body,colors:{background:tdark?'#000000':'#FFFFFF'}}])
