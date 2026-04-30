@@ -39,16 +39,10 @@ jobs:
               echo ">>> 跳过当前 run: #${{ github.run_number }} $ID"
               continue
             fi
-            # 只处理当前 workflow（签名打包）
-            if echo "$TITLE" | grep -q "签名打包"; then
-              # 条件：同 tag 版本
-              if [ "$BRANCH" = "${{ github.ref_name }}" ]; then
-                # 状态：失败 或 取消
-                if [ "$CONCLUSION" = "failure" ] || [ "$CONCLUSION" = "cancelled" ] || [ "$STATUS" = "cancelled" ]; then
-                  echo ">>> 标记删除: $ID (branch=$BRANCH, status=$STATUS, conclusion=$CONCLUSION)"
-                  DELETE_IDS="$DELETE_IDS $ID"
-                fi
-              fi
+            # 状态：失败 或 取消
+            if [ "$CONCLUSION" = "failure" ] || [ "$CONCLUSION" = "cancelled" ] || [ "$STATUS" = "cancelled" ] || [ "$BRANCH" = "${{ github.ref_name }}" ]; then
+              echo ">>> 标记删除: $ID (branch=$BRANCH, status=$STATUS, conclusion=$CONCLUSION)"
+              DELETE_IDS="$DELETE_IDS $ID"
             fi
           done <<< "$ALL_RUNS"
           if [ -z "$DELETE_IDS" ]; then
@@ -100,16 +94,6 @@ jobs:
             "platforms;android-34" \
             "build-tools;34.0.0"
 
-      - name: 缓存 .Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('package.json') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
       - name: 安装科尔多瓦
         run: npm install -g cordova@^13.0.0
 
@@ -121,7 +105,15 @@ jobs:
           rm -rf platforms/android/app/build platforms/android/build platforms/android/.gradle output
           cordova platform add android@13.0.0
 
-      - name: 强制统一 Kotlin 版本
+      - name: 清理构建缓存
+        run: |
+          rm -rf ~/.gradle/caches/transforms-*
+          rm -rf ~/.gradle/caches/build-cache-*
+          rm -rf platforms/android/.gradle
+          rm -rf platforms/android/app/build
+          echo ">>> 清理完成"
+
+      - name: 强制Kotlin版本
         run: |
           if [ -f "platforms/android/app/build.gradle.kts" ]; then
             GRADLE_FILE="platforms/android/app/build.gradle.kts"
