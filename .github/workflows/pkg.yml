@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 配置 JV17 库
+      - name: 配置 J17  库
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -48,15 +48,17 @@ jobs:
       - name: 添加安卓平台
         run: cordova platform add android
 
-      - name: 修改 AndroidManifest
+      - name: AndroidManifest
         run: |
           MANIFEST="platforms/android/app/src/main/AndroidManifest.xml"
+
           if grep -q 'requestLegacyExternalStorage' "$MANIFEST"; then
             echo "✓ requestLegacyExternalStorage 已存在，跳过"
           else
             sed -i 's|<application|<application android:requestLegacyExternalStorage="true"|' "$MANIFEST"
             echo "✓ 已添加 requestLegacyExternalStorage"
           fi
+
           if grep -q 'networkSecurityConfig' "$MANIFEST"; then
             echo "✓ networkSecurityConfig 已存在，跳过"
           else
@@ -94,10 +96,6 @@ jobs:
             echo ">>> 正在打包架构：$ABI"
 
             cordova clean android
-
-            mkdir -p platforms/android/app/src/main/res/drawable-nodpi
-            mkdir -p platforms/android/app/src/main/res/values
-            mkdir -p platforms/android/app/src/main/res/values-night
 
             cordova build android --release -- \
               --packageType=apk \
