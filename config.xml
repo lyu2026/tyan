@@ -28,10 +28,10 @@
 	<plugin name="cordova-plugin-device" spec="*" />
 	<plugin name="cordova-plugin-dialogs" spec="*" />
 	<plugin name="cordova-plugin-camera" spec="*">
-	<variable name="ANDROIDX_CORE_VERSION" value="1.6+" />
+		<variable name="ANDROIDX_CORE_VERSION" value="1.6+" />
 	</plugin>
 	<plugin name="cordova-plugin-geolocation" spec="*">
-	<variable name="GPS_REQUIRED" value="true" />
+		<variable name="GPS_REQUIRED" value="true" />
 	</plugin>
 	<plugin name="cordova.plugins.diagnostic" spec="*" />
 	<plugin name="cordova-plugin-advanced-http" spec="*" />
@@ -39,6 +39,7 @@
 	<plugin name="cordova-plugin-screen-orientation" spec="*" />
 	<plugin name="cordova-plugin-android-permissions" spec="*" />
 	<plugin name="cordova-plugin-network-information" spec="*" />
+	<plugin name="cordova-plugin-nativestorage" spec="*" />
 
 	<platform name="android">
 		<!-- 开屏 -->
@@ -58,6 +59,16 @@
 		<!-- 网络 -->
 		<preference name="android-usesCleartextTraffic" value="true" />
 		<preference name="AndroidInsecureFileModeEnabled" value="true" />
+
+		<!-- 网络安全配置 -->
+		<resource-file src="res/android/xml/network_security_config.xml" target="app/src/main/res/xml/network_security_config.xml" />
+
+		<edit-config file="app/src/main/AndroidManifest.xml" mode="merge" target="/manifest/application">
+			<application
+				xmlns:android="http://schemas.android.com/apk/res/android"
+				android:requestLegacyExternalStorage="true"
+				android:networkSecurityConfig="@xml/network_security_config" />
+		</edit-config>
 
 		<!-- 图标 -->
 		<icon src="res/icons/ldpi.png" density="ldpi" />
