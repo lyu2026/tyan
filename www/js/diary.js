@@ -56,5 +56,10 @@ grid-c{float:left;display:block;width:calc(100vw - 20px);height:auto}
 		$O.$$('body>*:not(#w_logs)').forEach(_=>_.remove())
 
 		Journiv.save("标题", "内容", "开心", "标签", e=>log('保存成功',e,'success'), e=>log('保存失败',e,'error'));
+		
+		Journiv.all(e=>log('列表成功',e,'success'), e=>log('列表失败',e,'error'));
+		Journiv.syncUp(e=>log('同步成功',e,'success'), e=>log('同步失败',e,'error'));
+		Journiv.memory(e=>log('记忆成功',e,'success'), e=>log('记忆失败',e,'error'));
+		Journiv.syncStatus(e=>log('同步状态成功',e,'success'), e=>log('同步状态失败',e,'error'));
 	},
 }

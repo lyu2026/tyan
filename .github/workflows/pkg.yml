@@ -103,52 +103,6 @@ jobs:
           rm -rf platforms/android/app/build platforms/android/build platforms/android/.gradle output
           cordova platform add android@13.0.0
 
-      - name: 清理构建缓存
-        run: |
-          rm -rf ~/.gradle/caches/transforms-*
-          rm -rf ~/.gradle/caches/build-cache-*
-          rm -rf platforms/android/.gradle
-          rm -rf platforms/android/app/build
-          echo ">>> 清理完成"
-
-      - name: 强制Kotlin版本
-        run: |
-          if [ -f "platforms/android/app/build.gradle.kts" ]; then
-            GRADLE_FILE="platforms/android/app/build.gradle.kts"
-            USE_KTS=true
-          else
-            GRADLE_FILE="platforms/android/app/build.gradle"
-            USE_KTS=false
-          fi
-          echo ">>> 检测到文件: $GRADLE_FILE"
-          if grep -q "kotlin-stdlib.*1.9.22" "$GRADLE_FILE"; then
-            echo ">>> Kotlin 版本已锁定，跳过"
-          else
-            echo ">>> 正在锁定 Kotlin 版本到 1.9.22"
-            if [ "$USE_KTS" = true ]; then
-              echo "" >> "$GRADLE_FILE"
-              echo "configurations.all {" >> "$GRADLE_FILE"
-              echo "    resolutionStrategy {" >> "$GRADLE_FILE"
-              echo '        force("org.jetbrains.kotlin:kotlin-stdlib:1.9.22")' >> "$GRADLE_FILE"
-              echo '        force("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22")' >> "$GRADLE_FILE"
-              echo '        force("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")' >> "$GRADLE_FILE"
-              echo "    }" >> "$GRADLE_FILE"
-              echo "}" >> "$GRADLE_FILE"
-            else
-              echo "" >> "$GRADLE_FILE"
-              echo "configurations.all {" >> "$GRADLE_FILE"
-              echo "    resolutionStrategy {" >> "$GRADLE_FILE"
-              echo "        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'" >> "$GRADLE_FILE"
-              echo "        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22'" >> "$GRADLE_FILE"
-              echo "        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22'" >> "$GRADLE_FILE"
-              echo "    }" >> "$GRADLE_FILE"
-              echo "}" >> "$GRADLE_FILE"
-            fi
-            echo ">>> Kotlin 版本锁定完成"
-          fi
-          echo ">>> 验证当前配置"
-          grep -A4 "resolutionStrategy" "$GRADLE_FILE" || echo "(未找到 resolutionStrategy)"
-
       - name: 配置 ABI 过滤
         run: |
           cat > platforms/android/app/build-extras.gradle << 'EOF'
@@ -160,20 +114,8 @@ jobs:
                       }
                   }
               }
-              packagingOptions {
-                  jniLibs {
-                      useLegacyPackaging = true
-                  }
-              }
           }
           EOF
-
-      - name: 验证 SO 库件
-        run: |
-          echo ">>> 检查 libsqlcipher.so"
-          find platforms/android -name "libsqlcipher.so" -exec ls -lh {} \; || echo "❌ 未找到 libsqlcipher.so"
-          echo ">>> 检查 libstlport_shared.so（SQLCipher 依赖）"
-          find platforms/android -name "libstlport_shared.so" -exec ls -lh {} \; || echo "⚠ 未找到 libstlport_shared.so，SQLCipher 4.x 不需要此文件"
 
       - name: 注入网络配置
         run: |
