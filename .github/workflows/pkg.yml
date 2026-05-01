@@ -104,7 +104,7 @@ jobs:
           cordova platform add android@13.0.0
           sed -i 's|gradle-.*-bin.zip|gradle-8.7-bin.zip|' platforms/android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null || true
 
-      - name: 强制Ktln版本
+      - name: 强制Kotln版本
         run: |
           if [ -f "platforms/android/app/build.gradle.kts" ]; then
             GRADLE_FILE="platforms/android/app/build.gradle.kts"
@@ -142,7 +142,7 @@ jobs:
           echo ">>> 验证当前配置"
           grep -A4 "resolutionStrategy" "$GRADLE_FILE" || echo "(未找到 resolutionStrategy)"
 
-      - name: 配置 ABI 过滤
+      - name: 配置 ABI过滤
         run: |
           cat > platforms/android/app/build-extras.gradle << 'EOF'
           android {
