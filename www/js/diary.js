@@ -15,46 +15,51 @@ window.IX={
 	page:0,stop:false,
 
 	ftime:_=>{
-		const o=new Date(parseInt(_)),x=_=>(_<10?'0'+_:_)
-		const wm=['日','一','二','三','四','五','六']
-		const mm=['元','二','三','四','五','六','七','八','九','十','十一','腊']
+		const O=new Date(parseInt(_)),X=_=>(_<10?'0'+_:_)
+		const W=['日','一','二','三','四','五','六'],M=['元','二','三','四','五','六','七','八','九','十','十一','腊']
 		return {
-			d:x(o.getDate()),m:mm[o.getMonth()]+'月',y:o.getFullYear(),
-			w:'周'+wm[o.getDay()],t:`${x(o.getHours())}:${x(o.getMinutes())}:${x(o.getSeconds())}`
+			d:X(O.getDate()),m:M[O.getMonth()]+'月',y:O.getFullYear(),
+			w:'周'+W[O.getDay()],t:`${X(O.getHours())}:${X(O.getMinutes())}:${X(O.getSeconds())}`
 		}
 	},
 
 	add:async()=>{ // 新增
-		await IX.J.save({title:'挖掘客户举报检测方法关系还记得盖好',content:'魔女还不晓得都是当天就看了看和爸爸重新打说的话回家吃饭好吃',mood:'开心',tags:'瞎说'},true)
+		const title='挖掘客户举报检测方法关系还记得盖好'
+		const content='顾虑感觉刚放假你好哥哥很多地方个非常喜欢好看'
+		const mood='said',tags='徐',imgs=['https://pixabay.com/zh/images/download/x-10222434_1920.jpg']
+		const {id}=await IX.J.save({title,content,mood,tags,imgs},true)
+		log(id)
+		// $O.$('grid>grid-c[dr]:last-child').append($O.node('div',{I:x.id,ondblclick:'run("IX","remove",WI)(this)'},`<div><div>${x.w}</div>${x.d}</div><div><div>${s[i].title}</div><div>${s[i].content}</div><div>${x.t}</div></div>`))
 	},
 
 	statistics:async(me)=>{ // 统计
 		'diary_tab'.sc(me.ga('v'))
 		$O.$$('tab>*').forEach(_=>_[_!=me?'da':'sa']('c'))
-		const gbox=$O.$('grid').html(''),{streak,count,days,icount,fcount,peak,lavg}=await IX.J.summary().catch(e=>{
+		const gbox=$O.$('grid').html(''),{streak,totalCount,totalDays,imgCount,fileCount,peakHour,avgLen}=await IX.J.summary().catch(e=>{
 			log('统计失败',e,'error')
-			return {streak:0,count:0,days:0,icount:0,fcount:0,lavg:0,peak:0}
+			return {streak:0,totalCount:0,totalDays:0,imgCount:0,fileCount:0,avgLen:0,peakHour:0}
 		})
 		gbox.html(`
 		<grid-c summary>
-			<div streak x='当前持续天数：'>${streak}</div><div days x='记录总天数：'>${days}</div><div count x='记录总数：'>${count}</div>
-			<div icount x='图片总数：'>${icount}</div><div fcount x='文件总数：'>${fcount}</div>
-			<div lavg x='平均字数：'>${lavg}</div><div peak x='最活跃时段：'>${peak}点</div>
+			<div streak x='当前持续天数：'>${streak}</div><div days x='记录总天数：'>${totalDays}</div><div count x='记录总数：'>${totalCount}</div>
+			<div icount x='图片总数：'>${imgCount}</div><div fcount x='附件总数：'>${fileCount}</div>
+			<div lavg x='平均字数：'>${avgLen}</div><div peak x='最活跃时段：'>${peakHour}点</div>
 		</grid-c>`)
 	},
 
-	list:async(_,go)=>{ // 列表
+	list:async(me,go)=>{ // 列表
 		let gbox=$O.$('grid')
-		if(!_T(_,'int')){
+		if(!_T(me,'int')){
 			IX.stop=false
 			gbox=gbox.html('')
-			'diary_tab'.sc(_.ga('v'))
-			$O.$$('tab>*').forEach(_=>_[_!=_?'da':'sa']('c'))
+			'diary_tab'.sc(me.ga('v'))
+			$O.$$('tab>*').forEach(_=>_[me!=_?'da':'sa']('c'))
+			IX.page=me=1
 		}else if(IX.stop)return
 		const s=await IX.J.page({},me,30).then(_=>_.data)
 		if(s.length<30)IX.stop=true
 		for(let d,m,y,i=0;i<s.length;i++){
-			const x=s[i].x=IX.ftime(s[i].created)
+			const x=s[i].x=IX.ftime(s[i].at)
 			if(i===0||x.m!=m||x.y!=y){
 				y=x.y
 				m=x.m
@@ -77,7 +82,7 @@ window.IX={
 		if(!confirm('你确定删除此记录吗？'))return
 		const I=me.ga('I'),o=await IX.J.remove(parseInt(I),true)
 		log('删除结果',o)
-		if(o&&o.includes('成功'))me.remove()
+		if(o&&o.includes('OK'))me.remove()
 	},
 
 	watch:()=>{ // 监听节点
@@ -86,7 +91,7 @@ window.IX={
 			s.forEach(e=>(e.target.nodeName=='GRID-C')&&(e.intersectionRatio>=0.7)&&(card=e.target))
 			if(!card||card.ha('wait'))return
 			card.sa('wait')
-			IX.list(null,_=>{
+			IX.list(++IX.page,_=>{
 				if(_)o?.unobserve(card)
 				card.da('wait')
 			})
@@ -119,7 +124,7 @@ body{display:flex!important;flex-direction:column!important}
 
 grid-c{float:left;display:block;width:calc(100vw - 20px);height:auto}
 
-grid-c[summary]{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;height:240px;color:rgba(0,0,0,.6);font-size:40px;font-weight:800;gap:10px}
+grid-c[summary]{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr 1fr;height:600px;color:rgba(0,0,0,.6);font-size:40px;font-weight:800;gap:10px}
 body[dark] grid-c[summary]{color:rgba(255,255,255,.6)}
 grid-c[summary]>*{display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.06);border-radius:6px}
 body[dark] grid-c[summary]>*{background:rgba(255,255,255,.06)}
@@ -127,10 +132,10 @@ grid-c[summary]>*::before{content:attr(x);display:block;position:absolute;top:12
 grid-c[summary]>[streak]{grid-column:1;grid-row:1/3}
 grid-c[summary]>[days]{grid-column:2;grid-row:1}
 grid-c[summary]>[const]{grid-column:2;grid-row:2}
-grid-c[summary]>[icount]{grid-column:1}
-grid-c[summary]>[fcount]{grid-column:2}
-grid-c[summary]>[lavg]{grid-column:1}
-grid-c[summary]>[peak]{grid-column:2}
+grid-c[summary]>[icount]{grid-column:1;grid-row:3}
+grid-c[summary]>[fcount]{grid-column:2;grid-row:3}
+grid-c[summary]>[lavg]{grid-column:1;grid-row:4}
+grid-c[summary]>[peak]{grid-column:2;grid-row:4}
 
 grid-c[my]{background:rgba(0,0,0,0);color:black;font-size:26px;line-height:40px;color:black;padding:0}
 body[dark] grid-c[my]{color:white}
@@ -167,11 +172,13 @@ body[dark] grid-c[dr]>*>*:last-child>*:first-child{color:white}
 		</tab><grid></grid>`+($O.$('#w_logs')?.html(true)||''))
 
 		log('日记数据，本地同步')
-		await IX.J.sync(false)
+		const x=await IX.J.page({})
+		if(x.total<1)await IX.JS.init()
+		else await IX.J.sync(false)
 
 		log('获取缓存，点击 TAB')
-		let tab=$O.$(`tab>[v='${'diary_tab'.gc('list')}']`)
-		if(!tab)tab=$O.$(`tab>[v='list']`)
+		let tab=$O.$(`tab>[v='${'diary_tab'.gc('statistics')}']`)
+		if(!tab)tab=$O.$(`tab>[v='statistics']`)
 		tab.click()
 	},
 }
