@@ -223,11 +223,12 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		if(!'diary_already'.gc(false)){
 			await IX.J.clear(1)
 			log('初始数据，本地记录已清空')
-			const m=await IX.J.lmap()
-			log(`初始数据，线上记录文件清单:`,m)
-			for(const id in m){
-				const r=await IX.J.lsync(Number(id))
-				log(`初始数据，恢复记录 ${id}:`+(r.ok?'成功':r.msg))
+			const s=await IX.J.lone()
+			log(`初始数据，线上记录文件清单:`,s)
+			for(const id of s){
+				const o=await IX.J.lone(id)
+				const r=await IX.J.save(o,true,false)
+				log(`初始数据，恢复记录 ${id}:`,o,r)
 			}
 			log('初始数据，本地记录已同步')
 			'diary_already'.gc(true)
