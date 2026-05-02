@@ -33,9 +33,9 @@
 	<preference name="StatusBarBackgroundColor" value="#000000" />
 
 	<!-- 插件 -->
-	<plugin name="cordova-plugin-file" spec="*" />
 	<plugin name="cordova-plugin-device" spec="*" />
 	<plugin name="cordova-plugin-dialogs" spec="*" />
+	<plugin name="cordova-plugin-file" spec="^6.0.1" />
 	<plugin name="cordova-plugin-camera" spec="*">
 		<variable name="ANDROIDX_CORE_VERSION" value="1.6+" />
 	</plugin>
