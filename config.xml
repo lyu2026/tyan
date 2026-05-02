@@ -33,6 +33,7 @@
 	<preference name="StatusBarBackgroundColor" value="#000000" />
 
 	<!-- 插件 -->
+	<plugin name="cordova-sqlite-storage" spec="*" />
 	<plugin name="cordova-plugin-device" spec="*" />
 	<plugin name="cordova-plugin-dialogs" spec="*" />
 	<plugin name="cordova-plugin-file" spec="^6.0.1" />
@@ -52,7 +53,6 @@
 	<plugin name="cordova-plugin-screen-orientation" spec="*" />
 	<plugin name="cordova-plugin-android-permissions" spec="*" />
 	<plugin name="cordova-plugin-network-information" spec="*" />
-	<plugin name="cordova-plugin-journiv" spec="https://github.com/lyu2026/cordova-plugin-journiv.git" />
 
 	<platform name="android">
 		<!-- SDK -->
