@@ -45,7 +45,6 @@
 	</plugin>
 	<plugin name="cordova.plugins.diagnostic" spec="*" />
 	<plugin name="cordova-plugin-filechooser" spec="*" />
-	<plugin name="cordova-plugin-image-picker" spec="*" />
 	<plugin name="cordova-plugin-photo-library" spec="*" />
 	<plugin name="cordova-plugin-nativestorage" spec="*" />
 	<plugin name="cordova-plugin-advanced-http" spec="*" />
