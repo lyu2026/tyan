@@ -6,12 +6,10 @@ on:
       - 'v*'
 
 jobs:
-  build:
+  cleanup:
     runs-on: ubuntu-latest
     permissions:
       actions: write
-      contents: write
-
     steps:
       - name: 清理无效执行
         run: |
@@ -63,6 +61,15 @@ jobs:
             echo ">>> 清理完成"
           fi
 
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag_name: ${{ steps.version.outputs.tag_name }}
+      datetime: ${{ steps.time.outputs.datetime }}
+    steps:
       - name: 拉取项目代码
         uses: actions/checkout@v4
         with:
@@ -104,7 +111,7 @@ jobs:
           cordova platform add android@13.0.0
           sed -i 's|gradle-.*-bin.zip|gradle-8.7-bin.zip|' platforms/android/gradle/wrapper/gradle-wrapper.properties 2>/dev/null || true
 
-      - name: 强制Kotn版本
+      - name: 强制Kotlin版本
         run: |
           if [ -f "platforms/android/app/build.gradle.kts" ]; then
             GRADLE_FILE="platforms/android/app/build.gradle.kts"
@@ -142,7 +149,7 @@ jobs:
           echo ">>> 验证当前配置"
           grep -A4 "resolutionStrategy" "$GRADLE_FILE" || echo "(未找到 resolutionStrategy)"
 
-      - name: 配置 ABI过滤
+      - name: 配置 ABI 过滤
         run: |
           cat > platforms/android/app/build-extras.gradle << 'EOF'
           android {
@@ -197,36 +204,6 @@ jobs:
           ls -la platforms/android/app/src/main/res/xml/network_security_config.xml
           grep "networkSecurityConfig" "$MANIFEST"
 
-      - name: 解密签名信息
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/tyan.keystore"
-
-      - name: 区分架构打包
-        run: |
-          KEYSTORE_PATH="$GITHUB_WORKSPACE/tyan.keystore"
-          ABIS=("arm64-v8a" "armeabi-v7a")
-          mkdir -p output
-
-          for ABI in "${ABIS[@]}"; do
-            echo ">>> 正在打包架构：$ABI"
-
-            rm -f platforms/android/app/src/main/res/xml/config.xml
-            rm -f platforms/android/res/xml/config.xml
-
-            cordova build android --release -- \
-              --packageType=apk \
-              --gradleArg="-PtargetAbi=$ABI" \
-              --keystore="$KEYSTORE_PATH" \
-              --storePassword="Tyan2026" \
-              --alias="tyan" \
-              --password="Tyan2026"
-
-            cp platforms/android/app/build/outputs/apk/release/app-release.apk \
-               output/${ABI}.apk
-
-            echo ">>> $ABI 打包完成"
-          done
-
       - name: 获取版本编号
         id: version
         run: |
@@ -241,11 +218,76 @@ jobs:
           export TZ='Asia/Shanghai'
           echo "datetime=$(date '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
 
+      - uses: actions/cache/save@v4
+        with:
+          path: platforms
+          key: plat-${{ github.sha }}
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: [arm64-v8a, armeabi-v7a]
+    steps:
+      - uses: actions/cache/restore@v4
+        with:
+          path: platforms
+          key: plat-${{ github.sha }}
+
+      - run: cp -r platforms $GITHUB_WORKSPACE/p
+
+      - name: 解密签名信息
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$GITHUB_WORKSPACE/tyan.keystore"
+
+      - name: 区分架构打包
+        run: |
+          KEYSTORE_PATH="$GITHUB_WORKSPACE/tyan.keystore"
+          cd $GITHUB_WORKSPACE/p/android
+          rm -f app/src/main/res/xml/config.xml res/xml/config.xml
+
+          cordova build android --release -- \
+            --packageType=apk \
+            --gradleArg="-PtargetAbi=${{ matrix.abi }}" \
+            --keystore="$KEYSTORE_PATH" \
+            --storePassword="Tyan2026" \
+            --alias="tyan" \
+            --password="Tyan2026"
+
+          mkdir -p $GITHUB_WORKSPACE/output
+          cp app/build/outputs/apk/release/app-release.apk \
+             $GITHUB_WORKSPACE/output/${{ matrix.abi }}.apk
+
+          echo ">>> ${{ matrix.abi }} 打包完成"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-${{ matrix.abi }}
+          path: output/${{ matrix.abi }}.apk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: output
+
+      - name: 整理签名包件
+        run: |
+          mkdir -p release
+          find output -name "*.apk" -exec cp {} release/ \;
+          ls -lh release/
+
       - name: 生成发布信息
         id: apk_info
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          cd output
+          VERSION="${{ needs.prepare.outputs.version }}"
+          cd release
           {
             echo "### 📦 APK 文件清单"
             echo ""
@@ -259,25 +301,9 @@ jobs:
           } > ../release_body.md
           cd ..
 
-          CURRENT_TAG="${{ steps.version.outputs.tag_name }}"
-          PREV_TAG=$(git tag --sort=-creatordate | grep -v "^${CURRENT_TAG}$" | head -1)
-
-          if [ -n "$PREV_TAG" ]; then
-            {
-              echo "### 📝 更新内容"
-              echo ""
-              git log "${PREV_TAG}..${CURRENT_TAG}" \
-                --pretty=format:"- %s (%h, @%an)" \
-                --no-merges
-              echo ""
-            } > release_changelog.md
-          else
-            printf "### 📝 更新内容\n\n首次发布 🎉\n" > release_changelog.md
-          fi
-
-          CHANGELOG=$(cat release_changelog.md)
-          MANIFEST=$(cat release_body.md)
-          DATETIME="${{ steps.time.outputs.datetime }}"
+          CURRENT_TAG="${{ needs.prepare.outputs.tag_name }}"
+          CHANGELOG="### 📝 更新内容\n\n首次发布 🎉\n"
+          DATETIME="${{ needs.prepare.outputs.datetime }}"
 
           {
             echo "## 🫧 廷琰 V${VERSION}"
@@ -290,7 +316,7 @@ jobs:
             echo ""
             echo "${CHANGELOG}"
             echo ""
-            echo "${MANIFEST}"
+            cat release_body.md
             echo ""
             echo "### 📥 安装说明"
             echo "1. 大多数现代手机选择 \`arm64-v8a\`"
@@ -302,10 +328,10 @@ jobs:
       - name: 发布并上传包
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.tag_name }}
-          name: 廷琰 v${{ steps.version.outputs.version }}
+          tag_name: ${{ needs.prepare.outputs.tag_name }}
+          name: 廷琰 v${{ needs.prepare.outputs.version }}
           body_path: release_body_full.md
-          files: output/*.apk
+          files: release/*.apk
           generate_release_notes: false
           make_latest: true
         env:
@@ -315,7 +341,7 @@ jobs:
         if: success()
         run: |
           echo "✅ 所有 APK 包构建成功"
-          ls -lh output/
+          ls -lh release/
 
       - name: 构建失败通知
         if: failure()
