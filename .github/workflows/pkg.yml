@@ -109,7 +109,6 @@ jobs:
           rm -rf node_modules platforms plugins package-lock.json
           npm cache clean --force
           rm -rf ~/.npm
-          npm config set registry https://registry.npmjs.org/
 
       - name: 安装科尔多瓦
         run: npm install -g cordova@^13.0.0 > /dev/null 2>&1
