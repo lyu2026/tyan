@@ -137,7 +137,7 @@ jobs:
 
       - name: 安装项目依赖
         run: |
-          npm install --no-audit --no-fund
+          npm install
 
       - name: 添加安卓平台
         run: |
