@@ -56,10 +56,10 @@
 	<plugin name="cordova-plugin-android-fingerprint-auth" />
 	<plugin name="cordova-plugin-koofr" spec="https://github.com/lyu2026/cordova-plugin-koofr" />
 	-->
-	<plugin name="cordova-plugin-advanced-http" spec="*" />
-	<plugin name="@e-is/cordova-plugin-downloader" spec="*" />
-	<plugin name="cordova-plugin-screen-orientation" spec="*" />
-	<plugin name="cordova-plugin-android-permissions" spec="*" />
+	<plugin name="cordova-plugin-advanced-http" spec="latest" />
+	<plugin name="@e-is/cordova-plugin-downloader" spec="latest" />
+	<plugin name="cordova-plugin-screen-orientation" spec="latest" />
+	<plugin name="cordova-plugin-android-permissions" spec="latest" />
 	<plugin name="cordova-plugin-tyan" spec="git@github.com:lyu2026/cordova-plugin-tyan.git" />
 
 
