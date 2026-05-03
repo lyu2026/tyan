@@ -122,11 +122,8 @@ jobs:
 
       - name: 修复 npm 缓存
         run: |
-          echo ">>> 强制删除幽灵缓存"
-          rm -rf ~/.npm
-          rm -rf /home/runner/.npm
+          rm -rf ~/.npm /home/runner/.npm
           CLEAN_CACHE_DIR=$(mktemp -d -t npm-cache-XXXXXX)
-          echo ">>> 重建干净缓存到: $CLEAN_CACHE_DIR"
           mkdir -p "$CLEAN_CACHE_DIR"
           npm config set cache "$CLEAN_CACHE_DIR"
           npm config set prefer-offline false
@@ -137,7 +134,7 @@ jobs:
 
       - name: 安装项目依赖
         run: |
-          npm install --prefer-online
+          npm install
 
       - name: 添加安卓平台
         run: |
