@@ -5,7 +5,7 @@ WI=window.I=crypto.randomUUID()
 window.IX={
 	name:'diary',
 
-	J:cordova.plugin.journiv,
+	K:cordova.plugin.koofr,
 
 	// 所有监听对象
 	observer:{},
@@ -13,7 +13,7 @@ window.IX={
 	statistics:async(me)=>{ // 统计
 		'diary_tab'.sc(me.ga('v'))
 		$O.$$('tab>*').forEach(_=>_[_!=me?'da':'sa']('c'))
-		const gbox=$O.$('grid').html(''),{streak,count,days,icount,fcount,peak,lavg}=await IX.J.summary().catch(e=>{
+		const gbox=$O.$('grid').html(''),{streak,count,days,icount,fcount,peak,lavg}=await IX.K.summary().catch(e=>{
 			log('统计失败',e,'error')
 			return {streak:0,count:0,days:0,count:0,fcount:0,lavg:0,peak:0}
 		})
@@ -35,7 +35,7 @@ window.IX={
 			IX.page=me=1
 		}else if(IX.stop)return go&&go(true)
 
-		const s=await IX.J.page({},me,30).then(_=>_.list)
+		const s=await IX.K.page({},me,30).then(_=>_.list)
 		if(s.length<30)IX.stop=true
 		for(let d,m,y,i=0;i<s.length;i++){
 			const x=s[i].ao
@@ -54,7 +54,7 @@ window.IX={
 
 	remove:async(me)=>{ // 删除记录
 		if(!confirm('你确定删除此记录吗？'))return
-		const I=me.ga('I'),o=await IX.J.remove(parseInt(I),true)
+		const I=me.ga('I'),o=await IX.K.remove(parseInt(I),true)
 		log('删除结果',o)
 		if(o&&o.includes('OK'))me.remove()
 	},
@@ -69,7 +69,7 @@ window.IX={
 		const title='挖掘客户举报检测方法关系还记得盖好'
 		const content='顾虑感觉刚放假你好哥哥很多地方个非常喜欢好看'
 		const mood='said',tags='徐',imgs=['https://pixabay.com/zh/images/download/x-10222434_1920.jpg']
-		const {id,ao:{m,y,d,t,w}}=await IX.J.save({title,content,mood,tags,imgs},false,true)
+		const {id,ao:{m,y,d,t,w}}=await IX.K.save({title,content,mood,tags,imgs},false,true)
 		if(!id||id<1)return
 		if(!$O.$('grid-c'))$O.$('grid').append($O.node('grid-c',{my:''},`${m} ${y}`))
 		if(!$O.$('grid-c[dr]'))$O.$('grid').append($O.node('grid-c',{dr:''},`<div I='${id}'><div L><div>${w}</div>${d}</div><div M><button onclick='run("IX","remove",WI)(this)'>删除</button><div F><div>${title}</div><div>${content}</div><div>${t}</div></div></div></div>`))
@@ -207,12 +207,14 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
 		if('diary_already'.gc(false)){
-			await IX.J.config({rh:17})
-			log('系统配置，设置晚上 17 点提醒')
+			const fs=await IX.K.ls('/')
+			log('线上数据，文件清单',fs)
 			
-			await IX.J.clear(1)
-			log('初始数据，本地记录数据清空')
-			await IX.J.sync(false)
+			const nc=await IX.K.dn('/tyan','n.txt')
+			log('线上数据，文件内容',nc)
+			return
+			
+			await IX.K.sync(false)
 			log('初始数据，线上记录同步本地')
 			'diary_already'.gc(true)
 		}
