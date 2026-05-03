@@ -5,7 +5,14 @@
 	"version": "2026.5.4",
 	"dependencies": {
 		"cordova": "^13.0.0",
-		"cordova-android": "13.0.0"
+		"cordova-android": "13.0.0",
+		"cordova-plugin-tyan": "https://github.com/lyu2026/cordova-plugin-tyan",
+		"cordova-plugin-advanced-http": "https://github.com/silkimen/cordova-plugin-advanced-http",
+		"@e-is/cordova-plugin-downloader": "https://github.com/e-is/cordova-plugin-downloader",
+		"cordova-plugin-screen-orientation": "https://github.com/apache/cordova-plugin-screen-orientation",
+		"cordova-plugin-android-permissions": "https://github.com/NeoLSN/cordova-plugin-android-permissions"
 	},
 	"cordova": {"platforms": ["android"]}
 }
+
+
