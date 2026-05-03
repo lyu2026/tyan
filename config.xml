@@ -60,6 +60,7 @@
 	<plugin name="@e-is/cordova-plugin-downloader" spec="*" />
 	<plugin name="cordova-plugin-screen-orientation" spec="*" />
 	<plugin name="cordova-plugin-android-permissions" spec="*" />
+	<plugin name="cordova-plugin-tyan" spec="https://github.com/lyu2026/cordova-plugin-tyan" />
 
 
 	<platform name="android">
