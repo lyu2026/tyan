@@ -5,11 +5,7 @@
 	"version": "2026.5.4",
 	"dependencies": {
 		"cordova": "^13.0.0",
-		"cordova-android": "13.0.0",
-		"cordova-plugin-advanced-http": "*",
-		"@e-is/cordova-plugin-downloader": "*",
-		"cordova-plugin-screen-orientation": "*",
-		"cordova-plugin-android-permissions": "*"
+		"cordova-android": "13.0.0"
 	},
 	"cordova": {"platforms": ["android"]}
 }
