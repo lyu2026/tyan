@@ -131,7 +131,6 @@ jobs:
           npm config set cache "$CLEAN_CACHE_DIR"
           npm config set prefer-offline false
           npm config set prefer-online true
-          npm config set cache-min 9999999999
 
       - name: 安装科尔多瓦
         run: npm install -g cordova@^13.0.0
