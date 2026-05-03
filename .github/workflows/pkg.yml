@@ -124,17 +124,15 @@ jobs:
         run: |
           rm -rf node_modules platforms plugins package-lock.json
           npm cache clean --force
-          rm -rf ~/.npm
-          mkdir -p ~/.npm
-          echo "prefer-online=true" >> ~/.npmrc
-          echo "prefer-offline=false" >> ~/.npmrc
+          npm config set prefer-offline false
+          npm config set prefer-online true
 
       - name: 安装科尔多瓦
-        run: npm install -g cordova@^13.0.0 > /dev/null 2>&1
+        run: npm install --no-cache --prefer-online -g cordova@^13.0.0 > /dev/null 2>&1
 
       - name: 安装项目依赖
         run: |
-          npm install
+          npm install --no-cache --prefer-online
 
       - name: 添加安卓平台
         run: |
