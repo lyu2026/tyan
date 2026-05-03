@@ -122,6 +122,7 @@ jobs:
 
       - name: 清空Node缓存
         run: |
+          rm -rf node_modules platforms plugins package-lock.json
           npm cache clean --force
           rm -rf ~/.npm/_cacache
 
