@@ -51,11 +51,11 @@
 	<plugin name="cordova-plugin-filechooser" />
 	<plugin name="cordova-plugin-photo-library" />
 	<plugin name="cordova-plugin-nativestorage" />
+	<plugin name="cordova-plugin-file" spec="^8.0.0" />
 	<plugin name="cordova-plugin-network-information" />
 	<plugin name="cordova-plugin-android-fingerprint-auth" />
 	<plugin name="cordova-plugin-koofr" spec="https://github.com/lyu2026/cordova-plugin-koofr" />
 	-->
-	<plugin name="cordova-plugin-file" spec="^8.0.0" />
 	<plugin name="cordova-plugin-advanced-http" />
 	<plugin name="@e-is/cordova-plugin-downloader" />
 	<plugin name="cordova-plugin-screen-orientation" />
