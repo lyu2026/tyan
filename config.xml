@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.tyan" version="2026.4.30"
+<widget id="com.tyan" version="2026.5.4"
 	xmlns="http://www.w3.org/ns/widgets"
 	xmlns:cdv="http://cordova.apache.org/ns/1.0">
 
@@ -32,13 +32,12 @@
 	<preference name="StatusBarOverlaysWebView" value="false" />
 	<preference name="StatusBarBackgroundColor" value="#000000" />
 
-	<!-- 插件 -->
+	<!-- 插件 
 	<plugin name="cordova-sms-plugin" spec="*" />
 	<plugin name="cordova-plugin-badge" spec="*" />
 	<plugin name="cordova-sqlite-storage" spec="*" />
 	<plugin name="cordova-plugin-device" spec="*" />
 	<plugin name="cordova-plugin-dialogs" spec="*" />
-	<plugin name="cordova-plugin-file" spec="^6.0.1" />
 	<plugin name="cordova-plugin-camera" spec="*">
 		<variable name="ANDROIDX_CORE_VERSION" value="1.6+" />
 	</plugin>
@@ -52,13 +51,16 @@
 	<plugin name="cordova-plugin-filechooser" spec="*" />
 	<plugin name="cordova-plugin-photo-library" spec="*" />
 	<plugin name="cordova-plugin-nativestorage" spec="*" />
+	<plugin name="cordova-plugin-network-information" spec="*" />
+	<plugin name="cordova-plugin-android-fingerprint-auth" spec="*" />
+	<plugin name="cordova-plugin-koofr" spec="https://github.com/lyu2026/cordova-plugin-koofr" />
+	-->
+	<plugin name="cordova-plugin-file" spec="*" />
 	<plugin name="cordova-plugin-advanced-http" spec="*" />
 	<plugin name="@e-is/cordova-plugin-downloader" spec="*" />
 	<plugin name="cordova-plugin-screen-orientation" spec="*" />
 	<plugin name="cordova-plugin-android-permissions" spec="*" />
-	<plugin name="cordova-plugin-network-information" spec="*" />
-	<plugin name="cordova-plugin-android-fingerprint-auth" spec="*" />
-	<plugin name="cordova-plugin-koofr" spec="https://github.com/lyu2026/cordova-plugin-koofr" />
+
 
 	<platform name="android">
 		<!-- SDK -->

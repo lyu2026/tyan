@@ -2,14 +2,10 @@
 	"name": "tyan",
 	"description": "...",
 	"displayName": "廷琰",
-	"version": "2026.4.30",
+	"version": "2026.5.4",
 	"dependencies": {
 		"cordova": "^13.0.0",
 		"cordova-android": "13.0.0"
 	},
-	"cordova": {
-		"platforms": [
-			"android"
-		]
-	}
+	"cordova": {"platforms": ["android"]}
 }
