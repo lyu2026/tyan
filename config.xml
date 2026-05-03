@@ -33,33 +33,33 @@
 	<preference name="StatusBarBackgroundColor" value="#000000" />
 
 	<!-- 插件 
-	<plugin name="cordova-sms-plugin" spec="*" />
-	<plugin name="cordova-plugin-badge" spec="*" />
-	<plugin name="cordova-sqlite-storage" spec="*" />
-	<plugin name="cordova-plugin-device" spec="*" />
-	<plugin name="cordova-plugin-dialogs" spec="*" />
-	<plugin name="cordova-plugin-camera" spec="*">
+	<plugin name="cordova-sms-plugin" />
+	<plugin name="cordova-plugin-badge" />
+	<plugin name="cordova-sqlite-storage" />
+	<plugin name="cordova-plugin-device" />
+	<plugin name="cordova-plugin-dialogs" />
+	<plugin name="cordova-plugin-camera">
 		<variable name="ANDROIDX_CORE_VERSION" value="1.6+" />
 	</plugin>
-	<plugin name="cordova-plugin-contacts" spec="*" />
-	<plugin name="cordova-plugin-geolocation" spec="*">
+	<plugin name="cordova-plugin-contacts" />
+	<plugin name="cordova-plugin-geolocation">
 		<variable name="GPS_REQUIRED" value="true" />
 	</plugin>
-	<plugin name="cordova.plugins.diagnostic" spec="*" />
-	<plugin name="cordova-plugin-datepicker" spec="*" />
-	<plugin name="cordova-plugin-native-logs" spec="*" />
-	<plugin name="cordova-plugin-filechooser" spec="*" />
-	<plugin name="cordova-plugin-photo-library" spec="*" />
-	<plugin name="cordova-plugin-nativestorage" spec="*" />
-	<plugin name="cordova-plugin-network-information" spec="*" />
-	<plugin name="cordova-plugin-android-fingerprint-auth" spec="*" />
+	<plugin name="cordova.plugins.diagnostic" />
+	<plugin name="cordova-plugin-datepicker" />
+	<plugin name="cordova-plugin-native-logs" />
+	<plugin name="cordova-plugin-filechooser" />
+	<plugin name="cordova-plugin-photo-library" />
+	<plugin name="cordova-plugin-nativestorage" />
+	<plugin name="cordova-plugin-network-information" />
+	<plugin name="cordova-plugin-android-fingerprint-auth" />
 	<plugin name="cordova-plugin-koofr" spec="https://github.com/lyu2026/cordova-plugin-koofr" />
 	-->
-	<plugin name="cordova-plugin-file" spec="*" />
-	<plugin name="cordova-plugin-advanced-http" spec="*" />
-	<plugin name="@e-is/cordova-plugin-downloader" spec="*" />
-	<plugin name="cordova-plugin-screen-orientation" spec="*" />
-	<plugin name="cordova-plugin-android-permissions" spec="*" />
+	<plugin name="cordova-plugin-file" />
+	<plugin name="cordova-plugin-advanced-http" />
+	<plugin name="@e-is/cordova-plugin-downloader" />
+	<plugin name="cordova-plugin-screen-orientation" />
+	<plugin name="cordova-plugin-android-permissions" />
 	<plugin name="cordova-plugin-tyan" spec="https://github.com/lyu2026/cordova-plugin-tyan" />
 
 
