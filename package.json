@@ -6,11 +6,10 @@
 	"dependencies": {
 		"cordova": "^13.0.0",
 		"cordova-android": "13.0.0",
-		"cordova-plugin-tyan": "git+https://github.com/lyu2026/cordova-plugin-tyan.git",
-		"cordova-plugin-advanced-http": "git+https://github.com/silkimen/cordova-plugin-advanced-http.git",
-		"@e-is/cordova-plugin-downloader": "git+https://github.com/e-is/cordova-plugin-downloader.git",
-		"cordova-plugin-screen-orientation": "git+https://github.com/apache/cordova-plugin-screen-orientation.git",
-		"cordova-plugin-android-permissions": "git+https://github.com/NeoLSN/cordova-plugin-android-permissions.git"
+		"cordova-plugin-advanced-http": "*",
+		"@e-is/cordova-plugin-downloader": "*",
+		"cordova-plugin-screen-orientation": "*",
+		"cordova-plugin-android-permissions": "*"
 	},
 	"cordova": {"platforms": ["android"]}
 }
