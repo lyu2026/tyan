@@ -71,6 +71,28 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: 缓存命令工具
+        id: cache-sdk
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/lib/android/sdk/cmdline-tools/16.0
+          key: android-cmdline-tools-16.0-${{ runner.os }}
+
+      - name: 修复SDK版本
+        if: steps.cache-sdk.outputs.cache-hit != 'true'
+        run: |
+          echo ">>> 清理错误的预装版本"
+          rm -rf /usr/local/lib/android/sdk/cmdline-tools/latest
+          
+          echo ">>> 下载正确的命令行工具"
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-12266719_latest.zip
+          unzip -q commandlinetools-linux-*.zip -d /tmp/cmdline-tools
+          mkdir -p /usr/local/lib/android/sdk/cmdline-tools
+          mv /tmp/cmdline-tools/cmdline-tools /usr/local/lib/android/sdk/cmdline-tools/16.0
+          
+          echo ">>> 创建 latest 软链接"
+          ln -sf /usr/local/lib/android/sdk/cmdline-tools/16.0 /usr/local/lib/android/sdk/cmdline-tools/latest
+
       - name: 配置 Java.. 17
         uses: actions/setup-java@v4
         with:
@@ -81,11 +103,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: 安装安卓SDK
-        uses: android-actions/setup-android@v3
-        with:
-          log-accepted-android-sdk-licenses: false
 
       - name: 接受SDK许可
         run: yes | sdkmanager --licenses > /dev/null 2>&1
