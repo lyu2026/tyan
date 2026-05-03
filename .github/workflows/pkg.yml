@@ -132,10 +132,9 @@ jobs:
       - name: 安装科尔多瓦
         run: npm install -g cordova@^13.0.0 > /dev/null 2>&1
 
-      # [修改点 2]：增加安装依赖的容错，失败后重试
-      - name: 安全安装项目依赖
+      - name: 安装项目依赖
         run: |
-          npm install > /dev/null 2>&1 || npm install
+          npm install
 
       - name: 添加安卓平台
         run: |
