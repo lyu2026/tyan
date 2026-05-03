@@ -134,22 +134,24 @@ jobs:
 
       - name: 安装安卓SDK
         uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: false
 
       - name: 接受SDK许可
-        run: yes | sdkmanager --licenses
+        run: yes | sdkmanager --licenses > /dev/null 2>&1
 
       - name: 安装打包组件
         run: |
           sdkmanager \
             "platform-tools" \
             "platforms;android-34" \
-            "build-tools;34.0.0"
+            "build-tools;34.0.0" > /dev/null 2>&1
 
       - name: 安装科尔多瓦
-        run: npm install -g cordova@^13.0.0
+        run: npm install -g cordova@^13.0.0 > /dev/null 2>&1
 
       - name: 安装项目依赖
-        run: npm install
+        run: npm install > /dev/null 2>&1
 
       - name: 添加安卓平台
         run: |
