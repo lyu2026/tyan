@@ -1,0 +1,45 @@
+name: Cordova Android Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 诊断并释放 inode
+      - name: Free disk space and inodes
+        run: |
+          echo "========== 清理前 =========="
+          df -h /
+          df -i /
+          
+          # 删除不需要的 Android SDK 组件（释放大量 inode）
+          rm -rf /usr/local/lib/android/sdk/ndk
+          rm -rf /usr/local/lib/android/sdk/build-tools
+          rm -rf /usr/local/lib/android/sdk/platforms/android-30
+          rm -rf /usr/local/lib/android/sdk/platforms/android-31
+          rm -rf /usr/local/lib/android/sdk/platforms/android-32
+          rm -rf /usr/local/lib/android/sdk/platforms/android-33
+          rm -rf /usr/local/lib/android/sdk/system-images
+          
+          # 删除其他大型工具
+          rm -rf /usr/share/dotnet
+          rm -rf /opt/ghc
+          rm -rf /usr/local/share/boost
+          rm -rf /usr/local/share/chromium
+          
+          echo "========== 清理后 =========="
+          df -h /
+          df -i /
+
+      - name: Pre-install problematic plugins
+        run: |
+          # 直接安装，绕过 Cordova 的依赖解析
+          npm install --no-cache --prefer-online cordova-plugin-file@^8.0.0
+          npm install --no-cache --prefer-online @e-is/cordova-plugin-downloader
