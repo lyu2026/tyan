@@ -1,0 +1,26 @@
+name: Test Filter
+
+on: workflow_dispatch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: |
+          PREV_TAG=$(git tag --sort=-creatordate | head -2 | tail -1)
+          CURRENT_TAG=$(git tag --sort=-creatordate | head -1)
+          
+          echo "=== before ==="
+          git log "${PREV_TAG}..${CURRENT_TAG}" \
+            --pretty=format:"- %s (%h, @%an)" \
+            --no-merges
+          
+          echo ""
+          echo "=== after ==="
+          git log "${PREV_TAG}..${CURRENT_TAG}" \
+            --pretty=format:"- %s (%h, @%an)" \
+            --no-merges | grep -v "^- \. ([a-f0-9]\+)"
