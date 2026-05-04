@@ -203,12 +203,12 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
 		// if('diary_already'.gc(false)){
-			const fs=await IX.K.ls('tyan').catch(_=>log(_))
+			const fs=await cordova.plugin.koofr.list('tyan').catch(_=>log(_))
 			// =>_.type=='file'&&_.endsWith('.json')?_.name:null).filter(Boolean))
 			log('线上数据，文件清单',fs)
 			
 			for(let _ of fs){
-				const c=await IX.K.dn('tyan',_)
+				const c=await cordova.plugin.koofr.download('tyan',_)
 				log('线上数据，文件内容',_+': '+c)
 			}
 			log('初始数据，线上记录同步本地')
