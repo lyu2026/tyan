@@ -203,7 +203,8 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
 		// if('diary_already'.gc(false)){
-			const fs=await IX.K.ls('tyan').then(_=>_.map(_=>_.type=='file'&&_.endsWith('.json')?_.name:null).filter(Boolean))
+			const fs=await IX.K.ls('tyan').catch(_=>log(_))
+			// =>_.type=='file'&&_.endsWith('.json')?_.name:null).filter(Boolean))
 			log('线上数据，文件清单',fs)
 			
 			for(let _ of fs){
