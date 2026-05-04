@@ -83,19 +83,6 @@ card h1{margin-top:8px;font-size:24px;text-shadow:2px 2px rgba(255,255,255,.18),
 		for(let {key,name,title,brief} of IX.cards)o.push(`<card${(i++)%2<1?' v':''} onclick='run("IX","goto",WI)(this)' K='${key}'><div class='front' style='--u:url(./img/${key}.webp)'><h1>${name}</h1></div><div class='back'><h2>${title}</h2><p>${brief}</p></div></card>`)
 		log('渲染页面，构建 DOM 树')
 		$O.body.html(o.join('')+($O.$('#w_logs')?.html(true)||''))
-
-
-		navigator.battery.start(
-			r => log('电量:' + r.level + ' 充电:' + r.plugged),
-			e => llog(e)
-		)
-		navigator.battery.stop(
-			() => iblog('已停止'),
-			e => log(e)
-		)
-		
-		constvv=await cordova.plugins.koofr.ls('tyan')
-		log(vv)
 	},
 
 }

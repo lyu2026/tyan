@@ -4,9 +4,7 @@ WI=window.I=crypto.randomUUID()
 
 window.IX={
 	name:'diary',
-
-	// 所有监听对象
-	observer:{},
+	observer:{},K:cordova.plugin.koofr,
 
 	statistics:async(me)=>{ // 统计
 		'diary_tab'.sc(me.ga('v'))
@@ -204,24 +202,19 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		<icc onclick='run("IX","modal_close",WI)()'>╳</icc>
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
-		if('diary_already'.gc(false)){
-			// const fs=await IX.ls('/')
-			// log('线上数据，文件清单',fs)
+		// if('diary_already'.gc(false)){
+			const fs=await IX.K.ls('tyan').then(_=>_.map(_=>_.type=='file'&&_.endsWith('.json')?_.name:null).filter(Boolean))
+			log('线上数据，文件清单',fs)
 			
-			// const nc=await IX.K.dn('/tyan','n.txt')
-			// log('线上数据，文件内容',nc)
-			cordova.plugins.actionsheet.show({title:'测试用例',stitle:'这是副标题',bls:['按钮A','按钮B','按钮C'],wcb:true,cbl:'取消了',wdb:true,dbl:'这是啥',theme:4},_=>{
-				log('OK',_)
-			},_=>{
-				log('NO',_)
-			})
-			return
-			
-			await IX.K.sync(false)
+			for(let _ of fs){
+				const c=await IX.K.dn('tyan',_)
+				log('线上数据，文件内容',_+': '+c)
+			}
 			log('初始数据，线上记录同步本地')
 			'diary_already'.gc(true)
-		}
-
+		// }
+		
+		return
 		log('绑定事件，节点监听')
 		IX.watch()
 		log('获取缓存，点击 TAB')

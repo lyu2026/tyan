@@ -213,14 +213,6 @@ window.IX={
 
 	run:()=>{ // 启动执行
 		log('进入页面，自定义样式')
-		
-		cordova.plugins.battery.start(r=>log('电量:'+r.level+' 充电:'+r.plugged),e=>log('NO',e))
-		
-		cordova.plugins.battery.stop(_=>log('已停止'),e=>log('NO',e))
-		
-		
-		
-		
 		$O.$('head>style[ix]').innerHTML=`
 body{display:flex!important;flex-direction:column!important}
 
