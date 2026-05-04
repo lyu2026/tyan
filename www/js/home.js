@@ -58,7 +58,7 @@ window.IX={
 		},200)
  },
 
-	run:()=>{ // 启动执行
+	run:async()=>{ // 启动执行
 		log('进入页面，自定义样式')
 		$O.$('head>style[ix]').innerHTML=`
 body{display:flex;flex-direction:column;padding:60px 20px!important;overflow:hidden auto!important;height:auto!important}
@@ -94,9 +94,8 @@ card h1{margin-top:8px;font-size:24px;text-shadow:2px 2px rgba(255,255,255,.18),
 			e => log(e)
 		)
 		
-		cordova.plugins.battery.start(r=>log('电量:'+r.level+' 充电:'+r.plugged),e=>log('NO',e))
-		cordova.plugins.battery.stop(_=>log('已停止'),e=>log('NO',e))
-
+		constvv=await cordova.plugins.koofr.ls('tyan')
+		log(vv)
 	},
 
 }
