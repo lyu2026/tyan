@@ -305,7 +305,7 @@ jobs:
               echo ""
               git log "${PREV_TAG}..${CURRENT_TAG}" \
                 --pretty=format:"- %s (%h, @%an)" \
-                --no-merges | grep -v "^- \. ("
+                --no-merges | grep -v "^- \. (" || true
               echo ""
             } > release_changelog.md
           else
