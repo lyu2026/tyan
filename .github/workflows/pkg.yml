@@ -120,7 +120,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: 修复 npm 缓存
+      - name: 修复 NPM缓存
         run: |
           rm -rf ~/.npm /home/runner/.npm
           CLEAN_CACHE_DIR=$(mktemp -d -t npm-cache-XXXXXX)
