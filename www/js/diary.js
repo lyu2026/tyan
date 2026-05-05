@@ -4,7 +4,9 @@ WI=window.I=crypto.randomUUID()
 
 window.IX={
 	name:'diary',
-	observer:{},K:cordova.plugin.koofr,
+	observer:{},
+	K:cordova.plugin.koofr,
+	S:cordova.plugin.sqlite,
 
 	statistics:async(me)=>{ // 统计
 		'diary_tab'.sc(me.ga('v'))
@@ -203,13 +205,22 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
 		// if('diary_already'.gc(false)){
-			const fs=await cordova.plugin.koofr.list('tyan').catch(_=>log(_))
-			// =>_.type=='file'&&_.endsWith('.json')?_.name:null).filter(Boolean))
-			log('线上数据，文件清单',fs)
+			const et=await IX.S.query('SELECT name FROM sqlite_master WHERE type=? AND name=?',['table','O'])
+			log(et)
 			
+			const fs=await IX.K.list('tyan').then(_=>_.rep.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
+				log('线上数据，文件清单获取失败',_,'error')
+				return []
+			})
+			log('线上数据，文件清单',fs)
 			for(let _ of fs){
-				const c=await cordova.plugin.koofr.download('tyan',_)
-				log('线上数据，文件内容',_+': '+c)
+				const c=await IX.K.download('tyan',_).then(_=>JSON.parse(_.rep)).catch(_=>{
+					log(`线上数据，文件 ${_} 内容获取失败`,_,'error')
+					return null
+				})
+				if(!c)continue
+				log(`线上数据，文件 ${_} 内容`,c)
+				
 			}
 			log('初始数据，线上记录同步本地')
 			'diary_already'.gc(true)
