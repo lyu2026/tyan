@@ -205,21 +205,22 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
 		// if('diary_already'.gc(false)){
-			const et=await IX.S.query('SELECT name FROM sqlite_master WHERE type=? AND name=?',['table','O'])
-			log(et)
+	// 例: count('user',{age:25}) 或 count('user')
+			const e=await IX.S.exist('sqlite_master',{type:'table',name:'O'})
+			log('核心表 O 是否存在',e?'YES':'NO')
 			
-			const fs=await IX.K.list('tyan').then(_=>_.rep.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
+			const s=await IX.K.list('tyan').then(_=>_.o.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
 				log('线上数据，文件清单获取失败',_,'error')
 				return []
 			})
-			log('线上数据，文件清单',fs)
-			for(let _ of fs){
-				const c=await IX.K.download('tyan',_).then(_=>JSON.parse(_.rep)).catch(_=>{
+			log('线上数据，文件清单',s)
+			for(let _ of s){
+				const o=await IX.K.download('tyan',_).then(_=>JSON.parse(_.o)).catch(_=>{
 					log(`线上数据，文件 ${_} 内容获取失败`,_,'error')
 					return null
 				})
-				if(!c)continue
-				log(`线上数据，文件 ${_} 内容`,c)
+				if(!o)continue
+				log(`线上数据，文件 ${_} 内容`,o)
 				
 			}
 			log('初始数据，线上记录同步本地')
