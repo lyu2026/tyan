@@ -7,6 +7,7 @@ window.IX={
 
 	// 所有监听对象
 	observer:{},
+	O:cordova.plugin.sorient,
 
 	// 视频名称过滤正则
 	name_reg:/(抢先|陈翔六点半|大电影|羊羊|没事|燃烧吧|拜托了|热恋|行不通|吃饭|差评女友|不好惹|怎敌她|永不放弃|鹊刀门|量产型|乡村爱情|扑通扑通|二龙湖|小财迷|武侠世界|别怕)/,
@@ -28,7 +29,7 @@ window.IX={
 			IX.sm={}
 			IX.page=0
 			IX.modal_close()
-			screen.orientation.unlock()
+			IX.O.unlock()
 			key=me.parentElement.ga('T');val=me.ga('V')
 			log(`手动筛选，点击 ${key}: ${val}`)
 			gbox.da('a').sa({_:key=='category'&&val=='?'?'💡 请输入关键字 . . ':'🥏 正在搜索，请稍等 . . .'}).html('')
@@ -177,16 +178,16 @@ window.IX={
 			IX.hls.attachMedia(V)
 			V.addEventListener('fullscreenchange',()=>{
 				if(!$O.fullscreenElement){
-					screen.orientation.unlock()
+					IX.O.unlock()
 					if(V.fsn)V.fsn=false
 					return
 				}
 				if(!V.fsn){
-					screen.orientation.lock('landscape')
+					IX.O.lock('landscape')
 					V.fsn=true
 					return
 				}
-				screen.orientation.unlock()
+				IX.O.unlock()
 				V.fsn=false
 			},false)
 			V.ondurationchange=()=>{

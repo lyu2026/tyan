@@ -75,9 +75,23 @@ window.IX={
 		'diary_tab'.sc(me.ga('v'))
 		$O.$$('tab>*').forEach(_=>_[_!=me?'da':'sa']('c'))
 		
+		let ok=await cordova.plugin.badge.check()
+		log('支持角标:',ok)
+		
+		await cordova.plugin.badge.set(5)
+		log('设置成功')
+		
+		await cordova.plugin.badge.inc(3)
+		let n=await cordova.plugin.badge.get()
+		log('当前角标:',n)
+		
+		cordova.plugin.sorient.set('H')
 	},
 
 	add:async()=>{ // 新增
+		cordova.plugin.badge.check(_=>log('支不支持',_),_=>log('检查失败',_))
+		cordova.plugin.badge.set(5,_=>log('设置成功',_),_=>log('设置失败',_))
+		
 		const title='挖掘客户举报检测方法关系还记得盖好'
 		const content='顾虑感觉刚放假你好哥哥很多地方个非常喜欢好看'
 		const address='中国.黑龙江.漠河',location='45.89666,86.88556'
@@ -87,6 +101,9 @@ window.IX={
 			log('添加失败','error')
 			return
 		}
+		const vo=await IX.S.find('O',{where:{id}})
+		const uo=await IX.K.upload('tyan',`${id}.json`,Array.from(new Uint8Array(new TextEncoder().encode(JSON.stringify(vo[0])))))
+		log('上传结果',uo.o.name+'' +uo.o.hash)
 		if('diary_tab'.gc()!='list')return
 		const [{at}]=await IX.S.find('O',{cols:'at',where:{id}}),{y,m,d,w,t}=IX.ftime(at)
 		if(!$O.$('grid-c'))$O.$('grid').append($O.node('grid-c',{my:''},`${m} ${y}`))
@@ -226,13 +243,13 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 			const e=await IX.S.exist('O',{id:'>0'}).catch(_=>false)
 			if(e)await IX.S.drop('O')
 			await IX.S.create('O',['id INTEGER PRIMARY KEY AUTOINCREMENT','title TEXT NOT NULL','content TEXT','address TEXT','location TEXT','imgs TEXT','files TEXT','mood TEXT','tags TEXT'])
-			const s=await IX.K.list('tyan').then(_=>_._g.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
+			const s=await IX.K.list('tyan').then(_=>_.o.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
 				log('线上数据，文件清单获取失败',_,'error')
 				return []
 			})
 			log('线上数据，文件清单',s)
 			for(let _ of s){
-				const o=await IX.K.download('tyan',_).then(_=>JSON.parse(_._g)).catch(_=>{
+				const o=await IX.K.download('tyan',_).then(_=>JSON.parse(_.o)).catch(_=>{
 					log(`线上数据，文件 ${_} 内容获取失败`,_,'error')
 					return null
 				})

@@ -7,6 +7,7 @@ window.IX={
 
 	// 所有监听对象
 	observer:{},
+	O:cordova.plugin.sorient,
 
 	vv:()=>{ // 链接公共参数
 		const x=(Date.parse(new Date())/1e3).toString(),a=x.md5(),b=[],c=[[],[],[],[]]
@@ -53,7 +54,7 @@ window.IX={
 			IX.sm={}
 			IX.page=0
 			IX.modal_close()
-			screen.orientation.unlock()
+			IX.O.unlock()
 			key=me.parentElement.ga('T');val=me.ga('V')
 			log(`手动筛选，点击 ${key}: ${val}`)
 			gbox.da('a').sa({_:key=='category'&&val=='?'?'💡 请输入关键字 . . ':'🥏 正在搜索，请稍等 . . .'}).html('')
@@ -190,16 +191,16 @@ window.IX={
 			IX.hls.attachMedia(V)
 			V.addEventListener('fullscreenchange',()=>{
 				if(!$O.fullscreenElement){
-					screen.orientation.unlock()
+					IX.O.unlock()
 					if(V.fsn)V.fsn=false
 					return
 				}
 				if(!V.fsn){
-					screen.orientation.lock('landscape')
+					IX.O.lock('H')
 					V.fsn=true
 					return
 				}
-				screen.orientation.unlock()
+				IX.O.unlock()
 				V.fsn=false
 			},false)
 			V.ondurationchange=()=>{
