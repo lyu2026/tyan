@@ -27,17 +27,14 @@ window.IX={
 		const peak=Math.round(s.reduce((x,r)=>x+new Date(r.at).getHours(),0)/count*10)/10
 		
 		// 图片/文件去重 - 只查有数据的
-		const imgs=await IX.S.select('O',{cs:['imgs'],w:{imgs:{ne:'[]'}}})
-		const si=new Set()
+		const imgs=await IX.S.select('O',{cs:['imgs'],w:{imgs:{ne:'[]'}}}),si=new Set()
 		imgs.forEach(r=>{if(r.imgs)JSON.parse(r.imgs).forEach(v=>si.add(v))})
 		
-		const files=await IX.S.select('O',{cs:['files'],w:{files:{ne:'[]'}}})
-		const sf=new Set()
+		const files=await IX.S.select('O',{cs:['files'],w:{files:{ne:'[]'}}}),sf=new Set()
 		files.forEach(r=>{if(r.files)JSON.parse(r.files).forEach(v=>sf.add(v))})
 		
 		// 连续天数 - 只查不同日期
-		const ds=await IX.S.select('O',{cs:['at']})
-		const dm=new Map()
+		const ds=await IX.S.select('O',{cs:['at']}),dm=new Map()
 		ds.forEach(r=>{let d=new Date(r.at).toLocaleDateString();dm.set(d,true)})
 		const da=[...dm.keys()].sort().reverse()
 		let streak=0,today=new Date().toLocaleDateString()
@@ -49,7 +46,7 @@ window.IX={
 		gbox.html(`
 		<grid-c summary>
 			<div streak x='当前持续天数：'>${streak}</div><div days x='记录总天数：'>${days}</div><div count x='记录总数：'>${count}</div>
-			<div icount x='图片总数：'>${icount}</div><div fcount x='附件总数：'>${fcount}</div>
+			<div icount x='图片总数：'>${si.size}</div><div fcount x='附件总数：'>${sf.size}</div>
 			<div lavg x='平均字数：'>${lavg}</div><div peak x='最活跃时段：'>${peak}点</div>
 		</grid-c>`)
 	},
@@ -83,7 +80,7 @@ window.IX={
 
 	remove:async(me)=>{ // 删除记录
 		if(!confirm('你确定删除此记录吗？'))return
-		const I=me.ga('I'),o=await IX.S.remove('O',{id:parseInt(I)},true)
+		const I=me.ga('I'),o=await IX.S.remove('O',parseInt(I))
 		log('删除结果',o)
 		if(o&&o.includes('OK'))me.remove()
 	},
@@ -93,7 +90,7 @@ window.IX={
 		$O.$$('tab>*').forEach(_=>_[_!=me?'da':'sa']('c'))
 		
 		log('开始转屏')
-		cordova.plugin.sorient.set('H')
+		// cordova.plugin.orient.set('H')
 		log('已经转屏')
 		
 		log('开始检查')
@@ -103,7 +100,6 @@ window.IX={
 		cordova.plugin.badge.set(5)
 		log('设置成功')
 		
-		cordova.plugin.badge.inc(3)
 		let n=await cordova.plugin.badge.get()
 		log('当前角标:',n)
 		
@@ -115,16 +111,23 @@ window.IX={
 		const content='顾虑感觉刚放假你好哥哥很多地方个非常喜欢好看'
 		const address='中国.黑龙江.漠河',location='45.89666,86.88556'
 		const mood='said',tags='徐',imgs=['https://pixabay.com/zh/images/download/x-10222434_1920.jpg']
-		const id=await IX.S.insert('O',{title,content,address,location,mood,tags,imgs,files:[]})
-		if(!id||id<1){
+		let o=await IX.S.insert('O',{title,content,address,location,mood,tags,imgs,files:[]})
+		if(!o||!o.id||o.id<1){
 			log('添加失败','error')
 			return
 		}
-		const vo=await IX.S.find('O',{where:{id}})
-		const uo=await IX.K.upload('tyan',`${id}.json`,Array.from(new Uint8Array(new TextEncoder().encode(JSON.stringify(vo[0])))))
-		log('上传结果',uo.o.name+'' +uo.o.hash)
+		log('已添数据',o)
+		
+		o=await IX.S.select('O',{w:{id:o.id},ec:false}).then(_=>_.shift())
+		log('该编详细',o)
+		
+		const id=o.id,uo=await IX.K.upload('tyan',`${o.id}.json`,Array.from(new Uint8Array(new TextEncoder().encode(JSON.stringify(o)))))
+		log('已传数据',uo.o.name+' '+uo.o.hash)
+		
 		if('diary_tab'.gc()!='list')return
-		const [{at}]=await IX.S.find('O',{cols:'at',where:{id}}),{y,m,d,w,t}=IX.ftime(at)
+		
+		o=await IX.S.select('O',{cs:'at',w:id})
+		const {y,m,d,w,t}=IX.ftime(o.at)
 		if(!$O.$('grid-c'))$O.$('grid').append($O.node('grid-c',{my:''},`${m} ${y}`))
 		if(!$O.$('grid-c[dr]'))$O.$('grid').append($O.node('grid-c',{dr:''},`<div I='${id}'><div L><div>${w}</div>${d}</div><div M><button onclick='run("IX","remove",WI)(this)'>删除</button><div F><div>${title}</div><div>${content}</div><div>${t}</div></div></div></div>`))
 		else $O.$('grid>grid-c[dr]:last-child').append($O.node('div',{I:id},`<div L><div>${w}</div>${d}</div><div R><button onclick='run("IX","remove",WI)(this)'>删除</button><div F><div>${title}</div><div>${content}</div><div>${t}</div></div></div>`))
@@ -258,39 +261,37 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		<icc onclick='run("IX","modal_close",WI)()'>╳</icc>
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
-		const e=await IX.S.exist('O',{id:'>0'}).catch(_=>false)
-		if(!e){
-			await IX.S.create('O',{
-				cs:[
-					{n:'id',tp:'INTEGER',pk:true,ai:true},
-					{n:'title',tp:'TEXT',nn:true},
-					{n:'content',tp:'TEXT'},
-					{n:'address',tp:'TEXT'},
-					{n:'location',tp:'TEXT'},
-					{n:'imgs',tp:'TEXT',df:'[]'},
-					{n:'files',tp:'TEXT',df:'[]'},
-					{n:'mood',tp:'TEXT'},
-					{n:'tags',tp:'TEXT',df:'[]'}
-				]
+		const e=await IX.S.exist('O')
+		if(!e)await IX.S.create('O',{
+			cs:[
+				{n:'id',tp:'INTEGER',pk:true,ai:true},
+				{n:'title',tp:'TEXT',nn:true},
+				{n:'content',tp:'TEXT'},
+				{n:'address',tp:'TEXT'},
+				{n:'location',tp:'TEXT'},
+				{n:'imgs',tp:'TEXT',df:'[]'},
+				{n:'files',tp:'TEXT',df:'[]'},
+				{n:'mood',tp:'TEXT'},
+				{n:'tags',tp:'TEXT',df:'[]'}
+			],ec:['content'],ix:['title','mood','tags','address']
+		})
+		const s=await IX.K.list('tyan').then(_=>_.o.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
+			log('线上数据，文件清单获取失败',_,'error')
+			return []
+		})
+		log('线上数据，文件清单',s)
+		for(let _ of s){
+			const o=await IX.K.download('tyan',_).then(_=>JSON.parse(_.o)).catch(_=>{
+				log(`线上数据，文件 ${_} 内容获取失败`,_,'error')
+				return null
 			})
-			const s=await IX.K.list('tyan').then(_=>_.o.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
-				log('线上数据，文件清单获取失败',_,'error')
-				return []
-			})
-			log('线上数据，文件清单',s)
-			for(let _ of s){
-				const o=await IX.K.download('tyan',_).then(_=>JSON.parse(_.o)).catch(_=>{
-					log(`线上数据，文件 ${_} 内容获取失败`,_,'error')
-					return null
-				})
-				if(!o)continue
-				o.imgs=JSON.stringify(o.imgs)
-				o.files=JSON.stringify(o.files)
-				const {id}=await IX.S.insert('O',o)
-				log(`线上数据，存储 ${_} 内容，记录编号: `+id)
-			}
-			log('初始数据，线上记录已完全同步本地')
+			if(!o)continue
+			o.imgs=JSON.stringify(o.imgs)
+			o.files=JSON.stringify(o.files)
+			const {id}=await IX.S.insert('O',o,{ec:false})
+			log(`线上数据，存储 ${_} 内容，记录编号: `+id)
 		}
+		
 		log('绑定事件，节点监听')
 		// IX.watch()
 		log('获取缓存，点击 TAB')
