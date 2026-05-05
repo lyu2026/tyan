@@ -8,13 +8,27 @@ window.IX={
 	K:cordova.plugin.koofr,
 	S:cordova.plugin.sqlite,
 
+	ftime:ts=>{
+		const wd=['日','一','二','三','四','五','六'],mc=['正月','二月','三月','四月','五月','六月','七月','八月','九月','十月','冬月','腊月']
+		let d=new Date(ts),y=d.getFullYear(),m=d.getMonth(),w=d.getDay(),t=d.toTimeString().slice(0,8)
+		return{w:'星期'+wd[w],y,m:mc[m],d:d.getDate(),t}
+	},
+
 	statistics:async(me)=>{ // 统计
 		'diary_tab'.sc(me.ga('v'))
 		$O.$$('tab>*').forEach(_=>_[_!=me?'da':'sa']('c'))
-		const gbox=$O.$('grid').html(''),{streak,count,days,icount,fcount,peak,lavg}=await IX.summary().catch(e=>{
-			log('统计失败',e,'error')
-			return {streak:0,count:0,days:0,count:0,fcount:0,lavg:0,peak:0}
+		const gbox=$O.$('grid').html('')
+		const s=await IX.S.query(`SELECT COUNT(*) AS c,COUNT(DISTINCT date(at/1000,'unixepoch','localtime')) AS d,AVG(LENGTH(content)) AS a,AVG(CAST(strftime('%H',at/1000,'unixepoch','localtime') AS REAL)) AS p FROM O`)
+		const rs=await IX.S.query('SELECT imgs,files FROM O')
+		const si=new Set(),sf=new Set()
+		rs.forEach(r=>{
+			if(r.imgs&&r.imgs!='[]')JSON.parse(r.imgs).forEach(v=>si.add(v))
+			if(r.files&&r.files!='[]')JSON.parse(r.files).forEach(v=>sf.add(v))
 		})
+		const ds=await IX.S.query(`SELECT DISTINCT date(at/1000,'unixepoch','localtime') AS d FROM O ORDER BY d DESC`)
+		const count=s[0].c,days=s[0].d,lavg=Math.round(s[0].a*10)/10,peak=Math.round(s[0].p*10)/10,icount=si.size,fcount=sf.size
+		let streak=0,today=new Date().toISOString().slice(0,10)
+		for(let i=0;i<ds.length;i++){if(i==0&&ds[i].d!=today)break;if(i==0||(new Date(ds[i-1].d)-new Date(ds[i].d))/864e5==1)streak++;else break}
 		gbox.html(`
 		<grid-c summary>
 			<div streak x='当前持续天数：'>${streak}</div><div days x='记录总天数：'>${days}</div><div count x='记录总数：'>${count}</div>
@@ -33,10 +47,10 @@ window.IX={
 			IX.page=me=1
 		}else if(IX.stop)return go&&go(true)
 
-		const s=await IX.page({},me,30).then(_=>_.list)
+		const s=await IX.S.page('O',me,30,'at DESC').then(_=>_.rows)
 		if(s.length<30)IX.stop=true
 		for(let d,m,y,i=0;i<s.length;i++){
-			const x=s[i].ao
+			const x=IX.ftime(s[i].at)
 			if(i===0||x.m!=m||x.y!=y){
 				y=x.y
 				m=x.m
@@ -52,7 +66,7 @@ window.IX={
 
 	remove:async(me)=>{ // 删除记录
 		if(!confirm('你确定删除此记录吗？'))return
-		const I=me.ga('I'),o=await IX.remove(parseInt(I),true)
+		const I=me.ga('I'),o=await IX.S.remove('O',{id:parseInt(I)},true)
 		log('删除结果',o)
 		if(o&&o.includes('OK'))me.remove()
 	},
@@ -66,9 +80,15 @@ window.IX={
 	add:async()=>{ // 新增
 		const title='挖掘客户举报检测方法关系还记得盖好'
 		const content='顾虑感觉刚放假你好哥哥很多地方个非常喜欢好看'
+		const address='中国.黑龙江.漠河',location='45.89666,86.88556'
 		const mood='said',tags='徐',imgs=['https://pixabay.com/zh/images/download/x-10222434_1920.jpg']
-		const {id,ao:{m,y,d,t,w}}=await IX.save({title,content,mood,tags,imgs},false,true)
-		if(!id||id<1)return
+		const id=await IX.S.insert('O',{title,content,address,location,mood,tags,imgs,files:[]})
+		if(!id||id<1){
+			log('添加失败','error')
+			return
+		}
+		if('diary_tab'.gc()!='list')return
+		const [{at}]=await IX.S.find('O',{cols:'at',where:{id}}),{y,m,d,w,t}=IX.ftime(at)
 		if(!$O.$('grid-c'))$O.$('grid').append($O.node('grid-c',{my:''},`${m} ${y}`))
 		if(!$O.$('grid-c[dr]'))$O.$('grid').append($O.node('grid-c',{dr:''},`<div I='${id}'><div L><div>${w}</div>${d}</div><div M><button onclick='run("IX","remove",WI)(this)'>删除</button><div F><div>${title}</div><div>${content}</div><div>${t}</div></div></div></div>`))
 		else $O.$('grid>grid-c[dr]:last-child').append($O.node('div',{I:id},`<div L><div>${w}</div>${d}</div><div R><button onclick='run("IX","remove",WI)(this)'>删除</button><div F><div>${title}</div><div>${content}</div><div>${t}</div></div></div>`))
@@ -173,17 +193,15 @@ grid-c[dr]>[I]:hover{background:#aaa}
 body[dark] grid-c[dr]>[I]:hover{background:#555}
 grid-c[dr]>[I]:last-child{margin-bottom:0}
 
-grid-c[dr]>[I]>[L]{opacity:0;width:12%;aspect-ratio:3/4.5;padding-left:6px}
-grid-c[dr]>[I]:first-child>[L]{background:#ddd;opacity:1;text-align:center;font-size:22px}
-body[dark] grid-c[dr]>[I]:first-child>[L]{background:#222}
-grid-c[dr]>[I]:first-child>[L]::after{content:'';display:block;position:absolute;top:6%;left:6px;z-index:10;width:80%;height:88%;background:rgba(0,0,0,.2);border-radius:24px}
+grid-c[dr]>[I]>[L]{opacity:0;width:12%;aspect-ratio:3/4.5;padding-left:3px}
+grid-c[dr]>[I]:first-child>[L]{background:translate;opacity:1;text-align:center;font-size:22px}
+grid-c[dr]>[I]:first-child>[L]::after{content:'';display:block;position:absolute;top:6%;left:6px;z-index:10;width:80%;height:88%;background:rgba(0,0,0,.2);border-radius:20px}
 body[dark] grid-c[dr]>[I]>[L]::after{background:rgba(255,255,255,.2)}
-grid-c[dr]>[I]:first-child>[L]>div{font-size:12px;margin:16px auto 4px auto}
+grid-c[dr]>[I]:first-child>[L]>div{font-size:12px;margin:20px auto 4px auto}
 
 grid-c[dr]>[I]>[R]{flex:1;overflow:hidden}
 grid-c[dr]>[I]>[R]>button{position:absolute;right:0;top:0;width:80px;height:100%;background:#e74c3c;color:#fff;border:none;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;z-index:1}
-grid-c[dr]>[I]>[R]>[F]{background:#ddd;width:100%;height:100%;z-index:2;display:flex;flex-direction:column;padding:6px 4px 6px 8px;transition:transform 0.25s ease;touch-action:pan-y}
-body[dark] grid-c[dr]>[I]>[R]>[F]{background:#222}
+grid-c[dr]>[I]>[R]>[F]{background:translate;width:100%;height:100%;z-index:2;display:flex;flex-direction:column;padding:6px 4px 6px 8px;transition:transform 0.25s ease;touch-action:pan-y}
 grid-c[dr]>[I]>[R]>[F].swiped{transform:translateX(-80px)}
 grid-c[dr]>[I]>[R]>[F]>*:first-child{font-size:16px;color:black;padding-bottom:3px}
 grid-c[dr]>[I]>[R]>[F]>*:nth-child(2){flex:1;font-size:13px;line-height:1.3;color:rgba(0,0,0,.9);padding-bottom:3px}
@@ -195,41 +213,40 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		$O.$$('body>*:not(#w_logs)').forEach(_=>_.remove())
 		$O.body.html(`
 		<tab>
-			<div v='statistics' onclick='run("IX","statistics",WI)(this)'>📦</div>
+			<div v='statistics' onclick='run("IX","statistics",WI)(this)'>🟡🟢</div>
 			<div v='list' onclick='run("IX","list",WI)(this)'>列表</div>
-			<div v='calendar' onclick='run("IX",calendar",WI)(this)'>日历</div>
+			<div v='calendar' onclick='run("IX","calendar",WI)(this)'>日历</div>
 			<div onclick='run("IX","add",WI)(this)'>╋ 新条目</div>
 			<div onclick='run("IX","sync",WI)(this)'>同步</div>
 		</tab><grid></grid><modal hide><mbox><modal-t><title></title>
 		<icc onclick='run("IX","modal_close",WI)()'>╳</icc>
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
-		// if('diary_already'.gc(false)){
-	// 例: count('user',{age:25}) 或 count('user')
-			const e=await IX.S.exist('sqlite_master',{type:'table',name:'O'})
-			log('核心表 O 是否存在',e?'YES':'NO')
-			
-			const s=await IX.K.list('tyan').then(_=>_.o.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
+		if('diary_already'.gc(false)){
+			const e=await IX.S.exist('O',{id:'>0'}).catch(_=>false)
+			if(e)await IX.S.drop('O')
+			await IX.S.create('O',['id INTEGER PRIMARY KEY AUTOINCREMENT','title TEXT NOT NULL','content TEXT','address TEXT','location TEXT','imgs TEXT','files TEXT','mood TEXT','tags TEXT'])
+			const s=await IX.K.list('tyan').then(_=>_._g.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
 				log('线上数据，文件清单获取失败',_,'error')
 				return []
 			})
 			log('线上数据，文件清单',s)
 			for(let _ of s){
-				const o=await IX.K.download('tyan',_).then(_=>JSON.parse(_.o)).catch(_=>{
+				const o=await IX.K.download('tyan',_).then(_=>JSON.parse(_._g)).catch(_=>{
 					log(`线上数据，文件 ${_} 内容获取失败`,_,'error')
 					return null
 				})
 				if(!o)continue
-				log(`线上数据，文件 ${_} 内容`,o)
-				
+				o.imgs=JSON.stringify(o.imgs)
+				o.files=JSON.stringify(o.files)
+				const i=await IX.S.insert('O',o)
+				log(`线上数据，存储 ${_} 内容，记录编号: `+i)
 			}
-			log('初始数据，线上记录同步本地')
+			log('初始数据，线上记录已完全同步本地')
 			'diary_already'.gc(true)
-		// }
-		
-		return
+		}
 		log('绑定事件，节点监听')
-		IX.watch()
+		// IX.watch()
 		log('获取缓存，点击 TAB')
 		let tab=$O.$(`tab>[v='${'diary_tab'.gc('statistics')}']`)
 		if(!tab)tab=$O.$(`tab>[v='statistics']`)
