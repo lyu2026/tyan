@@ -18,17 +18,34 @@ window.IX={
 		'diary_tab'.sc(me.ga('v'))
 		$O.$$('tab>*').forEach(_=>_[_!=me?'da':'sa']('c'))
 		const gbox=$O.$('grid').html('')
-		const s=await IX.S.query(`SELECT COUNT(*) AS c,COUNT(DISTINCT date(at/1000,'unixepoch','localtime')) AS d,AVG(LENGTH(content)) AS a,AVG(CAST(strftime('%H',at/1000,'unixepoch','localtime') AS REAL)) AS p FROM O`)
-		const rs=await IX.S.query('SELECT imgs,files FROM O')
-		const si=new Set(),sf=new Set()
-		rs.forEach(r=>{
-			if(r.imgs&&r.imgs!='[]')JSON.parse(r.imgs).forEach(v=>si.add(v))
-			if(r.files&&r.files!='[]')JSON.parse(r.files).forEach(v=>sf.add(v))
-		})
-		const ds=await IX.S.query(`SELECT DISTINCT date(at/1000,'unixepoch','localtime') AS d FROM O ORDER BY d DESC`)
-		const count=s[0].c,days=s[0].d,lavg=Math.round(s[0].a*10)/10,peak=Math.round(s[0].p*10)/10,icount=si.size,fcount=sf.size
-		let streak=0,today=new Date().toISOString().slice(0,10)
-		for(let i=0;i<ds.length;i++){if(i==0&&ds[i].d!=today)break;if(i==0||(new Date(ds[i-1].d)-new Date(ds[i].d))/864e5==1)streak++;else break}
+		// 统计 - 多次select按需拉取，避免全表
+		// 总条数和平均字数
+		const s=await IX.S.select('O',{cs:['content','at'],oy:'id DESC'})
+		const count=s.length
+		const days=new Set(s.map(r=>new Date(r.at).toLocaleDateString())).size
+		const lavg=Math.round(s.reduce((x,r)=>x+(r.content||'').length,0)/count*10)/10
+		const peak=Math.round(s.reduce((x,r)=>x+new Date(r.at).getHours(),0)/count*10)/10
+		
+		// 图片/文件去重 - 只查有数据的
+		const imgs=await IX.S.select('O',{cs:['imgs'],w:{imgs:{ne:'[]'}}})
+		const si=new Set()
+		imgs.forEach(r=>{if(r.imgs)JSON.parse(r.imgs).forEach(v=>si.add(v))})
+		
+		const files=await IX.S.select('O',{cs:['files'],w:{files:{ne:'[]'}}})
+		const sf=new Set()
+		files.forEach(r=>{if(r.files)JSON.parse(r.files).forEach(v=>sf.add(v))})
+		
+		// 连续天数 - 只查不同日期
+		const ds=await IX.S.select('O',{cs:['at']})
+		const dm=new Map()
+		ds.forEach(r=>{let d=new Date(r.at).toLocaleDateString();dm.set(d,true)})
+		const da=[...dm.keys()].sort().reverse()
+		let streak=0,today=new Date().toLocaleDateString()
+		for(let i=0;i<da.length;i++){
+			if(i==0&&da[i]!=today)break
+			if(i==0||(new Date(da[i-1])-new Date(da[i]))/864e5==1)streak++
+			else break
+		}
 		gbox.html(`
 		<grid-c summary>
 			<div streak x='当前持续天数：'>${streak}</div><div days x='记录总天数：'>${days}</div><div count x='记录总数：'>${count}</div>
@@ -47,7 +64,7 @@ window.IX={
 			IX.page=me=1
 		}else if(IX.stop)return go&&go(true)
 
-		const s=await IX.S.page('O',me,30,'at DESC').then(_=>_.rows)
+		const s=await IX.S.page('O',{p:me,z:30,oy:'at DESC'}).then(_=>_.rows)
 		if(s.length<30)IX.stop=true
 		for(let d,m,y,i=0;i<s.length;i++){
 			const x=IX.ftime(s[i].at)
@@ -243,7 +260,19 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 
 		const e=await IX.S.exist('O',{id:'>0'}).catch(_=>false)
 		if(!e){
-			await IX.S.create('O',['id INTEGER PRIMARY KEY AUTOINCREMENT','title TEXT NOT NULL','content TEXT','address TEXT','location TEXT','imgs TEXT','files TEXT','mood TEXT','tags TEXT'])
+			await IX.S.create('O',{
+				cs:[
+					{n:'id',tp:'INTEGER',pk:true,ai:true},
+					{n:'title',tp:'TEXT',nn:true},
+					{n:'content',tp:'TEXT'},
+					{n:'address',tp:'TEXT'},
+					{n:'location',tp:'TEXT'},
+					{n:'imgs',tp:'TEXT',df:'[]'},
+					{n:'files',tp:'TEXT',df:'[]'},
+					{n:'mood',tp:'TEXT'},
+					{n:'tags',tp:'TEXT',df:'[]'}
+				]
+			})
 			const s=await IX.K.list('tyan').then(_=>_.o.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
 				log('线上数据，文件清单获取失败',_,'error')
 				return []
@@ -257,8 +286,8 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 				if(!o)continue
 				o.imgs=JSON.stringify(o.imgs)
 				o.files=JSON.stringify(o.files)
-				const i=await IX.S.insert('O',o)
-				log(`线上数据，存储 ${_} 内容，记录编号: `+i)
+				const {id}=await IX.S.insert('O',o)
+				log(`线上数据，存储 ${_} 内容，记录编号: `+id)
 			}
 			log('初始数据，线上记录已完全同步本地')
 		}
