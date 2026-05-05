@@ -75,23 +75,25 @@ window.IX={
 		'diary_tab'.sc(me.ga('v'))
 		$O.$$('tab>*').forEach(_=>_[_!=me?'da':'sa']('c'))
 		
-		let ok=await cordova.plugin.badge.check()
-		log('支持角标:',ok)
+		log('开始转屏')
+		cordova.plugin.sorient.set('H')
+		log('已经转屏')
 		
-		await cordova.plugin.badge.set(5)
+		log('开始检查')
+		// let ok=await cordova.plugin.badge.check()
+		// log('支持角标:',ok)
+		
+		cordova.plugin.badge.set(5)
 		log('设置成功')
 		
-		await cordova.plugin.badge.inc(3)
+		cordova.plugin.badge.inc(3)
 		let n=await cordova.plugin.badge.get()
 		log('当前角标:',n)
 		
-		cordova.plugin.sorient.set('H')
+		
 	},
 
 	add:async()=>{ // 新增
-		cordova.plugin.badge.check(_=>log('支不支持',_),_=>log('检查失败',_))
-		cordova.plugin.badge.set(5,_=>log('设置成功',_),_=>log('设置失败',_))
-		
 		const title='挖掘客户举报检测方法关系还记得盖好'
 		const content='顾虑感觉刚放假你好哥哥很多地方个非常喜欢好看'
 		const address='中国.黑龙江.漠河',location='45.89666,86.88556'
@@ -239,9 +241,8 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 		<icc onclick='run("IX","modal_close",WI)()'>╳</icc>
 		</modal-t><modal-c><textarea IT></textarea><textarea IC></textarea></modal-c></mbox></modal>`+($O.$('#w_logs')?.html(true)||''))
 
-		if('diary_already'.gc(false)){
-			const e=await IX.S.exist('O',{id:'>0'}).catch(_=>false)
-			if(e)await IX.S.drop('O')
+		const e=await IX.S.exist('O',{id:'>0'}).catch(_=>false)
+		if(!e){
 			await IX.S.create('O',['id INTEGER PRIMARY KEY AUTOINCREMENT','title TEXT NOT NULL','content TEXT','address TEXT','location TEXT','imgs TEXT','files TEXT','mood TEXT','tags TEXT'])
 			const s=await IX.K.list('tyan').then(_=>_.o.files.map(_=>_.name.endsWith('.json')?_.name:null).filter(Boolean)).catch(_=>{
 				log('线上数据，文件清单获取失败',_,'error')
@@ -260,7 +261,6 @@ body[dark] grid-c[dr]>[I]>[R]>[F]>*:first-child{color:white}
 				log(`线上数据，存储 ${_} 内容，记录编号: `+i)
 			}
 			log('初始数据，线上记录已完全同步本地')
-			'diary_already'.gc(true)
 		}
 		log('绑定事件，节点监听')
 		// IX.watch()
